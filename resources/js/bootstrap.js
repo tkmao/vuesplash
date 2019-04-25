@@ -1,35 +1,61 @@
+import { getCookieValue } from './util'
 
+window.axios = require('axios')
+
+// Ajaxリクエストであることを示すヘッダーを付与する
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
+
+window.axios.interceptors.request.use(config => {
+    // クッキーからトークンを取り出してヘッダーに添付する
+    config.headers['X-XSRF-TOKEN'] = getCookieValue('XSRF-TOKEN')
+
+    return config
+})
+
+/*
+axios の response インターセプターはレスポンスを受けた後の処理を上書きします。
+第一引数が成功時の処理ですが、こちらは変更しないのでそのまま response を返しています。第二引数は失敗時の処理で、こちらを変更しています。
+通信エラーを取得するには await/catch パターンを用いましたが、API 呼び出しが増えると .catch(error => error.response || error) が重複してきます。
+エラーレスポンスが返ってきた場合はエラーそのものではなくレスポンスオブジェクトを返す、という処理はどの API 呼び出しにも共通しているのでインターセプターにまとめたわけです。
+*/
+window.axios.interceptors.response.use(
+    response => response,
+    error => error.response || error
+)
+
+/*
 window._ = require('lodash');
+*/
 
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
  * for JavaScript based Bootstrap features such as modals and tabs. This
  * code may be modified to fit the specific needs of your application.
  */
-
+/*
 try {
     window.Popper = require('popper.js').default;
     window.$ = window.jQuery = require('jquery');
 
     require('bootstrap');
 } catch (e) {}
-
+*/
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
-
+/*
 window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
+*/
 /**
  * Next we will register the CSRF Token as a common header with Axios so that
  * all outgoing HTTP requests automatically have it attached. This is just
  * a simple convenience so we don't have to attach every token manually.
  */
-
+/*
 let token = document.head.querySelector('meta[name="csrf-token"]');
 
 if (token) {
@@ -37,7 +63,7 @@ if (token) {
 } else {
     console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }
-
+*/
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
