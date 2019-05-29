@@ -12,7 +12,7 @@
       </div>
       <input class="form__item" type="file" @change="onFileChange">
       <output class="form__output" v-if="preview">
-        <img :src="preview" alt="">
+        <img :src="preview" alt>
       </output>
       <div class="form__button">
         <button type="submit" class="button button--inverse">submit</button>
@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import { CREATED, UNPROCESSABLE_ENTITY } from '../util'
-import Loader from './Loader.vue'
+import { CREATED, UNPROCESSABLE_ENTITY } from "../util";
+import Loader from "./Loader.vue";
 
 export default {
   components: {
@@ -35,70 +35,70 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       loading: false,
       preview: null,
       photo: null,
       errors: null
-    }
+    };
   },
   methods: {
-    onFileChange (event) {
+    onFileChange(event) {
       if (event.target.files.length === 0) {
-        this.reset()
-        return false
+        this.reset();
+        return false;
       }
 
-      if (! event.target.files[0].type.match('image.*')) {
-        this.reset()
-        return false
+      if (!event.target.files[0].type.match("image.*")) {
+        this.reset();
+        return false;
       }
 
-      const reader = new FileReader()
+      const reader = new FileReader();
 
       reader.onload = e => {
-        this.preview = e.target.result
-      }
+        this.preview = e.target.result;
+      };
 
-      reader.readAsDataURL(event.target.files[0])
+      reader.readAsDataURL(event.target.files[0]);
 
-      this.photo = event.target.files[0]
+      this.photo = event.target.files[0];
     },
-    reset () {
-      this.preview = ''
-      this.photo = null
-      this.$el.querySelector('input[type="file"]').value = null
+    reset() {
+      this.preview = "";
+      this.photo = null;
+      this.$el.querySelector('input[type="file"]').value = null;
     },
-    async submit () {
-      this.loading = true
+    async submit() {
+      this.loading = true;
 
-      const formData = new FormData()
-      formData.append('photo', this.photo)
-      const response = await axios.post('/api/photos', formData)
+      const formData = new FormData();
+      formData.append("photo", this.photo);
+      const response = await axios.post("/api/photos", formData);
 
-      this.loading = false
+      this.loading = false;
 
       if (response.status === UNPROCESSABLE_ENTITY) {
-        this.errors = response.data.errors
-        return false
+        this.errors = response.data.errors;
+        return false;
       }
 
-      this.reset()
-      this.$emit('input', false)
+      this.reset();
+      this.$emit("input", false);
 
       if (response.status !== CREATED) {
-        this.$store.commit('error/setCode', response.status)
-        return false
+        this.$store.commit("error/setCode", response.status);
+        return false;
       }
 
-      this.$store.commit('message/setContent', {
-        content: '写真が投稿されました！',
+      this.$store.commit("message/setContent", {
+        content: "写真が投稿されました！",
         timeout: 6000
-      })
+      });
 
-      this.$router.push(`/photos/${response.data.id}`)
+      this.$router.push(`/photos/${response.data.id}`);
     }
   }
-}
+};
 </script>

@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Comment;
 use App\Http\Requests\StoreComment;
 use App\Http\Requests\StorePhoto;
+use App\Http\Requests\StoreUser;
+use App\Services\User\UserServiceInterface;
 use App\Photo;
+use App\Repositories\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +17,27 @@ use phpDocumentor\Reflection\Types\Integer;
 
 class PhotoController extends Controller
 {
-    public function __construct()
-    {
+    /** @var UserServiceInterface */
+    protected $userServiceInterface;
+
+    public function __construct(
+        UserServiceInterface $userServiceInterface
+    ) {
+        $this->userServiceInterface = $userServiceInterface;
+
         // 認証が必要
         $this->middleware('auth')->except(['index', 'download', 'show']);
+    }
+
+    /**
+     * ユーザ一覧
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function indexUser()
+    {
+        $users = User::orderBy(User::CREATED_AT, 'desc')->get();
+
+        return $users;
     }
 
     /**
@@ -30,6 +50,33 @@ class PhotoController extends Controller
             ->orderBy(Photo::CREATED_AT, 'desc')->paginate();
 
         return $photos;
+    }
+
+    /**
+     * ユーザ詳細
+     * @param string $id
+     * @return User
+     */
+    public function showUser(string $id)
+    {
+        dd('showUser', $id);
+        $user = User::where('id', $id)->first();
+
+        return $user ?? abort(404);
+    }
+
+    /**
+     * ユーザ登録
+     * @param string $id
+     * @return User
+     */
+    public function storeUser(string $id, StoreUser $request)
+    {
+
+        //$result = $this->userServiceInterface->store($request);
+        dd('storeUser', $id, $request->all(), gettype($request));
+
+        return $user ?? abort(404);
     }
 
     /**

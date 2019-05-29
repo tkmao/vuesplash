@@ -8,28 +8,28 @@ const state = {
 }
 
 const getters = {
-  check: state => !! state.user,
+  check: state => !!state.user,
   username: state => state.user ? state.user.name : ''
 }
 
 const mutations = {
-  setUser (state, user) {
+  setUser(state, user) {
     state.user = user
   },
-  setApiStatus (state, status) {
+  setApiStatus(state, status) {
     state.apiStatus = status
   },
-  setLoginErrorMessages (state, messages) {
+  setLoginErrorMessages(state, messages) {
     state.loginErrorMessages = messages
   },
-  setRegisterErrorMessages (state, messages) {
+  setRegisterErrorMessages(state, messages) {
     state.registerErrorMessages = messages
   }
 }
 
 const actions = {
   // 会員登録
-  async register (context, data) {
+  async register(context, data) {
     context.commit('setApiStatus', null)
     const response = await axios.post('/api/register', data)
 
@@ -48,7 +48,7 @@ const actions = {
   },
 
   // ログイン
-  async login (context, data) {
+  async login(context, data) {
     context.commit('setApiStatus', null)
     const response = await axios.post('/api/login', data)
 
@@ -67,7 +67,7 @@ const actions = {
   },
 
   // ログアウト
-  async logout (context) {
+  async logout(context) {
     context.commit('setApiStatus', null)
     const response = await axios.post('/api/logout')
 
@@ -82,7 +82,7 @@ const actions = {
   },
 
   // ログインユーザーチェック
-  async currentUser (context) {
+  async currentUser(context) {
     context.commit('setApiStatus', null)
     const response = await axios.get('/api/user')
     const user = response.data || null

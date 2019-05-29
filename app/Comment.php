@@ -17,6 +17,6 @@ class Comment extends Model
      */
     public function author()
     {
-        return $this->belongsTo('App\User', 'user_id', 'id', 'users');
+        return $this->belongsTo('App\Repositories\Models\User', 'user_id', 'id', 'users');
     }
 }

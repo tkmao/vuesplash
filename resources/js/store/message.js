@@ -1,9 +1,9 @@
 const state = {
-  content: ''
+  content: 'ログイン中'
 }
 
 const mutations = {
-  setContent (state, { content, timeout }) {
+  setContent(state, { content, timeout }) {
     state.content = content
 
     if (typeof timeout === 'undefined') {

@@ -3,6 +3,8 @@ import VueRouter from 'vue-router'
 
 import PhotoList from './pages/PhotoList.vue'
 import PhotoDetail from './pages/PhotoDetail.vue'
+import Workschedule from './pages/WorkSchedule.vue'
+import UserList from './pages/UserList.vue'
 import Login from './pages/Login.vue'
 import SystemError from './pages/errors/System.vue'
 import NotFound from './pages/errors/NotFound.vue'
@@ -21,6 +23,22 @@ const routes = [
     }
   },
   {
+    path: '/workschedule',
+    component: Workschedule,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
+    path: '/user',
+    component: UserList,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
     path: '/photos/:id',
     component: PhotoDetail,
     props: true
@@ -28,7 +46,7 @@ const routes = [
   {
     path: '/login',
     component: Login,
-    beforeEnter (to, from, next) {
+    beforeEnter(to, from, next) {
       if (store.getters['auth/check']) {
         next('/')
       } else {
@@ -48,7 +66,7 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  scrollBehavior () {
+  scrollBehavior() {
     return { x: 0, y: 0 }
   },
   routes

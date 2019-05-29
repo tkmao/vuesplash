@@ -1,6 +1,4 @@
 <?php
-
-
 // 会員登録
 Route::post('/register', 'Auth\RegisterController@register')->name('register');
 
@@ -24,18 +22,27 @@ Route::get('/reflesh-token', function (Illuminate\Http\Request $request) {
 
 // 写真投稿
 Route::post('/photos', 'PhotoController@create')->name('photo.create');
-
 // 写真一覧
-Route::get('/photos', 'PhotoController@index')->name('photo.index');
-
+Route::get('/photos', 'PhotoController@indexUser')->name('photo.index');
 // 写真詳細
-Route::get('/photos/{id}', 'PhotoController@show')->name('photo.show');
-
+Route::get('/photos/{id}', 'PhotoController@showUser')->name('photo.show');
 // コメント
 Route::post('/photos/{photo}/comments', 'PhotoController@addComment')->name('photo.comment');
-
 // いいね
 Route::put('/photos/{id}/like', 'PhotoController@like')->name('photo.like');
-
 // いいね解除
 Route::delete('/photos/{id}/like', 'PhotoController@unlike');
+
+// ユーザ登録
+Route::post('/user/{id}/store', 'PhotoController@storeUser')->name('user.store');
+
+// 勤務表取得
+Route::post('/workschedule/get', 'WorkScheduleController@index')->name('workschedule.index');
+// 勤務表登録
+Route::post('/workschedule/store', 'WorkScheduleController@store')->name('workschedule.store');
+
+// プロジェクト一覧取得
+Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
+
+// 休日一覧取得
+Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall');
