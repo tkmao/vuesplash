@@ -6471,21 +6471,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   projectWorktimes[idx_1] = projectWorktime; // 一日のプロジェクト時間を勤務表データに投入
 
                   _this.workschedules[idx_1].project_work = projectWorktime;
-                });
-                console.log("this.selected", this.selected);
-                console.log("this.selected[0]", this.selected[0].project_id);
-                console.log("this.selected[1]", this.selected[1].project_id);
-                console.log("this.selected[2]", this.selected[2].project_id);
-                console.log("this.projects", this.projects);
-                console.log("this.projects[0]", this.projects[0]);
-                console.log("this.projects[0].id", this.projects[0].id);
-                console.log("this.projects[0].code", this.projects[0].code);
-                console.log("this.projects[0].name", this.projects[0].name); // リアクティブデータ代入
+                }); // リアクティブデータ代入
 
                 this.projectWorktimes = projectWorktimes;
                 this.tableheaders = this.createtableheaders(projectWorktimes[0].length);
 
-              case 23:
+              case 14:
               case "end":
                 return _context3.stop();
             }
@@ -6513,8 +6504,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _context4.next = 2;
                 return axios.post("/api/workschedule/store", {
                   workschedules: this.workschedules,
-                  projectWorktimes: this.projectWorktimes,
-                  projects: this.projects
+                  selectedprojects: this.selected
                 });
 
               case 2:
@@ -6621,7 +6611,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         // 追加のプロジェクトデータを作成
         var data = {
           work_schedule_id: val_1.project_work[0].work_schedule_id,
-          project_id: val_1.project_work[0].project_id,
+          project_id: 1,
           worktime: 0
         }; // 一日のプロジェクト時間データ格納
 
@@ -6629,6 +6619,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
         _this2.workschedules[idx_1].project_work = _this2.projectWorktimes[idx_1];
+      }); // 選択済みプロジェクトidリスト（デフォルト：Project_id=1）
+
+      this.selected.splice(this.selected.length, 0, {
+        project_id: 1
       }); // テーブルヘッダー変更
 
       this.tableheaders = this.createtableheaders(this.projectWorktimes[0].length);
@@ -6636,8 +6630,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     /** プロジェクトselect */
     changeSelected: function changeSelected(index) {
-      console.log(this.selected, this.selected);
-      console.log("selected");
+      this.projectWorktimes.forEach(function (val_1, idx_1, arr_1) {
+        console.log("test");
+        /**
+        this.$set(
+          this.projectWorktimes[idx_1],
+          "project_id",
+          this.selected[index].project_id
+        );
+        this.workschedules[idx_1].project_work = this.projectWorktimes[idx_1];
+         */
+      });
     }
   },
   watch: {
@@ -32281,22 +32284,27 @@ var render = function() {
                 [
                   _c("p", [_vm._v("プロジェクト" + _vm._s(index + 1))]),
                   _vm._v(" "),
-                  _c(
-                    "v-select",
-                    _vm._g(
-                      {
-                        attrs: {
-                          items: _vm.projects,
-                          "item-value": "id",
-                          "item-text": "name",
-                          label: "プロジェクト",
-                          box: "",
-                          "return-object": ""
-                        }
+                  _c("v-select", {
+                    attrs: {
+                      items: _vm.projects,
+                      "item-value": "id",
+                      "item-text": "name",
+                      label: "プロジェクト",
+                      box: ""
+                    },
+                    on: {
+                      change: function($event) {
+                        return _vm.changeSelected(index)
+                      }
+                    },
+                    model: {
+                      value: _vm.selected[index].project_id,
+                      callback: function($$v) {
+                        _vm.$set(_vm.selected[index], "project_id", $$v)
                       },
-                      _vm.changeSelected(index)
-                    )
-                  )
+                      expression: "selected[index].project_id"
+                    }
+                  })
                 ],
                 1
               )

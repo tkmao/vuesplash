@@ -24,13 +24,13 @@
         <div v-for="(projectWorktime, index) in projectWorktimes[0]" :key="projectWorktime.key">
           <p>プロジェクト{{ index + 1 }}</p>
           <v-select
-            v-on="changeSelected(index)"
+            v-model="selected[index].project_id"
+            @change="changeSelected(index)"
             :items="projects"
             item-value="id"
             item-text="name"
             label="プロジェクト"
             box
-            return-object
           ></v-select>
         </div>
 
@@ -272,15 +272,6 @@ export default {
         // 一日のプロジェクト時間を勤務表データに投入
         this.workschedules[idx_1].project_work = projectWorktime;
       });
-      console.log("this.selected", this.selected);
-      console.log("this.selected[0]", this.selected[0].project_id);
-      console.log("this.selected[1]", this.selected[1].project_id);
-      console.log("this.selected[2]", this.selected[2].project_id);
-      console.log("this.projects", this.projects);
-      console.log("this.projects[0]", this.projects[0]);
-      console.log("this.projects[0].id", this.projects[0].id);
-      console.log("this.projects[0].code", this.projects[0].code);
-      console.log("this.projects[0].name", this.projects[0].name);
 
       // リアクティブデータ代入
       this.projectWorktimes = projectWorktimes;
@@ -291,8 +282,7 @@ export default {
     async store() {
       const response = await axios.post(`/api/workschedule/store`, {
         workschedules: this.workschedules,
-        projectWorktimes: this.projectWorktimes,
-        projects: this.projects
+        selectedprojects: this.selected
       });
 
       if (response.status !== OK) {
@@ -370,7 +360,7 @@ export default {
         // 追加のプロジェクトデータを作成
         let data = {
           work_schedule_id: val_1.project_work[0].work_schedule_id,
-          project_id: val_1.project_work[0].project_id,
+          project_id: 1,
           worktime: 0
         };
 
@@ -380,6 +370,9 @@ export default {
         this.workschedules[idx_1].project_work = this.projectWorktimes[idx_1];
       });
 
+      // 選択済みプロジェクトidリスト（デフォルト：Project_id=1）
+      this.selected.splice(this.selected.length, 0, { project_id: 1 });
+
       // テーブルヘッダー変更
       this.tableheaders = this.createtableheaders(
         this.projectWorktimes[0].length
@@ -388,8 +381,17 @@ export default {
 
     /** プロジェクトselect */
     changeSelected: function(index) {
-      console.log(this.selected, this.selected);
-      console.log("selected");
+      this.projectWorktimes.forEach((val_1, idx_1, arr_1) => {
+        console.log("test");
+        /**
+        this.$set(
+          this.projectWorktimes[idx_1],
+          "project_id",
+          this.selected[index].project_id
+        );
+        this.workschedules[idx_1].project_work = this.projectWorktimes[idx_1];
+         */
+      });
     }
   },
   watch: {
