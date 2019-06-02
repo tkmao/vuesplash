@@ -20,15 +20,36 @@ class WorkScheduleMonthsTableSeeder extends Seeder
 
         $workScheduleMonths = new WorkScheduleMonth();
         $workScheduleMonths->id = 1;
-        $workScheduleMonths->user_id = 1;
+        $workScheduleMonths->user_id = 35;
         $workScheduleMonths->yearmonth = 201901;
         $workScheduleMonths->is_subumited = true;
         $workScheduleMonths->save();
 
         $workScheduleMonths = new WorkScheduleMonth();
         $workScheduleMonths->id = 2;
-        $workScheduleMonths->user_id = 1;
+        $workScheduleMonths->user_id = 35;
         $workScheduleMonths->yearmonth = 201902;
+        $workScheduleMonths->is_subumited = true;
+        $workScheduleMonths->save();
+
+        $workScheduleMonths = new WorkScheduleMonth();
+        $workScheduleMonths->id = 3;
+        $workScheduleMonths->user_id = 35;
+        $workScheduleMonths->yearmonth = 201903;
+        $workScheduleMonths->is_subumited = true;
+        $workScheduleMonths->save();
+
+        $workScheduleMonths = new WorkScheduleMonth();
+        $workScheduleMonths->id = 4;
+        $workScheduleMonths->user_id = 35;
+        $workScheduleMonths->yearmonth = 201904;
+        $workScheduleMonths->is_subumited = true;
+        $workScheduleMonths->save();
+
+        $workScheduleMonths = new WorkScheduleMonth();
+        $workScheduleMonths->id = 5;
+        $workScheduleMonths->user_id = 35;
+        $workScheduleMonths->yearmonth = 201905;
         $workScheduleMonths->is_subumited = true;
         $workScheduleMonths->save();
 

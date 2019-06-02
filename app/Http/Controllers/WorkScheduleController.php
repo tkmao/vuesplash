@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Models\WorkSchedule;
 use App\Services\User\WorkScheduleServiceInterface;
 use Illuminate\Http\Request;
 
@@ -27,21 +26,16 @@ class WorkScheduleController extends Controller
      */
     public function index(Request $request)
     {
-        $requestPara = $request->all();
+        $requestArray = $request->all();
+        $userId = $requestArray['userId'];
+        $yearmonth = $requestArray['yearmonth'];
 
-        $yearmonth = $requestPara['yearmonth'];
-        $user_id = 1;
-        if ($yearmonth != null) {
-            $yearmonth = $yearmonth . '01';
-            $dt = new \Carbon\Carbon($yearmonth);
-        } else {
-            $dt = \Carbon\Carbon::now();
-        }
+        $date = (isset($yearmonth)) ? new \Carbon\Carbon($yearmonth . '01') : \Carbon\Carbon::now();
 
-        $dateFrom = $dt->copy()->startOfMonth();
-        $dateTo = $dt->copy()->endOfMonth();
+        $dateFrom = $date->copy()->startOfMonth();
+        $dateTo = $date->copy()->endOfMonth();
 
-        $workSchedule = WorkSchedule::with(['projectWork'])->where('user_id', $user_id)->whereBetween('workdate', [$dateFrom, $dateTo])->orderBy('workdate')->get();
+        $workSchedule = $this->workScheduleServiceInterface->getWorkSchedule($userId, $dateFrom, $dateTo);
 
         return $workSchedule ?? abort(404);
     }
@@ -53,10 +47,7 @@ class WorkScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
-        //$result = $this->workScheduleServiceInterface->store($request);
-        dd('storeUser', $id, $request->all(), gettype($request));
-
-        return $user ?? abort(404);
+        $requestArray = $request->all();
+        $result = $this->workScheduleServiceInterface->store($requestArray);
     }
 }

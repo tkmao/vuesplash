@@ -3,194 +3,127 @@
 namespace App\Repositories;
 
 use App\Repositories\Models\WorkSchedule;
+use Illuminate\Support\Facades\DB;
 
 class WorkScheduleRepository implements WorkScheduleRepositoryInterface
 {
     /** @var WorkSchedule */
-    protected $user;
+    protected $workSchedule;
 
     /**
-     * @param WorkSchedule $user
+     * @param WorkSchedule $workSchedule
      */
-    public function __construct(WorkSchedule $user)
+    public function __construct(WorkSchedule $workSchedule)
     {
-        $this->user = $user;
+        $this->workSchedule = $workSchedule;
     }
 
     /**
-     * ユーザ情報取得
-     *
-     * @param int $id
-     * @return \App\Repositories\Models\WorkSchedule
-     */
-    public function find($id): \App\Repositories\Models\WorkSchedule
-    {
-        try {
-            $user = $this->user->find($id);
-            if (!$user) {
-                $user = new User();
-            }
-
-            return $user;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * ユーザデータ登録
-     *
-     * @param array $requestArray
-     * @return void
-     */
-    public function store(array $requestArray): void
-    {
-        try {
-            $user = new User;
-            $user->name = $requestArray['userName'];
-            $user->email = $requestArray['userEmail'];
-            $user->password = bcrypt($requestArray['userPassword']);
-            $user->usertype_id = $requestArray['userTypeId'];
-            $user->workingtime_type = $requestArray['workingtimeType'];
-            $user->worktime_day = (isset($requestArray['worktimeDay']) ? $requestArray['worktimeDay'] : null);
-            $user->maxworktime_month = (isset($requestArray['maxWorktimeMonth']) ? $requestArray['maxWorktimeMonth'] : null);
-            $user->workingtime_min = (isset($requestArray['workingtimeMin']) ? $requestArray['workingtimeMin'] : null);
-            $user->workingtime_max = (isset($requestArray['workingtimeMax']) ? $requestArray['workingtimeMax'] : null);
-            $user->paid_holiday = $requestArray['paidHoliday'];
-            $user->hiredate = $requestArray['hiredate'];
-            $user->is_admin = $requestArray['userIsAdmin'];
-            $user->is_deleted = false;
-            $user->save();
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * ユーザデータ編集
-     *
-     * @param array $requestArray
-     * @return void
-     */
-    public function edit(array $requestArray): void
-    {
-        try {
-            $where = [ 'id' => $requestArray['userId'] ];
-            $update_values  = [ 'name' => $requestArray['userName'],
-                                'email' => $requestArray['userEmail'],
-                                'usertype_id' => $requestArray['userTypeId'],
-                                'workingtime_type' => $requestArray['workingtimeType'],
-                                'worktime_day' => (isset($requestArray['worktimeDay']) ? $requestArray['worktimeDay'] : null),
-                                'maxworktime_month' => (isset($requestArray['maxWorktimeMonth']) ? $requestArray['maxWorktimeMonth'] : null),
-                                'workingtime_min' => (isset($requestArray['workingtimeMin']) ? $requestArray['workingtimeMin'] : null),
-                                'workingtime_max' => (isset($requestArray['workingtimeMax']) ? $requestArray['workingtimeMax'] : null),
-                                'paid_holiday' => $requestArray['paidHoliday'],
-                                'hiredate' => $requestArray['hiredate'],
-                                'is_admin' => $requestArray['userIsAdmin'],
-                                'is_deleted' => false,
-                            ];
-
-            $this->user->where($where)->update($update_values);
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * ユーザデータ削除
+     * 勤務表取得
      *
      * @param int $userId
-     * @return void
-     */
-    public function delete(int $userId): void
-    {
-        try {
-            $where = [ 'id' => $userId ];
-            $update_values  = [ 'is_deleted' => true ];
-
-            $this->user->where($where)->update($update_values);
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 全ユーザ勤務表情報取得（週単位）
-     *
-     * @param int $weekNumber
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getWorkScheduleByWeekNumber(int $weekNumber): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            $user = $this->user
-                            ->with(['workSchedule' => function ($query) use ($weekNumber) {
-                                $query->with(['projectWork.project', 'holiday'])
-                                      ->where('week_number', '=', $weekNumber)
-                                      ->orderBy('workdate', 'asc');
-                            }])
-                            ->where('is_deleted', false)->orderBy('id', 'asc')->get();
-
-            if (!$user) {
-                $user = new User();
-            }
-
-            return $user;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 全ユーザ勤務表情報取得
-     *
-     * @param int $weekNumber
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getWeeklyReportByWeekNumber(int $weekNumber): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            $user = $this->user
-                            ->with(['weeklyReport' => function ($query) use ($weekNumber) {
-                                $query->with(['project'])
-                                      ->where('week_number', '=', $weekNumber)
-                                      ->get();
-                            }])
-                            ->where('is_deleted', false)->orderBy('id', 'asc')->get();
-
-            if (!$user) {
-                $user = new User();
-            }
-
-            return $user;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 全ユーザ勤務表情報取得（日付指定）
-     *
      * @param \Carbon\Carbon $dateFrom
      * @param \Carbon\Carbon $dateTo
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection $workSchedule
      */
-    public function getWorkSchedule(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
+    public function getWorkSchedule(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $user = $this->user
-                            ->with(['workSchedule' => function ($query) use ($dateFrom, $dateTo) {
-                                $query->with(['projectWork.project', 'holiday'])
-                                      ->whereBetween('workdate', [$dateFrom, $dateTo])
-                                      ->orderBy('workdate', 'asc');
-                            }])
-                            ->where('is_deleted', false)->orderBy('id', 'asc')->get();
+            $workSchedule = $this->workSchedule::with(['projectWork'])
+                                                ->where('user_id', $userId)
+                                                ->whereBetween('workdate', [$dateFrom, $dateTo])
+                                                ->orderBy('workdate')->get();
 
-            if (!$user) {
-                $user = new User();
+            return $workSchedule;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 勤務表取得
+     *
+     * @param int $userId
+     * @param int $weekNumber
+     * @return \Illuminate\Database\Eloquent\Collection $workSchedule
+     */
+    public function getWorkScheduleByUserIdWeekNumber(int $userId, int $weekNumber): \Illuminate\Database\Eloquent\Collection
+    {
+        try {
+            $workSchedule = $this->workSchedule->with(['projectWork.project', 'holiday'])->where('user_id', $userId)->where('week_number', $weekNumber)->orderBy('workdate', 'asc')->get();
+            if (!$workSchedule) {
+                $workSchedule = new WorkSchedule();
             }
 
-            return $user;
+            return $workSchedule;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 最古の勤務日データ取得
+     *
+     * @return string $oldestWrokdate
+     */
+    public function getOldestWorkdate(): string
+    {
+        try {
+            $oldestWrokdate = $this->workSchedule->min('workdate');
+
+            return $oldestWrokdate;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 勤務表データ保存
+     *
+     * @param array $workSchedules
+     * @return array $workSchedulesHasId
+     */
+    public function store(array $workSchedules): array
+    {
+        try {
+            $workSchedulesHasId = DB::transaction(function () use ($workSchedules) {
+                foreach ($workSchedules as $key => $value) {
+                    // 勤務表データが存在する場合と存在しない場合で場合分け
+                    if (is_null($value['id'])) {
+                        $workSchedule = new WorkSchedule;
+                        $workSchedule->user_id = \Auth::user()['id'];
+                        $workSchedule->workdate = $value['workdate'];
+                        $workSchedule->week_number = $value['week_number'];
+                        $workSchedule->detail = $value['detail'];
+                        $workSchedule->starttime_hh = $value['starttime_hh'];
+                        $workSchedule->starttime_mm = $value['starttime_mm'];
+                        $workSchedule->endtime_hh = $value['endtime_hh'];
+                        $workSchedule->endtime_mm = $value['endtime_mm'];
+                        $workSchedule->breaktime = $value['breaktime'];
+                        $workSchedule->breaktime_midnight = $value['breaktime_midnight'];
+                        $workSchedule->is_paid_holiday = (isset($value['is_paid_holiday']) ? $value['is_paid_holiday'] : false);
+                        $workSchedule->save();
+
+                        $workSchedules[$key]['id'] = $workSchedule->id;
+                    } else {
+                        $where = [ 'id' => $value['id'] ];
+                        $update_values  = [ 'starttime_hh' => $value['starttime_hh'],
+                                            'starttime_mm' => $value['starttime_mm'],
+                                            'endtime_hh' => $value['endtime_hh'],
+                                            'endtime_mm' => $value['endtime_mm'],
+                                            'breaktime' => $value['breaktime'],
+                                            'breaktime_midnight' => $value['breaktime_midnight'],
+                                            'detail' => $value['detail'],
+                                            'is_paid_holiday' => (isset($value['is_paid_holiday']) ? $value['is_paid_holiday'] : false),
+                                        ];
+
+                        $this->workSchedule->where($where)->update($update_values);
+                    }
+                }
+                return $workSchedules;
+            });
+
+            return $workSchedulesHasId;
         } catch (\Exception $e) {
             throw $e;
         }

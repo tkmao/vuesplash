@@ -51,9 +51,4 @@ class WorkSchedule extends Model
     {
         return $this->hasMany('App\Repositories\Models\ProjectWork', 'work_schedule_id');
     }
-
-    public function holiday()
-    {
-        return $this->hasone('App\Repositories\Models\Holiday', 'date', 'workdate');
-    }
 }

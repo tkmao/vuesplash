@@ -18,15 +18,15 @@ class ProjectWorksTableSeeder extends Seeder
 
         DB::table('project_works')->truncate();
 
-        $project_id = 1;
-        $startWS = 121;
+        $workScheduleMaxId = App\Repositories\Models\WorkSchedule::max('id');
+        $worktimes = array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3);
 
-        for ($i = $startWS; $i <= 151; $i++) {
-            for ($j = 1; $j <= 3; $j++) {
+        for ($i = 1; $i <= $workScheduleMaxId; $i++) {
+            for ($j = 1; $j <= 2; $j++) {
                 $projectWorks = new ProjectWork();
                 $projectWorks->work_schedule_id = $i;
-                $projectWorks->project_id = $project_id;
-                $projectWorks->worktime = $j;
+                $projectWorks->project_id = App\Repositories\Models\Project::inRandomOrder()->value('id');
+                $projectWorks->worktime = $worktimes[array_rand($worktimes, 1)];
                 $projectWorks->save();
             }
         }

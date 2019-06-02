@@ -39,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
             'App\Services\User\HolidayServiceInterface'                 => 'App\Services\User\HolidayService',
             'App\Services\User\ProjectServiceInterface'                 => 'App\Services\User\ProjectService',
             'App\Services\User\UserServiceInterface'                    => 'App\Services\User\UserService',
+            'App\Services\User\WeeklyReportServiceInterface'            => 'App\Services\User\WeeklyReportService',
+            'App\Services\User\WorkScheduleMonthServiceInterface'       => 'App\Services\User\WorkScheduleMonthService',
             'App\Services\User\WorkScheduleServiceInterface'            => 'App\Services\User\WorkScheduleService',
 
             // Repository
@@ -46,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
             'App\Repositories\ProjectRepositoryInterface'               => 'App\Repositories\ProjectRepository',
             'App\Repositories\ProjectWorkRepositoryInterface'           => 'App\Repositories\ProjectWorkRepository',
             'App\Repositories\UserRepositoryInterface'                  => 'App\Repositories\UserRepository',
+            'App\Repositories\WeeklyReportRepositoryInterface'          => 'App\Repositories\WeeklyReportRepository',
+            'App\Repositories\WorkScheduleMonthRepositoryInterface'     => 'App\Repositories\WorkScheduleMonthRepository',
             'App\Repositories\WorkScheduleRepositoryInterface'          => 'App\Repositories\WorkScheduleRepository',
         ];
 

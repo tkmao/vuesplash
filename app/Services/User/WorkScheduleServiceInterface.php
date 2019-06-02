@@ -4,11 +4,9 @@ namespace App\Services\User;
 
 interface WorkScheduleServiceInterface
 {
-    public function get(int $userId): \Illuminate\Database\Eloquent\Collection;
+    public function getWorkSchedule(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection;
+
+    public function getWorkScheduleAllUser(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection;
 
     public function store(array $requestArray): void;
-
-    public function edit(array $requestArray): void;
-
-    public function delete(int $userId): void;
 }

@@ -3895,6 +3895,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -6103,6 +6104,932 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WeeklyReport.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util */ "./resources/js/util.js");
+/* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! crypto */ "./node_modules/crypto-browserify/index.js");
+/* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(crypto__WEBPACK_IMPORTED_MODULE_2__);
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  components: {},
+  props: {
+    page: {
+      type: Number,
+      required: false,
+      "default": 1
+    }
+  },
+  created: function created() {
+    this.initialize();
+  },
+  data: function data() {
+    return {
+      targetDate: 0,
+      basicWorkDay: 0,
+      workingtimeMin: 0,
+      workingtimeMax: 0,
+      tableheaders: [],
+      user: [],
+      isSubmitted: false,
+      projects: [],
+      holidays: [],
+      workschedules: [],
+      worktimes: [0],
+      projectWorktimes: [],
+      worktimeSum: 0,
+      selected: [],
+      pagination: {
+        rowsPerPage: 200
+      },
+      rules: {
+        required: function required(value) {
+          return !!value || "This field is required.";
+        }
+      }
+    };
+  },
+  computed: {
+    formTitle: function formTitle() {
+      return 1;
+    }
+  },
+  methods: {
+    /** 初期処理 */
+    initialize: function initialize() {
+      this.targetDate = moment();
+    },
+
+    /** 日付変換 */
+    dateformat: function dateformat(date) {
+      return moment(date).format("DD(ddd)");
+    },
+
+    /** 基本勤務日数計算 */
+    culBasicWorkDay: function culBasicWorkDay() {
+      this.basicWorkDay = 0;
+      var startDate = this.targetDate.startOf("month").clone();
+      var endDate = this.targetDate.endOf("month").clone(); // 1日ずつインクリメントして配列へpush
+
+      while (startDate.unix() <= endDate.unix()) {
+        !this.isHoliday(startDate.format("YYYY-MM-DD")) ? this.basicWorkDay++ : null;
+        startDate.add(1, "days");
+      }
+    },
+
+    /** 出勤日数計算 */
+    WorktingDay: function WorktingDay() {
+      return this.worktimes.reduce(function (total, data, index) {
+        return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
+      });
+    },
+
+    /** 欠勤日数計算 */
+    AbsenceDay: function AbsenceDay() {
+      return this.basicWorkDay - this.WorktingDay();
+    },
+
+    /** 今月の勤務時間数 */
+    culBasicWorktimeAMonth: function culBasicWorktimeAMonth() {
+      if (this.user.workingtime_type === 1) {
+        this.workingtimeMin = this.basicWorkDay * this.user.worktime_day;
+        this.workingtimeMax = this.workingtimeMin + this.user.maxworktime_month;
+      } else if (this.user.workingtime_type === 2) {
+        this.workingtimeMin = this.user.workingtime_min;
+        this.workingtimeMax = this.user.workingtime_max;
+      }
+    },
+
+    /** 不足時間 */
+    ShortageTime: function ShortageTime() {
+      return this.worktimeSum < this.workingtimeMin ? this.workingtimeMin - this.worktimeSum : 0;
+    },
+
+    /** 超過時間 */
+    OverTime: function OverTime() {
+      return this.worktimeSum > this.workingtimeMax ? this.worktimeSum - this.workingtimeMax : 0;
+    },
+
+    /** 今月の有給消化数 */
+    paidHolidayThisMonth: function paidHolidayThisMonth() {
+      var paidHolidayThisMonth = 0;
+      this.workschedules.forEach(function (val_1, idx_1, arr_1) {
+        val_1.is_paid_holiday ? paidHolidayThisMonth++ : null;
+      });
+      return paidHolidayThisMonth;
+    },
+
+    /** 休日チェック */
+    isHoliday: function isHoliday(date) {
+      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+    },
+
+    /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
+    isSameWorkingTime: function isSameWorkingTime(index) {
+      var projectWorktime = 0;
+      this.projectWorktimes[index].forEach(function (val_1, idx_1, arr_1) {
+        projectWorktime = projectWorktime + parseFloat(val_1.worktime);
+      });
+      return this.worktimes[index] === projectWorktime ? true : false;
+    },
+
+    /** 1月の勤務時間と1月のプロジェクト時間が一致しているか確認 */
+    isSameWorkingTimeAMonth: function isSameWorkingTimeAMonth() {
+      var _this = this;
+
+      var canSubmit = false;
+
+      if (this.projectWorktimes.length !== 0) {
+        canSubmit = true;
+        this.worktimes.forEach(function (val_1, idx_1, arr_1) {
+          _this.isSameWorkingTime(idx_1) ? null : canSubmit = false;
+        });
+      }
+
+      return canSubmit;
+    },
+
+    /** 月次移動 */
+    changeMonth: function changeMonth(index) {
+      this.targetDate.add(index, "months");
+      this.fetchWorkScheduleMonth();
+      this.fetchWorkSchedules();
+    },
+
+    /** 勤務表データ作成 */
+    createWorkSchedule: function createWorkSchedule(responseData) {
+      if (responseData.length === 0) {
+        responseData = [];
+        var startDate = this.targetDate.startOf("month").clone();
+        var endDate = this.targetDate.endOf("month").clone(); // 当月分のデータが存在しない場合、デフォルト値で作成
+
+        while (startDate.unix() <= endDate.unix()) {
+          var isHoliday = this.isHoliday(startDate.format("YYYY-MM-DD"));
+          responseData.push({
+            id: null,
+            user_id: this.user.id,
+            week_number: startDate.format("ggggWW"),
+            workdate: startDate.format("YYYY-MM-DD"),
+            is_paid_holiday: false,
+            starttime_hh: isHoliday ? null : "09",
+            starttime_mm: isHoliday ? null : "00",
+            endtime_hh: isHoliday ? null : "18",
+            endtime_mm: isHoliday ? null : "00",
+            breaktime: isHoliday ? null : 1,
+            breaktime_midnight: isHoliday ? null : 0,
+            project_work: [{
+              work_schedule_id: null,
+              project_id: 1,
+              worktime: isHoliday ? 0 : 8
+            }],
+            detail: null
+          }); // 1日加算
+
+          startDate.add(1, "days");
+        }
+      }
+
+      return responseData;
+    },
+
+    /** ユーザデータ取得 */
+    fetchUser: function () {
+      var _fetchUser = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return axios.post("/api/user/get", {
+                  userId: this.$store.state.auth.user.id
+                });
+
+              case 2:
+                response = _context.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context.abrupt("return", false);
+
+              case 6:
+                // ユーザデータ
+                this.user = response.data;
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function fetchUser() {
+        return _fetchUser.apply(this, arguments);
+      }
+
+      return fetchUser;
+    }(),
+
+    /** 勤務表提出状況データ取得 */
+    fetchWorkScheduleMonth: function () {
+      var _fetchWorkScheduleMonth = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return axios.post("/api/workschedulemonth/issubmitted", {
+                  userId: this.$store.state.auth.user.id,
+                  yearmonth: this.targetDate.format("YYYYMM")
+                });
+
+              case 2:
+                response = _context2.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context2.abrupt("return", false);
+
+              case 6:
+                // 勤務表提出状況データ
+                this.isSubmitted = response.data === 1 ? true : false;
+
+              case 7:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function fetchWorkScheduleMonth() {
+        return _fetchWorkScheduleMonth.apply(this, arguments);
+      }
+
+      return fetchWorkScheduleMonth;
+    }(),
+
+    /** 休日データ取得 */
+    fetchHolidays: function () {
+      var _fetchHolidays = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
+        var response, holidays;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.next = 2;
+                return axios.get("/api/holiday/getall");
+
+              case 2:
+                response = _context3.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context3.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context3.abrupt("return", false);
+
+              case 6:
+                // 休日データ
+                holidays = [];
+                response.data.forEach(function (val_1, idx_1, arr_1) {
+                  holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+                });
+                this.holidays = holidays;
+
+              case 9:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function fetchHolidays() {
+        return _fetchHolidays.apply(this, arguments);
+      }
+
+      return fetchHolidays;
+    }(),
+
+    /** プロジェクトデータ取得 */
+    fetchProjects: function () {
+      var _fetchProjects = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.next = 2;
+                return axios.get("/api/project/getall");
+
+              case 2:
+                response = _context4.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context4.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context4.abrupt("return", false);
+
+              case 6:
+                // プロジェクトデータ
+                this.projects = response.data.map(function (item) {
+                  return {
+                    id: item.id,
+                    code: item.code,
+                    name: item.code + " : " + item.name
+                  };
+                });
+
+              case 7:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function fetchProjects() {
+        return _fetchProjects.apply(this, arguments);
+      }
+
+      return fetchProjects;
+    }(),
+
+    /** 勤務表データ取得 */
+    fetchWorkSchedules: function () {
+      var _fetchWorkSchedules = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.next = 2;
+                return axios.post("/api/workschedule/get", {
+                  userId: this.$store.state.auth.user.id,
+                  yearmonth: this.targetDate.format("YYYYMM")
+                });
+
+              case 2:
+                response = _context5.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context5.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context5.abrupt("return", false);
+
+              case 6:
+                // 勤務表データ
+                this.workschedules = this.createWorkSchedule(response.data); // 勤務時間初期化
+
+                this.worktimes = Array(this.workschedules.length).fill(0); // プロジェクト時間
+
+                this.projectWorktimes = this.workschedules.map(function (item) {
+                  return item["project_work"];
+                }); // プロジェクトコード
+
+                this.selected = this.workschedules[0].project_work.map(function (item) {
+                  return {
+                    project_id: item["project_id"]
+                  };
+                }); // テーブルヘッダー作成
+
+                this.tableheaders = this.createTableHeaders(this.workschedules[0].project_work.length); // 勤務情報再計算
+
+                this.culBasicWorkDay();
+                this.culBasicWorktimeAMonth();
+
+              case 13:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function fetchWorkSchedules() {
+        return _fetchWorkSchedules.apply(this, arguments);
+      }
+
+      return fetchWorkSchedules;
+    }(),
+
+    /** 週報データ取得 */
+    fetchWeeklyReport: function () {
+      var _fetchWeeklyReport = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                console.log(this.targetDate.format("YYYYMMDD"));
+                _context6.next = 3;
+                return axios.post("/api/weeklyreport/get", {
+                  userId: this.$store.state.auth.user.id,
+                  weekNumber: this.targetDate.format("ggggWW")
+                });
+
+              case 3:
+                response = _context6.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context6.next = 7;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context6.abrupt("return", false);
+
+              case 7:
+                // 週報データ
+                this.weeklyreport = response.data;
+                console.log("this.weeklyreport", this.weeklyreport);
+
+              case 9:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function fetchWeeklyReport() {
+        return _fetchWeeklyReport.apply(this, arguments);
+      }
+
+      return fetchWeeklyReport;
+    }(),
+
+    /** 勤務表登録 */
+    save: function () {
+      var _save = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                this.store(false);
+
+              case 1:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function save() {
+        return _save.apply(this, arguments);
+      }
+
+      return save;
+    }(),
+
+    /** 勤務表提出 */
+    submit: function () {
+      var _submit = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                this.store(true);
+
+              case 1:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this);
+      }));
+
+      function submit() {
+        return _submit.apply(this, arguments);
+      }
+
+      return submit;
+    }(),
+
+    /** 勤務表データ登録 */
+    store: function () {
+      var _store = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee9(submit) {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.next = 2;
+                return axios.post("/api/workschedule/store", {
+                  workschedules: this.workschedules,
+                  submit: submit
+                });
+
+              case 2:
+                response = _context9.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context9.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context9.abrupt("return", false);
+
+              case 6:
+                // 勤務表提出状況データ更新
+                this.fetchWorkScheduleMonth();
+
+              case 7:
+              case "end":
+                return _context9.stop();
+            }
+          }
+        }, _callee9, this);
+      }));
+
+      function store(_x) {
+        return _store.apply(this, arguments);
+      }
+
+      return store;
+    }(),
+
+    /** テーブルヘッダー */
+    createTableHeaders: function createTableHeaders(projectMaxCount) {
+      var tableheaders = [{
+        text: "日付",
+        sortable: false
+      }, {
+        text: "有給",
+        sortable: false
+      }, {
+        text: "開始時間",
+        sortable: false
+      }, {
+        text: "終了時間",
+        sortable: false
+      }, {
+        text: "休憩時間(h)",
+        sortable: false
+      }, {
+        text: "深夜休憩時間",
+        sortable: false
+      }, {
+        text: "勤務時間",
+        sortable: false
+      }, {
+        text: "PJ合計時間",
+        sortable: false
+      }];
+
+      for (var i = 1; i <= projectMaxCount; i++) {
+        tableheaders[tableheaders.length] = {
+          text: "PJ時間" + i,
+          sortable: false
+        };
+      }
+
+      tableheaders[tableheaders.length] = {
+        text: "内容",
+        sortable: false
+      };
+      return tableheaders;
+    },
+
+    /** 勤務時間計算 */
+    worktimeADay: function worktimeADay(index) {
+      // リアクティブデータコピー
+      var worktime_array = this.worktimes; // 1日の勤務時間計算
+
+      worktime_array[index] = Object(_util__WEBPACK_IMPORTED_MODULE_1__["getWorktime"])(this.workschedules[index].starttime_hh, this.workschedules[index].starttime_mm, this.workschedules[index].endtime_hh, this.workschedules[index].endtime_mm, this.workschedules[index].breaktime, this.workschedules[index].breaktime_midnight); // リアクティブデータに登録
+
+      this.worktimes = worktime_array; // 1月の合計勤務時間計算
+
+      this.worktimeSum = this.worktimes.reduce(function (total, data) {
+        return total + data;
+      });
+      return this.worktimes[index];
+    },
+
+    /** 1日のプロジェクト時間計算 */
+    PJWorktimeADay: function PJWorktimeADay(index) {
+      // プロジェクト時間を勤務表データに投入
+      this.workschedules[index].project_work = this.projectWorktimes[index]; // 1日のプロジェクト合計時間の計算
+
+      var projectWorktime = 0;
+      this.projectWorktimes[index].forEach(function (val_2, idx_2, arr_2) {
+        projectWorktime = projectWorktime + parseFloat(val_2.worktime);
+      });
+      return projectWorktime;
+    },
+
+    /** プロジェクト追加 */
+    addProject: function addProject() {
+      var _this2 = this;
+
+      // プロジェクト時間の計算
+      this.workschedules.forEach(function (val_1, idx_1, arr_1) {
+        // 1日のプロジェクト時間データ格納
+        _this2.projectWorktimes[idx_1].splice(val_1.project_work.length, 0, {
+          work_schedule_id: val_1.project_work[0].work_schedule_id,
+          project_id: 1,
+          worktime: 0
+        }); // 1日のプロジェクト時間を勤務表データに投入
+
+
+        _this2.workschedules[idx_1].project_work = _this2.projectWorktimes[idx_1];
+      }); // 選択済みプロジェクトidリスト（デフォルト：Project_id=1）
+
+      this.selected.splice(this.selected.length, 0, {
+        project_id: 1
+      }); // テーブルヘッダー変更
+
+      this.tableheaders = this.createTableHeaders(this.projectWorktimes[0].length);
+    },
+
+    /** プロジェクトselect */
+    changeSelected: function changeSelected(index) {
+      var _this3 = this;
+
+      this.projectWorktimes.forEach(function (val_1, idx_1, arr_1) {
+        // プロジェクト時間のリアクティブデータの変更
+        _this3.$set(_this3.projectWorktimes[idx_1][index], "project_id", _this3.selected[index].project_id); // 勤務表のリアクティブデータの変更
+
+
+        _this3.workschedules[idx_1].project_work = _this3.projectWorktimes[idx_1];
+      });
+    },
+
+    /** 有給チェック */
+    changePaidHoliday: function changePaidHoliday(index) {
+      var _this4 = this;
+
+      if (this.workschedules[index].is_paid_holiday) {
+        this.$set(this.workschedules[index], "starttime_hh", null);
+        this.$set(this.workschedules[index], "starttime_mm", null);
+        this.$set(this.workschedules[index], "endtime_hh", null);
+        this.$set(this.workschedules[index], "endtime_mm", null);
+        this.$set(this.workschedules[index], "breaktime", null);
+        this.$set(this.workschedules[index], "breaktime_midnight", null);
+        this.projectWorktimes[index].forEach(function (val_1, idx_1, arr_1) {
+          _this4.$set(_this4.projectWorktimes[index][idx_1], "worktime", 0); // 勤務表のリアクティブデータの変更
+
+
+          _this4.workschedules[index].project_work = _this4.projectWorktimes[index];
+        });
+      } else if (!this.isHoliday(this.workschedules[index].workdate)) {
+        this.$set(this.workschedules[index], "starttime_hh", "09");
+        this.$set(this.workschedules[index], "starttime_mm", "00");
+        this.$set(this.workschedules[index], "endtime_hh", "18");
+        this.$set(this.workschedules[index], "endtime_mm", "00");
+        this.$set(this.workschedules[index], "breaktime", 1);
+        this.$set(this.workschedules[index], "breaktime_midnight", 0);
+        this.$set(this.projectWorktimes[index][0], "worktime", 8); // 勤務表のリアクティブデータの変更
+
+        this.workschedules[index].project_work = this.projectWorktimes[index];
+      }
+    }
+  },
+  watch: {
+    $route: {
+      handler: function () {
+        var _handler = _asyncToGenerator(
+        /*#__PURE__*/
+        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee10() {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee10$(_context10) {
+            while (1) {
+              switch (_context10.prev = _context10.next) {
+                case 0:
+                  _context10.next = 2;
+                  return this.fetchUser();
+
+                case 2:
+                  _context10.next = 4;
+                  return this.fetchWorkScheduleMonth();
+
+                case 4:
+                  _context10.next = 6;
+                  return this.fetchHolidays();
+
+                case 6:
+                  _context10.next = 8;
+                  return this.fetchProjects();
+
+                case 8:
+                  _context10.next = 10;
+                  return this.fetchWorkSchedules();
+
+                case 10:
+                  _context10.next = 12;
+                  return this.fetchWeeklyReport();
+
+                case 12:
+                case "end":
+                  return _context10.stop();
+              }
+            }
+          }, _callee10, this);
+        }));
+
+        function handler() {
+          return _handler.apply(this, arguments);
+        }
+
+        return handler;
+      }(),
+      immediate: true
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WorkSchedule.vue?vue&type=script&lang=js&":
 /*!******************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WorkSchedule.vue?vue&type=script&lang=js& ***!
@@ -6236,6 +7163,29 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -6254,7 +7204,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   data: function data() {
     return {
       targetDate: 0,
+      basicWorkDay: 0,
+      workingtimeMin: 0,
+      workingtimeMax: 0,
       tableheaders: [],
+      user: [],
+      isSubmitted: false,
       projects: [],
       holidays: [],
       workschedules: [],
@@ -6288,33 +7243,147 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return moment(date).format("DD(ddd)");
     },
 
+    /** 基本勤務日数計算 */
+    culBasicWorkDay: function culBasicWorkDay() {
+      this.basicWorkDay = 0;
+      var startDate = this.targetDate.startOf("month").clone();
+      var endDate = this.targetDate.endOf("month").clone(); // 1日ずつインクリメントして配列へpush
+
+      while (startDate.unix() <= endDate.unix()) {
+        !this.isHoliday(startDate.format("YYYY-MM-DD")) ? this.basicWorkDay++ : null;
+        startDate.add(1, "days");
+      }
+    },
+
+    /** 出勤日数計算 */
+    WorktingDay: function WorktingDay() {
+      return this.worktimes.reduce(function (total, data, index) {
+        return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
+      });
+    },
+
+    /** 欠勤日数計算 */
+    AbsenceDay: function AbsenceDay() {
+      return this.basicWorkDay - this.WorktingDay();
+    },
+
+    /** 今月の勤務時間数 */
+    culBasicWorktimeAMonth: function culBasicWorktimeAMonth() {
+      if (this.user.workingtime_type === 1) {
+        this.workingtimeMin = this.basicWorkDay * this.user.worktime_day;
+        this.workingtimeMax = this.workingtimeMin + this.user.maxworktime_month;
+      } else if (this.user.workingtime_type === 2) {
+        this.workingtimeMin = this.user.workingtime_min;
+        this.workingtimeMax = this.user.workingtime_max;
+      }
+    },
+
+    /** 不足時間 */
+    ShortageTime: function ShortageTime() {
+      return this.worktimeSum < this.workingtimeMin ? this.workingtimeMin - this.worktimeSum : 0;
+    },
+
+    /** 超過時間 */
+    OverTime: function OverTime() {
+      return this.worktimeSum > this.workingtimeMax ? this.worktimeSum - this.workingtimeMax : 0;
+    },
+
+    /** 今月の有給消化数 */
+    paidHolidayThisMonth: function paidHolidayThisMonth() {
+      var paidHolidayThisMonth = 0;
+      this.workschedules.forEach(function (val_1, idx_1, arr_1) {
+        val_1.is_paid_holiday ? paidHolidayThisMonth++ : null;
+      });
+      return paidHolidayThisMonth;
+    },
+
     /** 休日チェック */
-    holiday: function holiday(date) {
-      if (moment(date).day() % 6 === 0 || this.holidays[date]) {
-        return true;
+    isHoliday: function isHoliday(date) {
+      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+    },
+
+    /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
+    isSameWorkingTime: function isSameWorkingTime(index) {
+      var projectWorktime = 0;
+      this.projectWorktimes[index].forEach(function (val_1, idx_1, arr_1) {
+        projectWorktime = projectWorktime + parseFloat(val_1.worktime);
+      });
+      return this.worktimes[index] === projectWorktime ? true : false;
+    },
+
+    /** 1月の勤務時間と1月のプロジェクト時間が一致しているか確認 */
+    isSameWorkingTimeAMonth: function isSameWorkingTimeAMonth() {
+      var _this = this;
+
+      var canSubmit = false;
+
+      if (this.projectWorktimes.length !== 0) {
+        canSubmit = true;
+        this.worktimes.forEach(function (val_1, idx_1, arr_1) {
+          _this.isSameWorkingTime(idx_1) ? null : canSubmit = false;
+        });
       }
 
-      return false;
+      return canSubmit;
     },
 
     /** 月次移動 */
     changeMonth: function changeMonth(index) {
-      this.targetDate = this.targetDate.add("months", index);
+      this.targetDate.add(index, "months");
+      this.fetchWorkScheduleMonth();
       this.fetchWorkSchedules();
     },
 
-    /** 休日データ取得 */
-    fetchHolidays: function () {
-      var _fetchHolidays = _asyncToGenerator(
+    /** 勤務表データ作成 */
+    createWorkSchedule: function createWorkSchedule(responseData) {
+      if (responseData.length === 0) {
+        responseData = [];
+        var startDate = this.targetDate.startOf("month").clone();
+        var endDate = this.targetDate.endOf("month").clone(); // 当月分のデータが存在しない場合、デフォルト値で作成
+
+        while (startDate.unix() <= endDate.unix()) {
+          var isHoliday = this.isHoliday(startDate.format("YYYY-MM-DD"));
+          responseData.push({
+            id: null,
+            user_id: this.user.id,
+            week_number: startDate.format("ggggWW"),
+            workdate: startDate.format("YYYY-MM-DD"),
+            is_paid_holiday: false,
+            starttime_hh: isHoliday ? null : "09",
+            starttime_mm: isHoliday ? null : "00",
+            endtime_hh: isHoliday ? null : "18",
+            endtime_mm: isHoliday ? null : "00",
+            breaktime: isHoliday ? null : 1,
+            breaktime_midnight: isHoliday ? null : 0,
+            project_work: [{
+              work_schedule_id: null,
+              project_id: 1,
+              worktime: isHoliday ? 0 : 8
+            }],
+            detail: null
+          }); // 1日加算
+
+          startDate.add(1, "days");
+        }
+      }
+
+      return responseData;
+    },
+
+    /** ユーザデータ取得 */
+    fetchUser: function () {
+      var _fetchUser = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-        var response, holidays;
+        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.next = 2;
-                return axios.get("/api/holiday/getall");
+                return axios.post("/api/user/get", {
+                  userId: this.$store.state.auth.user.id
+                });
 
               case 2:
                 response = _context.sent;
@@ -6328,14 +7397,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context.abrupt("return", false);
 
               case 6:
-                // 休日データ
-                holidays = [];
-                response.data.forEach(function (val_1, idx_1, arr_1) {
-                  holidays[arr_1[idx_1].date] = [arr_1[idx_1].name];
-                });
-                this.holidays = holidays;
+                // ユーザデータ
+                this.user = response.data;
 
-              case 9:
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -6343,25 +7408,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee, this);
       }));
 
-      function fetchHolidays() {
-        return _fetchHolidays.apply(this, arguments);
+      function fetchUser() {
+        return _fetchUser.apply(this, arguments);
       }
 
-      return fetchHolidays;
+      return fetchUser;
     }(),
 
-    /** プロジェクトデータ取得 */
-    fetchProjects: function () {
-      var _fetchProjects = _asyncToGenerator(
+    /** 勤務表提出状況データ取得 */
+    fetchWorkScheduleMonth: function () {
+      var _fetchWorkScheduleMonth = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
-        var response, projects;
+        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return axios.get("/api/project/getall");
+                return axios.post("/api/workschedulemonth/issubmitted", {
+                  userId: this.$store.state.auth.user.id,
+                  yearmonth: this.targetDate.format("YYYYMM")
+                });
 
               case 2:
                 response = _context2.sent;
@@ -6375,18 +7443,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context2.abrupt("return", false);
 
               case 6:
-                // プロジェクトデータ
-                projects = [];
-                response.data.forEach(function (val_1, idx_1, arr_1) {
-                  projects[idx_1] = {
-                    id: arr_1[idx_1].id,
-                    code: arr_1[idx_1].code,
-                    name: arr_1[idx_1].code + " : " + arr_1[idx_1].name
-                  };
-                });
-                this.projects = projects;
+                // 勤務表提出状況データ
+                this.isSubmitted = response.data === 1 ? true : false;
 
-              case 9:
+              case 7:
               case "end":
                 return _context2.stop();
             }
@@ -6394,29 +7454,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee2, this);
       }));
 
-      function fetchProjects() {
-        return _fetchProjects.apply(this, arguments);
+      function fetchWorkScheduleMonth() {
+        return _fetchWorkScheduleMonth.apply(this, arguments);
       }
 
-      return fetchProjects;
+      return fetchWorkScheduleMonth;
     }(),
 
-    /** 勤務表データ取得 */
-    fetchWorkSchedules: function () {
-      var _fetchWorkSchedules = _asyncToGenerator(
+    /** 休日データ取得 */
+    fetchHolidays: function () {
+      var _fetchHolidays = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
-        var _this = this;
-
-        var response, projectWorktimes, selected, isFirst;
+        var response, holidays;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.next = 2;
-                return axios.post("/api/workschedule/get", {
-                  yearmonth: this.targetDate.format("YYYYMM")
-                });
+                return axios.get("/api/holiday/getall");
 
               case 2:
                 response = _context3.sent;
@@ -6430,53 +7486,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context3.abrupt("return", false);
 
               case 6:
-                // 勤務表データ
-                this.workschedules = response.data; // 勤務時間初期化
-
-                this.worktimes = Array(response.data.length).fill(0); // プロジェクト勤務時間データ作成
-
-                projectWorktimes = [];
-                selected = [];
-                isFirst = true; // プロジェクト時間の計算
-
+                // 休日データ
+                holidays = [];
                 response.data.forEach(function (val_1, idx_1, arr_1) {
-                  // 1日のプロジェクト時間初期化
-                  var projectWorktime = []; // 1日のプロジェクト時間データ取得
+                  holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+                });
+                this.holidays = holidays;
 
-                  arr_1[idx_1].project_work.forEach(function (val_2, idx_2, arr_2) {
-                    projectWorktime[idx_2] = {
-                      work_schedule_id: arr_2[idx_2].work_schedule_id,
-                      project_id: arr_2[idx_2].project_id,
-                      worktime: arr_2[idx_2].worktime
-                    };
-
-                    if (isFirst) {
-                      selected[idx_2] = {
-                        project_id: arr_2[idx_2].project_id
-                      };
-                    }
-                  });
-                  isFirst = false;
-                  _this.selected = selected; // 1日のプロジェクト時間一件も存在しなければ、データ作成
-
-                  if (projectWorktime.length == 0) {
-                    projectWorktime[0] = {
-                      work_schedule_id: null,
-                      project_id: null,
-                      worktime: 0
-                    };
-                  } // 一日のプロジェクト時間データ格納
-
-
-                  projectWorktimes[idx_1] = projectWorktime; // 一日のプロジェクト時間を勤務表データに投入
-
-                  _this.workschedules[idx_1].project_work = projectWorktime;
-                }); // リアクティブデータ代入
-
-                this.projectWorktimes = projectWorktimes;
-                this.tableheaders = this.createtableheaders(projectWorktimes[0].length);
-
-              case 14:
+              case 9:
               case "end":
                 return _context3.stop();
             }
@@ -6484,16 +7501,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee3, this);
       }));
 
-      function fetchWorkSchedules() {
-        return _fetchWorkSchedules.apply(this, arguments);
+      function fetchHolidays() {
+        return _fetchHolidays.apply(this, arguments);
       }
 
-      return fetchWorkSchedules;
+      return fetchHolidays;
     }(),
 
-    /** 勤務表データ登録 */
-    store: function () {
-      var _store = _asyncToGenerator(
+    /** プロジェクトデータ取得 */
+    fetchProjects: function () {
+      var _fetchProjects = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
         var response;
@@ -6502,10 +7519,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return axios.post("/api/workschedule/store", {
-                  workschedules: this.workschedules,
-                  selectedprojects: this.selected
-                });
+                return axios.get("/api/project/getall");
 
               case 2:
                 response = _context4.sent;
@@ -6519,6 +7533,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context4.abrupt("return", false);
 
               case 6:
+                // プロジェクトデータ
+                this.projects = response.data.map(function (item) {
+                  return {
+                    id: item.id,
+                    code: item.code,
+                    name: item.code + " : " + item.name
+                  };
+                });
+
+              case 7:
               case "end":
                 return _context4.stop();
             }
@@ -6526,15 +7550,176 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee4, this);
       }));
 
-      function store() {
+      function fetchProjects() {
+        return _fetchProjects.apply(this, arguments);
+      }
+
+      return fetchProjects;
+    }(),
+
+    /** 勤務表データ取得 */
+    fetchWorkSchedules: function () {
+      var _fetchWorkSchedules = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.next = 2;
+                return axios.post("/api/workschedule/get", {
+                  userId: this.$store.state.auth.user.id,
+                  yearmonth: this.targetDate.format("YYYYMM")
+                });
+
+              case 2:
+                response = _context5.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context5.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context5.abrupt("return", false);
+
+              case 6:
+                // 勤務表データ
+                this.workschedules = this.createWorkSchedule(response.data); // 勤務時間初期化
+
+                this.worktimes = Array(this.workschedules.length).fill(0); // プロジェクト時間
+
+                this.projectWorktimes = this.workschedules.map(function (item) {
+                  return item["project_work"];
+                }); // プロジェクトコード
+
+                this.selected = this.workschedules[0].project_work.map(function (item) {
+                  return {
+                    project_id: item["project_id"]
+                  };
+                }); // テーブルヘッダー作成
+
+                this.tableheaders = this.createTableHeaders(this.workschedules[0].project_work.length); // 勤務情報再計算
+
+                this.culBasicWorkDay();
+                this.culBasicWorktimeAMonth();
+
+              case 13:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function fetchWorkSchedules() {
+        return _fetchWorkSchedules.apply(this, arguments);
+      }
+
+      return fetchWorkSchedules;
+    }(),
+
+    /** 勤務表登録 */
+    save: function () {
+      var _save = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                this.store(false);
+
+              case 1:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function save() {
+        return _save.apply(this, arguments);
+      }
+
+      return save;
+    }(),
+
+    /** 勤務表提出 */
+    submit: function () {
+      var _submit = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                this.store(true);
+
+              case 1:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function submit() {
+        return _submit.apply(this, arguments);
+      }
+
+      return submit;
+    }(),
+
+    /** 勤務表データ登録 */
+    store: function () {
+      var _store = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8(submit) {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                _context8.next = 2;
+                return axios.post("/api/workschedule/store", {
+                  workschedules: this.workschedules,
+                  submit: submit
+                });
+
+              case 2:
+                response = _context8.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context8.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context8.abrupt("return", false);
+
+              case 6:
+                // 勤務表提出状況データ更新
+                this.fetchWorkScheduleMonth();
+
+              case 7:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this);
+      }));
+
+      function store(_x) {
         return _store.apply(this, arguments);
       }
 
       return store;
     }(),
 
-    /** テーブルのヘッダー情報 */
-    createtableheaders: function createtableheaders(projectMaxCount) {
+    /** テーブルヘッダー */
+    createTableHeaders: function createTableHeaders(projectMaxCount) {
       var tableheaders = [{
         text: "日付",
         sortable: false
@@ -6576,7 +7761,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
 
     /** 勤務時間計算 */
-    worktime_day: function worktime_day(index) {
+    worktimeADay: function worktimeADay(index) {
       // リアクティブデータコピー
       var worktime_array = this.worktimes; // 1日の勤務時間計算
 
@@ -6590,16 +7775,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return this.worktimes[index];
     },
 
-    /** プロジェクト時間計算 */
-    pj_worktime_day: function pj_worktime_day(index) {
+    /** 1日のプロジェクト時間計算 */
+    PJWorktimeADay: function PJWorktimeADay(index) {
       // プロジェクト時間を勤務表データに投入
       this.workschedules[index].project_work = this.projectWorktimes[index]; // 1日のプロジェクト合計時間の計算
 
-      var project_worktime = 0;
+      var projectWorktime = 0;
       this.projectWorktimes[index].forEach(function (val_2, idx_2, arr_2) {
-        project_worktime = project_worktime + parseFloat(val_2.worktime);
+        projectWorktime = projectWorktime + parseFloat(val_2.worktime);
       });
-      return project_worktime;
+      return projectWorktime;
     },
 
     /** プロジェクト追加 */
@@ -6608,14 +7793,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       // プロジェクト時間の計算
       this.workschedules.forEach(function (val_1, idx_1, arr_1) {
-        // 追加のプロジェクトデータを作成
-        var data = {
+        // 1日のプロジェクト時間データ格納
+        _this2.projectWorktimes[idx_1].splice(val_1.project_work.length, 0, {
           work_schedule_id: val_1.project_work[0].work_schedule_id,
           project_id: 1,
           worktime: 0
-        }; // 一日のプロジェクト時間データ格納
-
-        _this2.projectWorktimes[idx_1].splice(val_1.project_work.length, 0, data); // 一日のプロジェクト時間を勤務表データに投入
+        }); // 1日のプロジェクト時間を勤務表データに投入
 
 
         _this2.workschedules[idx_1].project_work = _this2.projectWorktimes[idx_1];
@@ -6625,22 +7808,50 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         project_id: 1
       }); // テーブルヘッダー変更
 
-      this.tableheaders = this.createtableheaders(this.projectWorktimes[0].length);
+      this.tableheaders = this.createTableHeaders(this.projectWorktimes[0].length);
     },
 
     /** プロジェクトselect */
     changeSelected: function changeSelected(index) {
+      var _this3 = this;
+
       this.projectWorktimes.forEach(function (val_1, idx_1, arr_1) {
-        console.log("test");
-        /**
-        this.$set(
-          this.projectWorktimes[idx_1],
-          "project_id",
-          this.selected[index].project_id
-        );
-        this.workschedules[idx_1].project_work = this.projectWorktimes[idx_1];
-         */
+        // プロジェクト時間のリアクティブデータの変更
+        _this3.$set(_this3.projectWorktimes[idx_1][index], "project_id", _this3.selected[index].project_id); // 勤務表のリアクティブデータの変更
+
+
+        _this3.workschedules[idx_1].project_work = _this3.projectWorktimes[idx_1];
       });
+    },
+
+    /** 有給チェック */
+    changePaidHoliday: function changePaidHoliday(index) {
+      var _this4 = this;
+
+      if (this.workschedules[index].is_paid_holiday) {
+        this.$set(this.workschedules[index], "starttime_hh", null);
+        this.$set(this.workschedules[index], "starttime_mm", null);
+        this.$set(this.workschedules[index], "endtime_hh", null);
+        this.$set(this.workschedules[index], "endtime_mm", null);
+        this.$set(this.workschedules[index], "breaktime", null);
+        this.$set(this.workschedules[index], "breaktime_midnight", null);
+        this.projectWorktimes[index].forEach(function (val_1, idx_1, arr_1) {
+          _this4.$set(_this4.projectWorktimes[index][idx_1], "worktime", 0); // 勤務表のリアクティブデータの変更
+
+
+          _this4.workschedules[index].project_work = _this4.projectWorktimes[index];
+        });
+      } else if (!this.isHoliday(this.workschedules[index].workdate)) {
+        this.$set(this.workschedules[index], "starttime_hh", "09");
+        this.$set(this.workschedules[index], "starttime_mm", "00");
+        this.$set(this.workschedules[index], "endtime_hh", "18");
+        this.$set(this.workschedules[index], "endtime_mm", "00");
+        this.$set(this.workschedules[index], "breaktime", 1);
+        this.$set(this.workschedules[index], "breaktime_midnight", 0);
+        this.$set(this.projectWorktimes[index][0], "worktime", 8); // 勤務表のリアクティブデータの変更
+
+        this.workschedules[index].project_work = this.projectWorktimes[index];
+      }
     }
   },
   watch: {
@@ -6648,28 +7859,36 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       handler: function () {
         var _handler = _asyncToGenerator(
         /*#__PURE__*/
-        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee9() {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee9$(_context9) {
             while (1) {
-              switch (_context5.prev = _context5.next) {
+              switch (_context9.prev = _context9.next) {
                 case 0:
-                  _context5.next = 2;
-                  return this.fetchHolidays();
+                  _context9.next = 2;
+                  return this.fetchUser();
 
                 case 2:
-                  _context5.next = 4;
-                  return this.fetchProjects();
+                  _context9.next = 4;
+                  return this.fetchWorkScheduleMonth();
 
                 case 4:
-                  _context5.next = 6;
-                  return this.fetchWorkSchedules();
+                  _context9.next = 6;
+                  return this.fetchHolidays();
 
                 case 6:
+                  _context9.next = 8;
+                  return this.fetchProjects();
+
+                case 8:
+                  _context9.next = 10;
+                  return this.fetchWorkSchedules();
+
+                case 10:
                 case "end":
-                  return _context5.stop();
+                  return _context9.stop();
               }
             }
-          }, _callee5, this);
+          }, _callee9, this);
         }));
 
         function handler() {
@@ -14621,6 +15840,21 @@ exports.push([module.i, "/*!\n* Vuetify v1.5.14\n* Forged by John Leider\n* Rele
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css&":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
+// Module
+exports.push([module.i, "\n.holiday[data-v-7d72b49e] {\n  background: lightgray;\n}\n.notsame[data-v-7d72b49e] {\n  color: red;\n}\n", ""]);
+
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WorkSchedule.vue?vue&type=style&index=0&id=3e5e22d1&scoped=true&lang=css&":
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WorkSchedule.vue?vue&type=style&index=0&id=3e5e22d1&scoped=true&lang=css& ***!
@@ -14630,7 +15864,7 @@ exports.push([module.i, "/*!\n* Vuetify v1.5.14\n* Forged by John Leider\n* Rele
 
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
 // Module
-exports.push([module.i, "\n.holiday[data-v-3e5e22d1] {\n  background: lightgray;\n}\n", ""]);
+exports.push([module.i, "\n.holiday[data-v-3e5e22d1] {\n  background: lightgray;\n}\n.notsame[data-v-3e5e22d1] {\n  color: red;\n}\n", ""]);
 
 
 
@@ -29020,6 +30254,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/dist/cjs.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader/dist/cjs.js??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader/dist/cjs.js??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css& */ "./node_modules/css-loader/dist/cjs.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/dist/cjs.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WorkSchedule.vue?vue&type=style&index=0&id=3e5e22d1&scoped=true&lang=css&":
 /*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader/dist/cjs.js??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WorkSchedule.vue?vue&type=style&index=0&id=3e5e22d1&scoped=true&lang=css& ***!
@@ -30052,6 +31316,12 @@ var render = function() {
                   "RouterLink",
                   { staticClass: "nav-link", attrs: { to: "/workschedule" } },
                   [_vm._v("勤務表")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "RouterLink",
+                  { staticClass: "nav-link", attrs: { to: "/weeklyreport" } },
+                  [_vm._v("週報")]
                 ),
                 _vm._v(" "),
                 _c(
@@ -32185,9 +33455,9 @@ render._withStripped = true
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WorkSchedule.vue?vue&type=template&id=3e5e22d1&scoped=true&":
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true&":
 /*!**********************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WorkSchedule.vue?vue&type=template&id=3e5e22d1&scoped=true& ***!
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true& ***!
   \**********************************************************************************************************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -32214,7 +33484,7 @@ var render = function() {
               [
                 _c("v-toolbar-title", [
                   _vm._v(
-                    "勤務表 (" +
+                    "週報 (" +
                       _vm._s(this.targetDate.format("YYYY")) +
                       "年" +
                       _vm._s(this.targetDate.format("MM")) +
@@ -32232,8 +33502,52 @@ var render = function() {
               1
             ),
             _vm._v(" "),
+            _c(
+              "v-alert",
+              { attrs: { value: this.isSubmitted, type: "success" } },
+              [_vm._v("当月分の勤務表は提出済みです")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-alert",
+              { attrs: { value: !this.isSubmitted, type: "warning" } },
+              [_vm._v("当月分の勤務表は未提出です")]
+            ),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v("基本勤務日数：" + _vm._s(this.basicWorkDay) + " 日")
+            ]),
+            _vm._v(" "),
+            _c("p", [_vm._v("出勤日数：" + _vm._s(_vm.WorktingDay()) + " 日")]),
+            _vm._v(" "),
+            _c("p", [_vm._v("欠勤日数：" + _vm._s(_vm.AbsenceDay()) + " 日")]),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v(
+                "今月の勤務時間：下限 " +
+                  _vm._s(this.workingtimeMin) +
+                  " h 〜 上限 " +
+                  _vm._s(this.workingtimeMax) +
+                  " h"
+              )
+            ]),
+            _vm._v(" "),
             _c("p", [
               _vm._v("総勤務時間：" + _vm._s(this.worktimeSum) + " 時間")
+            ]),
+            _vm._v(" "),
+            _c("p", [_vm._v("不足時間：" + _vm._s(_vm.ShortageTime()) + " h")]),
+            _vm._v(" "),
+            _c("p", [_vm._v("超過時間：" + _vm._s(_vm.OverTime()) + " h")]),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v(
+                "残有給日数：" +
+                  _vm._s(this.user.paid_holiday) +
+                  " 日 (今月 " +
+                  _vm._s(_vm.paidHolidayThisMonth()) +
+                  " 日消費)"
+              )
             ]),
             _vm._v(" "),
             _c(
@@ -32313,14 +33627,44 @@ var render = function() {
             _c(
               "v-btn",
               {
-                attrs: { color: "success" },
+                attrs: {
+                  color: "success",
+                  disabled: !_vm.isSameWorkingTimeAMonth()
+                },
                 on: {
                   click: function($event) {
-                    return _vm.store()
+                    return _vm.save()
                   }
                 }
               },
               [_vm._v("勤務表登録")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-btn",
+              {
+                attrs: {
+                  color: "info",
+                  disabled: !_vm.isSameWorkingTimeAMonth()
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.submit()
+                  }
+                }
+              },
+              [_vm._v("勤務表提出")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-alert",
+              {
+                attrs: {
+                  value: !_vm.isSameWorkingTimeAMonth(),
+                  type: "warning"
+                }
+              },
+              [_vm._v("総勤務時間と総プロジェクト時間が一致していません。")]
             ),
             _vm._v(" "),
             _c("v-data-table", {
@@ -32344,7 +33688,9 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "5%" }
                         },
                         [_vm._v(_vm._s(_vm.dateformat(props.item.workdate)))]
@@ -32353,11 +33699,21 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "3%" }
                         },
                         [
                           _c("v-checkbox", {
+                            attrs: {
+                              disabled: _vm.isHoliday(props.item.workdate)
+                            },
+                            on: {
+                              change: function($event) {
+                                return _vm.changePaidHoliday(props.index)
+                              }
+                            },
                             model: {
                               value: props.item.is_paid_holiday,
                               callback: function($$v) {
@@ -32373,7 +33729,9 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "10%" }
                         },
                         [
@@ -32416,7 +33774,9 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "10%" }
                         },
                         [
@@ -32459,7 +33819,9 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "7%" }
                         },
                         [
@@ -32480,7 +33842,9 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "7%" }
                         },
                         [
@@ -32501,19 +33865,47 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "7%" }
                         },
-                        [_vm._v(_vm._s(_vm.worktime_day(props.index)))]
+                        [
+                          _c(
+                            "font",
+                            {
+                              class: {
+                                notsame: !_vm.isSameWorkingTime(props.index)
+                              },
+                              attrs: { size: "5" }
+                            },
+                            [_vm._v(_vm._s(_vm.worktimeADay(props.index)))]
+                          )
+                        ],
+                        1
                       ),
                       _vm._v(" "),
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "7%" }
                         },
-                        [_vm._v(_vm._s(_vm.pj_worktime_day(props.index)))]
+                        [
+                          _c(
+                            "font",
+                            {
+                              class: {
+                                notsame: !_vm.isSameWorkingTime(props.index)
+                              },
+                              attrs: { size: "5" }
+                            },
+                            [_vm._v(_vm._s(_vm.PJWorktimeADay(props.index)))]
+                          )
+                        ],
+                        1
                       ),
                       _vm._v(" "),
                       _vm._l(_vm.projectWorktimes[props.index], function(
@@ -32524,7 +33916,7 @@ var render = function() {
                           {
                             key: projectWorktime.key,
                             class: {
-                              holiday: _vm.holiday(props.item.workdate)
+                              holiday: _vm.isHoliday(props.item.workdate)
                             },
                             attrs: { width: "7%" }
                           },
@@ -32547,7 +33939,538 @@ var render = function() {
                       _c(
                         "td",
                         {
-                          class: { holiday: _vm.holiday(props.item.workdate) },
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "30%" }
+                        },
+                        [
+                          _c("v-textarea", {
+                            attrs: {
+                              solo: "",
+                              rows: "2",
+                              name: "detail",
+                              label: "詳細",
+                              value: ""
+                            },
+                            model: {
+                              value: props.item.detail,
+                              callback: function($$v) {
+                                _vm.$set(props.item, "detail", $$v)
+                              },
+                              expression: "props.item.detail"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]
+                  }
+                }
+              ])
+            })
+          ],
+          2
+        )
+      ])
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WorkSchedule.vue?vue&type=template&id=3e5e22d1&scoped=true&":
+/*!**********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/pages/WorkSchedule.vue?vue&type=template&id=3e5e22d1&scoped=true& ***!
+  \**********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "work-schedule" },
+    [
+      _c("v-app", { attrs: { id: "inspire" } }, [
+        _c(
+          "div",
+          [
+            _c(
+              "v-toolbar",
+              { attrs: { flat: "", color: "white" } },
+              [
+                _c("v-toolbar-title", [
+                  _vm._v(
+                    "勤務表 (" +
+                      _vm._s(this.targetDate.format("YYYY")) +
+                      "年" +
+                      _vm._s(this.targetDate.format("MM")) +
+                      "月)"
+                  )
+                ]),
+                _vm._v(" "),
+                _c("v-divider", {
+                  staticClass: "mx-2",
+                  attrs: { inset: "", vertical: "" }
+                }),
+                _vm._v(" "),
+                _c("v-spacer")
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "v-alert",
+              { attrs: { value: this.isSubmitted, type: "success" } },
+              [_vm._v("当月分の勤務表は提出済みです")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-alert",
+              { attrs: { value: !this.isSubmitted, type: "warning" } },
+              [_vm._v("当月分の勤務表は未提出です")]
+            ),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v("基本勤務日数：" + _vm._s(this.basicWorkDay) + " 日")
+            ]),
+            _vm._v(" "),
+            _c("p", [_vm._v("出勤日数：" + _vm._s(_vm.WorktingDay()) + " 日")]),
+            _vm._v(" "),
+            _c("p", [_vm._v("欠勤日数：" + _vm._s(_vm.AbsenceDay()) + " 日")]),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v(
+                "今月の勤務時間：下限 " +
+                  _vm._s(this.workingtimeMin) +
+                  " h 〜 上限 " +
+                  _vm._s(this.workingtimeMax) +
+                  " h"
+              )
+            ]),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v("総勤務時間：" + _vm._s(this.worktimeSum) + " 時間")
+            ]),
+            _vm._v(" "),
+            _c("p", [_vm._v("不足時間：" + _vm._s(_vm.ShortageTime()) + " h")]),
+            _vm._v(" "),
+            _c("p", [_vm._v("超過時間：" + _vm._s(_vm.OverTime()) + " h")]),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v(
+                "残有給日数：" +
+                  _vm._s(this.user.paid_holiday) +
+                  " 日 (今月 " +
+                  _vm._s(_vm.paidHolidayThisMonth()) +
+                  " 日消費)"
+              )
+            ]),
+            _vm._v(" "),
+            _c(
+              "v-btn",
+              {
+                attrs: { color: "info" },
+                on: {
+                  click: function($event) {
+                    return _vm.changeMonth(-1)
+                  }
+                }
+              },
+              [_vm._v("先月")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-btn",
+              {
+                attrs: { color: "info" },
+                on: {
+                  click: function($event) {
+                    return _vm.changeMonth(1)
+                  }
+                }
+              },
+              [_vm._v("次月")]
+            ),
+            _vm._v(" "),
+            _c("br"),
+            _vm._v(" "),
+            _c(
+              "v-btn",
+              {
+                attrs: { color: "success" },
+                on: {
+                  click: function($event) {
+                    return _vm.addProject()
+                  }
+                }
+              },
+              [_vm._v("プロジェクト追加")]
+            ),
+            _vm._v(" "),
+            _vm._l(_vm.projectWorktimes[0], function(projectWorktime, index) {
+              return _c(
+                "div",
+                { key: projectWorktime.key },
+                [
+                  _c("p", [_vm._v("プロジェクト" + _vm._s(index + 1))]),
+                  _vm._v(" "),
+                  _c("v-select", {
+                    attrs: {
+                      items: _vm.projects,
+                      "item-value": "id",
+                      "item-text": "name",
+                      label: "プロジェクト",
+                      box: ""
+                    },
+                    on: {
+                      change: function($event) {
+                        return _vm.changeSelected(index)
+                      }
+                    },
+                    model: {
+                      value: _vm.selected[index].project_id,
+                      callback: function($$v) {
+                        _vm.$set(_vm.selected[index], "project_id", $$v)
+                      },
+                      expression: "selected[index].project_id"
+                    }
+                  })
+                ],
+                1
+              )
+            }),
+            _vm._v(" "),
+            _c(
+              "v-btn",
+              {
+                attrs: {
+                  color: "success",
+                  disabled: !_vm.isSameWorkingTimeAMonth()
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.save()
+                  }
+                }
+              },
+              [_vm._v("勤務表登録")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-btn",
+              {
+                attrs: {
+                  color: "info",
+                  disabled: !_vm.isSameWorkingTimeAMonth()
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.submit()
+                  }
+                }
+              },
+              [_vm._v("勤務表提出")]
+            ),
+            _vm._v(" "),
+            _c(
+              "v-alert",
+              {
+                attrs: {
+                  value: !_vm.isSameWorkingTimeAMonth(),
+                  type: "warning"
+                }
+              },
+              [_vm._v("総勤務時間と総プロジェクト時間が一致していません。")]
+            ),
+            _vm._v(" "),
+            _c("v-data-table", {
+              staticClass: "elevation-1",
+              attrs: {
+                headers: this.tableheaders,
+                items: _vm.workschedules,
+                "rows-per-page-items": [],
+                pagination: _vm.pagination
+              },
+              on: {
+                "update:pagination": function($event) {
+                  _vm.pagination = $event
+                }
+              },
+              scopedSlots: _vm._u([
+                {
+                  key: "items",
+                  fn: function(props) {
+                    return [
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "5%" }
+                        },
+                        [_vm._v(_vm._s(_vm.dateformat(props.item.workdate)))]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "3%" }
+                        },
+                        [
+                          _c("v-checkbox", {
+                            attrs: {
+                              disabled: _vm.isHoliday(props.item.workdate)
+                            },
+                            on: {
+                              change: function($event) {
+                                return _vm.changePaidHoliday(props.index)
+                              }
+                            },
+                            model: {
+                              value: props.item.is_paid_holiday,
+                              callback: function($$v) {
+                                _vm.$set(props.item, "is_paid_holiday", $$v)
+                              },
+                              expression: "props.item.is_paid_holiday"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "10%" }
+                        },
+                        [
+                          _c(
+                            "div",
+                            { staticStyle: { display: "flex" } },
+                            [
+                              _c("v-text-field", {
+                                attrs: { type: "Number", min: "0", max: "30" },
+                                model: {
+                                  value: props.item.starttime_hh,
+                                  callback: function($$v) {
+                                    _vm.$set(props.item, "starttime_hh", $$v)
+                                  },
+                                  expression: "props.item.starttime_hh"
+                                }
+                              }),
+                              _vm._v(":\n              "),
+                              _c("v-text-field", {
+                                attrs: {
+                                  type: "Number",
+                                  min: "0",
+                                  max: "45",
+                                  step: "15"
+                                },
+                                model: {
+                                  value: props.item.starttime_mm,
+                                  callback: function($$v) {
+                                    _vm.$set(props.item, "starttime_mm", $$v)
+                                  },
+                                  expression: "props.item.starttime_mm"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "10%" }
+                        },
+                        [
+                          _c(
+                            "div",
+                            { staticStyle: { display: "flex" } },
+                            [
+                              _c("v-text-field", {
+                                attrs: { type: "Number", min: "0", max: "30" },
+                                model: {
+                                  value: props.item.endtime_hh,
+                                  callback: function($$v) {
+                                    _vm.$set(props.item, "endtime_hh", $$v)
+                                  },
+                                  expression: "props.item.endtime_hh"
+                                }
+                              }),
+                              _vm._v(":\n              "),
+                              _c("v-text-field", {
+                                attrs: {
+                                  type: "Number",
+                                  min: "0",
+                                  max: "45",
+                                  step: "15"
+                                },
+                                model: {
+                                  value: props.item.endtime_mm,
+                                  callback: function($$v) {
+                                    _vm.$set(props.item, "endtime_mm", $$v)
+                                  },
+                                  expression: "props.item.endtime_mm"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "7%" }
+                        },
+                        [
+                          _c("v-text-field", {
+                            attrs: { type: "Number", min: "0", step: "0.25" },
+                            model: {
+                              value: props.item.breaktime,
+                              callback: function($$v) {
+                                _vm.$set(props.item, "breaktime", $$v)
+                              },
+                              expression: "props.item.breaktime"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "7%" }
+                        },
+                        [
+                          _c("v-text-field", {
+                            attrs: { type: "Number", min: "0", step: "0.25" },
+                            model: {
+                              value: props.item.breaktime_midnight,
+                              callback: function($$v) {
+                                _vm.$set(props.item, "breaktime_midnight", $$v)
+                              },
+                              expression: "props.item.breaktime_midnight"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "7%" }
+                        },
+                        [
+                          _c(
+                            "font",
+                            {
+                              class: {
+                                notsame: !_vm.isSameWorkingTime(props.index)
+                              },
+                              attrs: { size: "5" }
+                            },
+                            [_vm._v(_vm._s(_vm.worktimeADay(props.index)))]
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
+                          attrs: { width: "7%" }
+                        },
+                        [
+                          _c(
+                            "font",
+                            {
+                              class: {
+                                notsame: !_vm.isSameWorkingTime(props.index)
+                              },
+                              attrs: { size: "5" }
+                            },
+                            [_vm._v(_vm._s(_vm.PJWorktimeADay(props.index)))]
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _vm._l(_vm.projectWorktimes[props.index], function(
+                        projectWorktime
+                      ) {
+                        return _c(
+                          "td",
+                          {
+                            key: projectWorktime.key,
+                            class: {
+                              holiday: _vm.isHoliday(props.item.workdate)
+                            },
+                            attrs: { width: "7%" }
+                          },
+                          [
+                            _c("v-text-field", {
+                              attrs: { type: "Number", min: "0", step: "0.25" },
+                              model: {
+                                value: projectWorktime.worktime,
+                                callback: function($$v) {
+                                  _vm.$set(projectWorktime, "worktime", $$v)
+                                },
+                                expression: "projectWorktime.worktime"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      }),
+                      _vm._v(" "),
+                      _c(
+                        "td",
+                        {
+                          class: {
+                            holiday: _vm.isHoliday(props.item.workdate)
+                          },
                           attrs: { width: "30%" }
                         },
                         [
@@ -75843,6 +77766,93 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/pages/WeeklyReport.vue":
+/*!*********************************************!*\
+  !*** ./resources/js/pages/WeeklyReport.vue ***!
+  \*********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WeeklyReport_vue_vue_type_template_id_7d72b49e_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true& */ "./resources/js/pages/WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true&");
+/* harmony import */ var _WeeklyReport_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WeeklyReport.vue?vue&type=script&lang=js& */ "./resources/js/pages/WeeklyReport.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css& */ "./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WeeklyReport_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WeeklyReport_vue_vue_type_template_id_7d72b49e_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WeeklyReport_vue_vue_type_template_id_7d72b49e_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "7d72b49e",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/pages/WeeklyReport.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/pages/WeeklyReport.vue?vue&type=script&lang=js&":
+/*!**********************************************************************!*\
+  !*** ./resources/js/pages/WeeklyReport.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WeeklyReport.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css&":
+/*!******************************************************************************************************!*\
+  !*** ./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css& ***!
+  \******************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_dist_cjs_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader/dist/cjs.js??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/dist/cjs.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=style&index=0&id=7d72b49e&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_dist_cjs_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_dist_cjs_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_dist_cjs_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_dist_cjs_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_dist_cjs_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_style_index_0_id_7d72b49e_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/pages/WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true&":
+/*!****************************************************************************************!*\
+  !*** ./resources/js/pages/WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true& ***!
+  \****************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_template_id_7d72b49e_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/pages/WeeklyReport.vue?vue&type=template&id=7d72b49e&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_template_id_7d72b49e_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WeeklyReport_vue_vue_type_template_id_7d72b49e_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/pages/WorkSchedule.vue":
 /*!*********************************************!*\
   !*** ./resources/js/pages/WorkSchedule.vue ***!
@@ -76051,11 +78061,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pages_PhotoList_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pages/PhotoList.vue */ "./resources/js/pages/PhotoList.vue");
 /* harmony import */ var _pages_PhotoDetail_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pages/PhotoDetail.vue */ "./resources/js/pages/PhotoDetail.vue");
 /* harmony import */ var _pages_WorkSchedule_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./pages/WorkSchedule.vue */ "./resources/js/pages/WorkSchedule.vue");
-/* harmony import */ var _pages_UserList_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./pages/UserList.vue */ "./resources/js/pages/UserList.vue");
-/* harmony import */ var _pages_Login_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pages/Login.vue */ "./resources/js/pages/Login.vue");
-/* harmony import */ var _pages_errors_System_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pages/errors/System.vue */ "./resources/js/pages/errors/System.vue");
-/* harmony import */ var _pages_errors_NotFound_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./pages/errors/NotFound.vue */ "./resources/js/pages/errors/NotFound.vue");
-/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./store */ "./resources/js/store/index.js");
+/* harmony import */ var _pages_WeeklyReport_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./pages/WeeklyReport.vue */ "./resources/js/pages/WeeklyReport.vue");
+/* harmony import */ var _pages_UserList_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pages/UserList.vue */ "./resources/js/pages/UserList.vue");
+/* harmony import */ var _pages_Login_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pages/Login.vue */ "./resources/js/pages/Login.vue");
+/* harmony import */ var _pages_errors_System_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./pages/errors/System.vue */ "./resources/js/pages/errors/System.vue");
+/* harmony import */ var _pages_errors_NotFound_vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./pages/errors/NotFound.vue */ "./resources/js/pages/errors/NotFound.vue");
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./store */ "./resources/js/store/index.js");
+
 
 
 
@@ -76086,8 +78098,17 @@ var routes = [{
     };
   }
 }, {
+  path: '/weeklyreport',
+  component: _pages_WeeklyReport_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
+  props: function props(route) {
+    var page = route.query.page;
+    return {
+      page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1
+    };
+  }
+}, {
   path: '/user',
-  component: _pages_UserList_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
+  component: _pages_UserList_vue__WEBPACK_IMPORTED_MODULE_6__["default"],
   props: function props(route) {
     var page = route.query.page;
     return {
@@ -76100,9 +78121,9 @@ var routes = [{
   props: true
 }, {
   path: '/login',
-  component: _pages_Login_vue__WEBPACK_IMPORTED_MODULE_6__["default"],
+  component: _pages_Login_vue__WEBPACK_IMPORTED_MODULE_7__["default"],
   beforeEnter: function beforeEnter(to, from, next) {
-    if (_store__WEBPACK_IMPORTED_MODULE_9__["default"].getters['auth/check']) {
+    if (_store__WEBPACK_IMPORTED_MODULE_10__["default"].getters['auth/check']) {
       next('/');
     } else {
       next();
@@ -76110,10 +78131,10 @@ var routes = [{
   }
 }, {
   path: '/500',
-  component: _pages_errors_System_vue__WEBPACK_IMPORTED_MODULE_7__["default"]
+  component: _pages_errors_System_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
 }, {
   path: '*',
-  component: _pages_errors_NotFound_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
+  component: _pages_errors_NotFound_vue__WEBPACK_IMPORTED_MODULE_9__["default"]
 }];
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   mode: 'history',
@@ -76536,8 +78557,12 @@ function getWorktime(start_hh, start_mm, end_hh, end_mm, breaktime, breaktime_mi
   var worktime = 0;
   var subtime_hh = 0;
   var subtime_mm = 0;
+  start_hh = parseInt(start_hh);
+  start_mm = parseInt(start_mm);
+  end_hh = parseInt(end_hh);
+  end_mm = parseInt(end_mm);
 
-  if (start_hh && start_mm && end_hh && end_mm) {
+  if (isFinite(start_hh) && isFinite(start_mm) && isFinite(end_hh) && isFinite(end_mm)) {
     if (end_hh >= start_hh) {
       subtime_hh = end_hh - start_hh;
 

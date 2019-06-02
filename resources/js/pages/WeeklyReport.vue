@@ -12,7 +12,7 @@
     <v-app id="inspire">
       <div>
         <v-toolbar flat color="white">
-          <v-toolbar-title>勤務表 ({{ this.targetDate.format("YYYY") }}年{{ this.targetDate.format("MM") }}月)</v-toolbar-title>
+          <v-toolbar-title>週報 ({{ this.targetDate.format("YYYY") }}年{{ this.targetDate.format("MM") }}月)</v-toolbar-title>
           <v-divider class="mx-2" inset vertical></v-divider>
           <v-spacer></v-spacer>
         </v-toolbar>
@@ -427,6 +427,24 @@ export default {
       this.culBasicWorktimeAMonth();
     },
 
+    /** 週報データ取得 */
+    async fetchWeeklyReport() {
+      console.log(this.targetDate.format("YYYYMMDD"));
+      const response = await axios.post(`/api/weeklyreport/get`, {
+        userId: this.$store.state.auth.user.id,
+        weekNumber: this.targetDate.format("ggggWW")
+      });
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      // 週報データ
+      this.weeklyreport = response.data;
+      console.log("this.weeklyreport", this.weeklyreport);
+    },
+
     /** 勤務表登録 */
     async save() {
       this.store(false);
@@ -588,6 +606,7 @@ export default {
         await this.fetchHolidays();
         await this.fetchProjects();
         await this.fetchWorkSchedules();
+        await this.fetchWeeklyReport();
       },
       immediate: true
     }

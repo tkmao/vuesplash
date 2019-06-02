@@ -4,17 +4,11 @@ namespace App\Repositories;
 
 interface WorkScheduleRepositoryInterface
 {
-    public function find($id): \App\Repositories\Models\WorkSchedule;
+    public function getWorkSchedule(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection;
 
-    public function store(array $requestArray): void;
+    public function getWorkScheduleByUserIdWeekNumber(int $userId, int $weekNumber): \Illuminate\Database\Eloquent\Collection;
 
-    public function edit(array $requestArray): void;
+    public function getOldestWorkdate(): string;
 
-    public function delete(int $userId): void;
-
-    public function getWorkScheduleByWeekNumber(int $weekNumber): \Illuminate\Database\Eloquent\Collection;
-
-    public function getWeeklyReportByWeekNumber(int $weekNumber): \Illuminate\Database\Eloquent\Collection;
-
-    public function getWorkSchedule(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection;
+    public function store(array $workSchedules): array;
 }

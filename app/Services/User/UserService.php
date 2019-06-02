@@ -25,12 +25,12 @@ class UserService implements UserServiceInterface
      * ユーザデータ取得
      *
      * @param int $userId
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \App\Repositories\Models\User
      */
-    public function getUser(int $userId): \Illuminate\Database\Eloquent\Collection
+    public function find(int $userId): \App\Repositories\Models\User
     {
         try {
-            return $this->userRepositoryInterface->getById($userId);
+            return $this->userRepositoryInterface->find($userId);
         } catch (\Exception $e) {
             throw $e;
         }

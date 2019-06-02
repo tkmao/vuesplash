@@ -41,8 +41,18 @@ Route::post('/workschedule/get', 'WorkScheduleController@index')->name('worksche
 // 勤務表登録
 Route::post('/workschedule/store', 'WorkScheduleController@store')->name('workschedule.store');
 
+// 勤務表提出状況取得
+Route::post('/workschedulemonth/issubmitted', 'WorkScheduleMonthController@isSubmitted')->name('workschedulemonth.issubmitted');
+
+// 週報取得
+Route::post('/weeklyreport/get', 'WeeklyReportController@index')->name('weeklyreport.index');
+
+
 // プロジェクト一覧取得
 Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
 
 // 休日一覧取得
 Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall');
+
+// ユーザ情報取得
+Route::post('/user/get', 'UserController@get')->name('user.get');

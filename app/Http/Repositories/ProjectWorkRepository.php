@@ -51,11 +51,11 @@ class ProjectWorkRepository implements ProjectWorkRepositoryInterface
 
                 // プロジェクト時間の追加
                 foreach ($requestArray['workschedules'] as $workscheduleskey => $workschedule) {
-                    foreach ($workschedule['worktime'] as $worktimekey => $projectworktime) {
+                    foreach ($workschedule['project_work'] as $projectWorkkey => $projectWorkValue) {
                         $projectWork = new ProjectWork;
                         $projectWork->work_schedule_id = $workschedule['id'];
-                        $projectWork->project_id = (isset($requestArray['projectIds'][$worktimekey])) ? $requestArray['projectIds'][$worktimekey] : config('const.undefineProjectId');
-                        $projectWork->worktime = (isset($projectworktime)) ? $projectworktime : 0;
+                        $projectWork->project_id = $projectWorkValue['project_id'];
+                        $projectWork->worktime = $projectWorkValue['worktime'];
                         $projectWork->save();
                     }
                 }

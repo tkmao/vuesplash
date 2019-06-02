@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 interface UserServiceInterface
 {
-    public function getUser(int $userId): \Illuminate\Database\Eloquent\Collection;
+    public function find(int $userId): \App\Repositories\Models\User;
 
     public function getAllUser(): \Illuminate\Database\Eloquent\Collection;
 

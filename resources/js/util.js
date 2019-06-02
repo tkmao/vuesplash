@@ -32,8 +32,12 @@ export function getWorktime(start_hh, start_mm, end_hh, end_mm, breaktime, break
   let worktime = 0;
   let subtime_hh = 0;
   let subtime_mm = 0;
+  start_hh = parseInt(start_hh);
+  start_mm = parseInt(start_mm);
+  end_hh = parseInt(end_hh);
+  end_mm = parseInt(end_mm);
 
-  if (start_hh && start_mm && end_hh && end_mm) {
+  if (isFinite(start_hh) && isFinite(start_mm) && isFinite(end_hh) && isFinite(end_mm)) {
     if (end_hh >= start_hh) {
       subtime_hh = end_hh - start_hh;
       if (end_mm >= start_mm) {

@@ -29,7 +29,7 @@ class WorkSchedulesTableSeeder extends Seeder
                 '土', //6
             ];
 
-        $start = '20190101'; // 開始日時
+        $start = '20190201'; // 開始日時
         $end = '20190531';   // 終了日時
         $today = date("Ymd"); // 今日の日付
         $userCount = DB::table('users')->count(); // 全ユーザ件数
