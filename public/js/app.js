@@ -6260,6 +6260,38 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -6287,6 +6319,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       projects: [],
       holidays: [],
       workschedules: [],
+      weeklyreport: [],
       worktimes: [0],
       projectWorktimes: [],
       worktimeSum: 0,
@@ -33968,6 +34001,74 @@ var render = function() {
                   }
                 }
               ])
+            }),
+            _vm._v("来週の予定 :\n      "),
+            _c("v-textarea", {
+              attrs: {
+                solo: "",
+                rows: "2",
+                name: "nextweek_schedule",
+                label: "来週の予定",
+                value: ""
+              },
+              model: {
+                value: this.weeklyreport.nextweek_schedule,
+                callback: function($$v) {
+                  _vm.$set(this.weeklyreport, "nextweek_schedule", $$v)
+                },
+                expression: "this.weeklyreport.nextweek_schedule"
+              }
+            }),
+            _vm._v("現場の情報 :\n      "),
+            _c("v-textarea", {
+              attrs: {
+                solo: "",
+                rows: "2",
+                name: "site_information",
+                label: "現場の情報",
+                value: ""
+              },
+              model: {
+                value: this.weeklyreport.site_information,
+                callback: function($$v) {
+                  _vm.$set(this.weeklyreport, "site_information", $$v)
+                },
+                expression: "this.weeklyreport.site_information"
+              }
+            }),
+            _vm._v("今月の休み :\n      "),
+            _c("v-textarea", {
+              attrs: {
+                solo: "",
+                rows: "2",
+                name: "thismonth_dayoff",
+                label: "今月の休み",
+                value: ""
+              },
+              model: {
+                value: this.weeklyreport.thismonth_dayoff,
+                callback: function($$v) {
+                  _vm.$set(this.weeklyreport, "thismonth_dayoff", $$v)
+                },
+                expression: "this.weeklyreport.thismonth_dayoff"
+              }
+            }),
+            _vm._v("所感 :\n      "),
+            _c("v-textarea", {
+              attrs: {
+                solo: "",
+                rows: "2",
+                name: "opinion",
+                label: "所感",
+                value: ""
+              },
+              model: {
+                value: this.weeklyreport.opinion,
+                callback: function($$v) {
+                  _vm.$set(this.weeklyreport, "opinion", $$v)
+                },
+                expression: "this.weeklyreport.opinion"
+              }
             })
           ],
           2

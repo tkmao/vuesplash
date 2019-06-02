@@ -45,15 +45,15 @@ class WorkScheduleService implements WorkScheduleServiceInterface
      * @param \Carbon\Carbon $dateTo
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getWorkSchedule(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
+    public function getByDate(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->workScheduleRepositoryInterface->getWorkSchedule($userId, $dateFrom, $dateTo);
+            return $this->workScheduleRepositoryInterface->getByDate($userId, $dateFrom, $dateTo);
         } catch (\Exception $e) {
             throw $e;
         }
     }
-
+    
     /**
      * 全ユーザの勤務表を取得する
      *

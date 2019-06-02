@@ -128,7 +128,39 @@
               <v-textarea solo rows="2" v-model="props.item.detail" name="detail" label="詳細" value></v-textarea>
             </td>
           </template>
-        </v-data-table>
+        </v-data-table>来週の予定 :
+        <v-textarea
+          solo
+          rows="2"
+          v-model="this.weeklyreport.nextweek_schedule"
+          name="nextweek_schedule"
+          label="来週の予定"
+          value
+        ></v-textarea>現場の情報 :
+        <v-textarea
+          solo
+          rows="2"
+          v-model="this.weeklyreport.site_information"
+          name="site_information"
+          label="現場の情報"
+          value
+        ></v-textarea>今月の休み :
+        <v-textarea
+          solo
+          rows="2"
+          v-model="this.weeklyreport.thismonth_dayoff"
+          name="thismonth_dayoff"
+          label="今月の休み"
+          value
+        ></v-textarea>所感 :
+        <v-textarea
+          solo
+          rows="2"
+          v-model="this.weeklyreport.opinion"
+          name="opinion"
+          label="所感"
+          value
+        ></v-textarea>
       </div>
     </v-app>
   </div>
@@ -163,6 +195,7 @@ export default {
       projects: [],
       holidays: [],
       workschedules: [],
+      weeklyreport: [],
       worktimes: [0],
       projectWorktimes: [],
       worktimeSum: 0,

@@ -26,7 +26,7 @@ class WorkScheduleRepository implements WorkScheduleRepositoryInterface
      * @param \Carbon\Carbon $dateTo
      * @return \Illuminate\Database\Eloquent\Collection $workSchedule
      */
-    public function getWorkSchedule(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
+    public function getByDate(int $userId, \Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
     {
         try {
             $workSchedule = $this->workSchedule::with(['projectWork'])

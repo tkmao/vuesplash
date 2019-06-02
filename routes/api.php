@@ -46,6 +46,8 @@ Route::post('/workschedulemonth/issubmitted', 'WorkScheduleMonthController@isSub
 
 // 週報取得
 Route::post('/weeklyreport/get', 'WeeklyReportController@index')->name('weeklyreport.index');
+// 勤務表取得
+Route::post('/workschedule/getweek', 'WorkScheduleController@getweek')->name('workschedule.getweek');
 
 
 // プロジェクト一覧取得
