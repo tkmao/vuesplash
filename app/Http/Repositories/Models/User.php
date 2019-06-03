@@ -46,6 +46,9 @@ class User extends Authenticatable
         'paid_holiday',
         'is_admin',
         'is_deleted',
+        'workSchedule',
+        'weeklyReport',
+        'userType'
     ];
 
     protected $casts = [

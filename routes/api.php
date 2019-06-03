@@ -46,8 +46,15 @@ Route::post('/workschedulemonth/issubmitted', 'WorkScheduleMonthController@isSub
 
 // 週報取得
 Route::post('/weeklyreport/get', 'WeeklyReportController@index')->name('weeklyreport.index');
-// 勤務表取得
-Route::post('/workschedule/getweek', 'WorkScheduleController@getweek')->name('workschedule.getweek');
+// 勤務表取得（週報用）
+Route::post('/workschedule/getweek', 'WorkScheduleController@getByWeekNumber')->name('workschedule.getweek');
+// 週報登録
+Route::post('/weeklyreport/store', 'WeeklyReportController@store')->name('weeklyreport.store');
+// 最古の勤務表データを取得
+Route::post('/workschedule/getoldestworkdate', 'WorkScheduleController@getOldestWorkdateByUserId')->name('workschedule.getoldestworkdate');
+
+// 全ユーザ週報取得
+Route::post('/weeklyreport/getalluser', 'WeeklyReportController@getAllUser')->name('weeklyreport.getalluser');
 
 
 // プロジェクト一覧取得

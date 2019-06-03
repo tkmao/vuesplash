@@ -175,7 +175,7 @@ class UserRepository implements UserRepositoryInterface
     }
 
     /**
-     * 全ユーザ勤務表情報取得
+     * 全ユーザ週報情報取得
      *
      * @param int $weekNumber
      * @return \Illuminate\Database\Eloquent\Collection

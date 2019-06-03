@@ -37,10 +37,9 @@ class WeeklyReportController extends Controller
         $requestArray = $request->all();
         $userId = $requestArray['userId'];
         $weekNumber = $requestArray['weekNumber'];
-        $weekNumber = '201922';
 
         // 週報情報取得
-        $weeklyReport = $this->weeklyReportServiceInterface->getWeeklyReport($userId, $weekNumber);
+        $weeklyReport = $this->weeklyReportServiceInterface->get($userId, $weekNumber);
 
         return $weeklyReport ?? abort(404);
     }
@@ -54,6 +53,24 @@ class WeeklyReportController extends Controller
     public function store(Request $request)
     {
         $requestArray = $request->all();
-        $this->weeklyReportServiceInterface->store($requestArray);
+        $this->weeklyReportServiceInterface->store($requestArray['weeklyreport']);
+    }
+
+    /**
+     * 全ユーザ週報情報取得
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getAllUser(Request $request)
+    {
+        $requestArray = $request->all();
+        $weekNumber = $requestArray['weekNumber'];
+        $weekNumber = '201919';
+
+        // 週報情報取得
+        $weeklyReports = $this->weeklyReportServiceInterface->getAllUser($weekNumber);
+
+        return $weeklyReports ?? abort(404);
     }
 }

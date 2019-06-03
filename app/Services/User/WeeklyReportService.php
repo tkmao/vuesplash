@@ -46,32 +46,50 @@ class WeeklyReportService implements WeeklyReportServiceInterface
     }
 
     /**
-     * 勤務表情報取得
-     *
-     * @param int $userId
-     * @param int $weekNumber
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getWorkSchedule(int $userId, int $weekNumber): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            return $this->workScheduleRepositoryInterface->getWorkScheduleByUserIdWeekNumber($userId, $weekNumber);
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
      * 週報情報取得
      *
      * @param int $userId
      * @param int $weekNumber
      * @return \App\Repositories\Models\WeeklyReport
      */
-    public function getWeeklyReport(int $userId, int $weekNumber): \App\Repositories\Models\WeeklyReport
+    public function get(int $userId, int $weekNumber): \App\Repositories\Models\WeeklyReport
     {
         try {
-            return $this->weeklyReportRepositoryInterface->getWeeklyReport($userId, $weekNumber);
+            return $this->weeklyReportRepositoryInterface->get($userId, $weekNumber);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 全ユーザ週報情報取得
+     *
+     * @param int $weekNumber
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllUser(int $weekNumber): \Illuminate\Database\Eloquent\Collection
+    {
+        try {
+            return $this->userRepositoryInterface->getWeeklyReportByWeekNumber($weekNumber);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 週報登録処理
+     *
+     * @param array $requestArray
+     * @return void
+     */
+    public function store(array $requestArray): void
+    {
+        try {
+            if (is_null($requestArray['id'])) {
+                $this->weeklyReportRepositoryInterface->store($requestArray);
+            } else {
+                $this->weeklyReportRepositoryInterface->edit($requestArray);
+            }
         } catch (\Exception $e) {
             throw $e;
         }
@@ -151,31 +169,6 @@ class WeeklyReportService implements WeeklyReportServiceInterface
             }
 
             return $weeklyReportJSON;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 週報登録処理
-     *
-     * @param array $requestArray
-     * @return void
-     */
-    public function store(array $requestArray): void
-    {
-        try {
-            if ($requestArray['submit_type'] == 'save' && $requestArray['is_subumited'] !== 'true') {
-                $requestArray['is_subumited'] = 0;
-            } else {
-                $requestArray['is_subumited'] = 1;
-            }
-
-            if (is_null($requestArray['weekly_report_id'])) {
-                $this->weeklyReportRepositoryInterface->store($requestArray);
-            } else {
-                $this->weeklyReportRepositoryInterface->edit($requestArray);
-            }
         } catch (\Exception $e) {
             throw $e;
         }

@@ -32,7 +32,8 @@ class WorkScheduleRepository implements WorkScheduleRepositoryInterface
             $workSchedule = $this->workSchedule::with(['projectWork'])
                                                 ->where('user_id', $userId)
                                                 ->whereBetween('workdate', [$dateFrom, $dateTo])
-                                                ->orderBy('workdate')->get();
+                                                ->orderBy('workdate')
+                                                ->get();
 
             return $workSchedule;
         } catch (\Exception $e) {
@@ -41,19 +42,20 @@ class WorkScheduleRepository implements WorkScheduleRepositoryInterface
     }
 
     /**
-     * 勤務表取得
+     * 勤務表取得（週報用）
      *
      * @param int $userId
-     * @param int $weekNumber
+     * @param string $weekNumber
      * @return \Illuminate\Database\Eloquent\Collection $workSchedule
      */
-    public function getWorkScheduleByUserIdWeekNumber(int $userId, int $weekNumber): \Illuminate\Database\Eloquent\Collection
+    public function getByWeekNumber(int $userId, string $weekNumber): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $workSchedule = $this->workSchedule->with(['projectWork.project', 'holiday'])->where('user_id', $userId)->where('week_number', $weekNumber)->orderBy('workdate', 'asc')->get();
-            if (!$workSchedule) {
-                $workSchedule = new WorkSchedule();
-            }
+            $workSchedule = $this->workSchedule::with(['projectWork'])
+                                               ->where('user_id', $userId)
+                                               ->where('week_number', $weekNumber)
+                                               ->orderBy('workdate', 'asc')
+                                               ->get();
 
             return $workSchedule;
         } catch (\Exception $e) {
@@ -70,6 +72,23 @@ class WorkScheduleRepository implements WorkScheduleRepositoryInterface
     {
         try {
             $oldestWrokdate = $this->workSchedule->min('workdate');
+
+            return $oldestWrokdate;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 最古の勤務日データ取得
+     *
+     * @param int $userId
+     * @return string $oldestWrokdate
+     */
+    public function getOldestWorkdateByUserId(int $userId): string
+    {
+        try {
+            $oldestWrokdate = $this->workSchedule->where('user_id', $userId)->min('workdate');
 
             return $oldestWrokdate;
         } catch (\Exception $e) {

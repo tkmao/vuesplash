@@ -5,6 +5,7 @@
       <div v-if="isLogin" class="navbar__item">
         <RouterLink class="nav-link" to="/workschedule">勤務表</RouterLink>
         <RouterLink class="nav-link" to="/weeklyreport">週報</RouterLink>
+        <RouterLink class="nav-link" to="/weeklyanalyze">週報管理</RouterLink>
         <RouterLink class="nav-link" to="/user">ユーザ一覧</RouterLink>
         <RouterLink class="nav-link" to="/project">プロジェクト一覧</RouterLink>
         <button class="button" @click="showForm = ! showForm">

@@ -4,7 +4,9 @@ namespace App\Repositories;
 
 interface WeeklyReportRepositoryInterface
 {
-    public function getWeeklyReport(int $userId, int $weekNumber): \App\Repositories\Models\WeeklyReport;
+    public function get(int $userId, int $weekNumber): \App\Repositories\Models\WeeklyReport;
+
+    public function getAllUser(int $weekNumber): \Illuminate\Database\Eloquent\Collection;
 
     public function store(array $requestArray): void;
 

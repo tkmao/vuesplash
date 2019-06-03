@@ -44,16 +44,29 @@ class WorkScheduleController extends Controller
      * 勤務表取得（週報登録画面用）
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getweek(Request $request)
+    public function getByWeekNumber(Request $request)
     {
         $requestArray = $request->all();
         $userId = $requestArray['userId'];
         $weekNumber = $requestArray['weekNumber'];
-        $weekNumber = '201922';
 
-        //$workSchedule = $this->workScheduleServiceInterface->getWorkSchedule($userId, $dateFrom, $dateTo);
+        $workSchedule = $this->workScheduleServiceInterface->getByWeekNumber($userId, $weekNumber);
 
         return $workSchedule ?? abort(404);
+    }
+
+    /**
+     * 最古の勤務表データ取得（週報登録画面用）
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getOldestWorkdateByUserId(Request $request)
+    {
+        $requestArray = $request->all();
+        $userId = $requestArray['userId'];
+
+        $oldestWrokdate = $this->workScheduleServiceInterface->getOldestWorkdateByUserId($userId);
+
+        return $oldestWrokdate ?? abort(404);
     }
 
     /**

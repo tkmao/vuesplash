@@ -8,14 +8,14 @@
 </style>
 
 <template>
-  <div class="weekly-report">
+  <div class="weekly-analyze">
     <v-app id="inspire">
       <v-container grid-list-md text-xs-left>
         <v-layout row wrap>
           <v-flex xs12>
             <div>
               <v-toolbar flat color="white">
-                <v-toolbar-title>週報</v-toolbar-title>
+                <v-toolbar-title>週報管理</v-toolbar-title>
                 <v-divider class="mx-2" inset vertical></v-divider>
                 <v-spacer>{{weekformat(targetWeek)}}</v-spacer>
               </v-toolbar>
@@ -435,8 +435,7 @@ export default {
 
     /** 週報データ取得 */
     async fetchWeeklyReport() {
-      const response = await axios.post(`/api/weeklyreport/get`, {
-        userId: this.$store.state.auth.user.id,
+      const response = await axios.post(`/api/weeklyreport/getalluser`, {
         weekNumber: this.targetWeek
       });
 
@@ -445,7 +444,8 @@ export default {
         return false;
       }
       // 週報データ
-      this.weeklyreport = this.createWeeklyReport(response.data);
+      console.log(response.data);
+      //this.weeklyreport = this.createWeeklyReport(response.data);
     },
 
     /** 週報登録 */

@@ -53,6 +53,22 @@ class WorkScheduleService implements WorkScheduleServiceInterface
             throw $e;
         }
     }
+
+    /**
+     * 勤務表を取得する（週報用）
+     *
+     * @param int $userId
+     * @param string $weekNumber
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByWeekNumber(int $userId, string $weekNumber): \Illuminate\Database\Eloquent\Collection
+    {
+        try {
+            return $this->workScheduleRepositoryInterface->getByWeekNumber($userId, $weekNumber);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
     
     /**
      * 全ユーザの勤務表を取得する
@@ -65,6 +81,21 @@ class WorkScheduleService implements WorkScheduleServiceInterface
     {
         try {
             return $this->userRepositoryInterface->getWorkSchedule($dateFrom, $dateTo);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 最古の勤務表データ取得（週報登録画面用）
+     *
+     * @param int $userId
+     * @return string
+     */
+    public function getOldestWorkdateByUserId(int $userId): string
+    {
+        try {
+            return $this->workScheduleRepositoryInterface->getOldestWorkdateByUserId($userId);
         } catch (\Exception $e) {
             throw $e;
         }
