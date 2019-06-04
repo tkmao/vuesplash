@@ -55,4 +55,15 @@ class UserController extends Controller
 
         return $user ?? abort(404);
     }
+
+    /**
+     * 全ユーザ情報取得
+     * @return User
+     */
+    public function getAll(Request $request)
+    {
+        $users = $this->userServiceInterface->all();
+
+        return $users ?? abort(404);
+    }
 }

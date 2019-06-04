@@ -66,7 +66,6 @@ class WeeklyReportController extends Controller
     {
         $requestArray = $request->all();
         $weekNumber = $requestArray['weekNumber'];
-        $weekNumber = '201919';
 
         // 週報情報取得
         $weeklyReports = $this->weeklyReportServiceInterface->getAllUser($weekNumber);

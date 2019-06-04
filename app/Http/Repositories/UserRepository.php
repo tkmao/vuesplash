@@ -158,7 +158,7 @@ class UserRepository implements UserRepositoryInterface
         try {
             $user = $this->user
                             ->with(['workSchedule' => function ($query) use ($weekNumber) {
-                                $query->with(['projectWork.project', 'holiday'])
+                                $query->with(['projectWork.project'])
                                       ->where('week_number', '=', $weekNumber)
                                       ->orderBy('workdate', 'asc');
                             }])
@@ -213,7 +213,7 @@ class UserRepository implements UserRepositoryInterface
         try {
             $user = $this->user
                             ->with(['workSchedule' => function ($query) use ($dateFrom, $dateTo) {
-                                $query->with(['projectWork.project', 'holiday'])
+                                $query->with(['projectWork.project'])
                                       ->whereBetween('workdate', [$dateFrom, $dateTo])
                                       ->orderBy('workdate', 'asc');
                             }])

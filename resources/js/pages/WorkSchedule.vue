@@ -64,7 +64,7 @@
               <v-alert :value="!isSameWorkingTimeAMonth()" type="warning">総勤務時間と総プロジェクト時間が一致していません。</v-alert>
 
               <v-data-table
-                :headers="this.tableheaders"
+                :headers="tableheaders"
                 :items="workschedules"
                 :rows-per-page-items="[]"
                 :pagination.sync="pagination"
@@ -449,6 +449,7 @@ export default {
       this.projectWorktimes = this.workschedules.map(item => {
         return item["project_work"];
       });
+      console.log("this.projectWorktimes", this.projectWorktimes);
       // プロジェクトコード
       this.selected = this.workschedules[0].project_work.map(item => {
         return { project_id: item["project_id"] };

@@ -53,9 +53,10 @@ Route::post('/weeklyreport/store', 'WeeklyReportController@store')->name('weekly
 // 最古の勤務表データを取得
 Route::post('/workschedule/getoldestworkdate', 'WorkScheduleController@getOldestWorkdateByUserId')->name('workschedule.getoldestworkdate');
 
-// 全ユーザ週報取得
+// 全ユーザ週報取得（週報管理用）
 Route::post('/weeklyreport/getalluser', 'WeeklyReportController@getAllUser')->name('weeklyreport.getalluser');
-
+// 全ユーザ勤務表取得（週報管理用）
+Route::post('/workschedule/getalluser', 'WorkScheduleController@getAllUser')->name('workschedule.getalluser');
 
 // プロジェクト一覧取得
 Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');

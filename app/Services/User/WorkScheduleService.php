@@ -77,7 +77,7 @@ class WorkScheduleService implements WorkScheduleServiceInterface
      * @param \Carbon\Carbon $dateTo
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getWorkScheduleAllUser(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
+    public function getAllUser(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection
     {
         try {
             return $this->userRepositoryInterface->getWorkSchedule($dateFrom, $dateTo);

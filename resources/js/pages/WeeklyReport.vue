@@ -63,7 +63,7 @@
               <v-btn color="info" @click="submit()">週報提出</v-btn>
 
               <v-data-table
-                :headers="this.tableheaders"
+                :headers="tableheaders"
                 :items="workschedules"
                 :rows-per-page-items="[]"
                 :pagination.sync="pagination"

@@ -2,27 +2,24 @@
 .holiday {
   background: lightgray;
 }
-.notsame {
+.is_submitted {
   color: red;
+  font-weight: bold;
 }
 </style>
 
 <template>
   <div class="weekly-analyze">
     <v-app id="inspire">
-      <v-container grid-list-md text-xs-left>
+      <v-container grid-list-md text-xs-left fluid>
         <v-layout row wrap>
           <v-flex xs12>
             <div>
               <v-toolbar flat color="white">
                 <v-toolbar-title>週報管理</v-toolbar-title>
                 <v-divider class="mx-2" inset vertical></v-divider>
-                <v-spacer>{{weekformat(targetWeek)}}</v-spacer>
+                <v-spacer></v-spacer>
               </v-toolbar>
-              <v-flex xs6>
-                <v-alert :value="this.weeklyreport.is_subumited" type="success">当週分の週報は提出済みです</v-alert>
-                <v-alert :value="!this.weeklyreport.is_subumited" type="warning">当週分の週報は未提出です</v-alert>
-              </v-flex>
 
               <v-flex xs6>
                 <v-select
@@ -36,94 +33,67 @@
                 ></v-select>
               </v-flex>
 
-              <p>基本勤務日数：{{ this.basicWorkDay }} 日</p>
-              <p>出勤日数：{{ WorktingDay() }} 日</p>
-              <p>欠勤日数：{{ AbsenceDay() }} 日</p>
-              <p>総勤務時間：{{ this.worktimeSum }} 時間</p>
-
-              <v-flex xs6>
-                <v-select
-                  v-model="weeklyreport.project_id"
-                  :items="projects"
-                  item-value="id"
-                  item-text="name"
-                  label="プロジェクト"
-                  box
-                ></v-select>
-              </v-flex>
-
-              <div
-                v-for="(projectWorktime, index) in projectWorktimes[0]"
-                :key="projectWorktime.key"
-              >
-                <p>プロジェクト{{ index + 1 }} {{ projects[projectWorktime.project_id -1].name }}</p>
-              </div>
-
-              <v-btn color="success" @click="save()">週報保存</v-btn>
-              <v-btn color="info" @click="submit()">週報提出</v-btn>
-
-              <v-data-table
-                :headers="this.tableheaders"
-                :items="workschedules"
-                :rows-per-page-items="[]"
-                :pagination.sync="pagination"
-                class="elevation-1"
-              >
-                <template v-slot:items="props">
-                  <td
-                    width="5%"
-                    :class="{ holiday: isHoliday(props.item.workdate) }"
-                  >{{ dateformat(props.item.workdate) }}</td>
-                  <td width="3%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-checkbox v-model="props.item.is_paid_holiday" disabled></v-checkbox>
-                  </td>
-                  <td width="10%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <div style="display:flex;">
-                      <v-text-field v-model="props.item.starttime_hh" type="Number" disabled></v-text-field>:
-                      <v-text-field v-model="props.item.starttime_mm" type="Number" disabled></v-text-field>
-                    </div>
-                  </td>
-                  <td width="10%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <div style="display:flex;">
-                      <v-text-field v-model="props.item.endtime_hh" type="Number" disabled></v-text-field>:
-                      <v-text-field v-model="props.item.endtime_mm" type="Number" disabled></v-text-field>
-                    </div>
-                  </td>
-                  <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-text-field v-model="props.item.breaktime" type="Number" disabled></v-text-field>
-                  </td>
-                  <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-text-field v-model="props.item.breaktime_midnight" type="Number" disabled></v-text-field>
-                  </td>
-                  <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <font
-                      :class="{ notsame: !isSameWorkingTime(props.index) }"
-                    >{{ worktimeADay(props.index) }}</font>
-                  </td>
-                  <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <font
-                      :class="{ notsame: !isSameWorkingTime(props.index) }"
-                    >{{ PJWorktimeADay(props.index) }}</font>
-                  </td>
-                  <td
-                    width="7%"
-                    :class="{ holiday: isHoliday(props.item.workdate) }"
-                    v-for="projectWorktime in projectWorktimes[props.index]"
-                    :key="projectWorktime.key"
-                  >
-                    <v-text-field v-model="projectWorktime.worktime" type="Number" disabled></v-text-field>
-                  </td>
-                  <td width="30%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-textarea solo rows="1" v-model="props.item.detail" disabled></v-textarea>
-                  </td>
-                </template>
-              </v-data-table>
-              <v-textarea outline rows="2" v-model="weeklyreport.nextweek_schedule" label="現場の情報"></v-textarea>
-              <v-textarea outline rows="2" v-model="weeklyreport.site_information" label="現場の情報"></v-textarea>
-              <v-textarea outline rows="2" v-model="weeklyreport.thismonth_dayoff" label="今月の休み"></v-textarea>
-              <v-textarea outline rows="2" v-model="weeklyreport.opinion" label="所感"></v-textarea>
-              <v-btn color="success" @click="save()">週報保存</v-btn>
-              <v-btn color="info" @click="submit()">週報提出</v-btn>
+              <v-tabs v-model="active" color="cyan" dark slider-color="yellow">
+                <v-tab v-for="tab in tabs" :key="tab">{{ tab }}</v-tab>
+                <v-tab-item>
+                  <v-card flat>
+                    <v-card-text>基本勤務日数：{{ this.basicWorkDay }} 日</v-card-text>
+                    <v-card-text>
+                      <v-data-table
+                        :headers="weeklyReportHeaders"
+                        :items="weeklyreports"
+                        :pagination.sync="pagination"
+                        class="elevation-1"
+                      >
+                        <template v-slot:items="props">
+                          <td width="2%">{{ props.item.id }}</td>
+                          <td width="7%">{{ props.item.name }}</td>
+                          <td
+                            width="20%"
+                          >{{ props.item.weekly_report.project.code }} : {{ props.item.weekly_report.project.name }}</td>
+                          <td width="20%">{{ props.item.weekly_report.nextweek_schedule }}</td>
+                          <td width="20%">{{ props.item.weekly_report.site_information }}</td>
+                          <td width="13%">{{ props.item.weekly_report.thismonth_dayoff }}</td>
+                          <td width="15%">{{ props.item.weekly_report.opinion }}</td>
+                          <td width="3%">
+                            <font
+                              :class="{ is_submitted: !props.item.weekly_report.is_subumited }"
+                            >{{ isSubmitted(props.item.weekly_report.is_subumited) }}</font>
+                          </td>
+                        </template>
+                      </v-data-table>
+                    </v-card-text>
+                  </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                  <v-card flat>
+                    <v-card-text>基本勤務日数：{{ this.basicWorkDay }} 日</v-card-text>
+                    <v-card-text>
+                      <v-data-table
+                        :headers="workScheduleHeaders"
+                        :items="workschedules"
+                        :pagination.sync="pagination"
+                        class="elevation-1"
+                      >
+                        <template v-slot:items="props">
+                          <td width="3%">{{ props.item.id }}</td>
+                          <td width="5%">{{ props.item.name }}</td>
+                          <td width="7%">グラフ</td>
+                          <td width="7%">{{ props.item.worktimeSum }} h</td>
+                          <td
+                            width="10%"
+                          >{{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h</td>
+                          <td width="10%">{{ props.item.shortageTime }} h</td>
+                          <td width="7%">{{ props.item.overTime }} h</td>
+                          <td width="7%">{{ props.item.WorktingDay }} 日</td>
+                          <td width="7%">{{ props.item.AbsenceDay }} 日</td>
+                          <td width="7%">{{ props.item.OverDay }} 日</td>
+                        </template>
+                      </v-data-table>
+                    </v-card-text>
+                  </v-card>
+                </v-tab-item>
+              </v-tabs>
             </div>
           </v-flex>
         </v-layout>
@@ -151,19 +121,44 @@ export default {
   },
   data() {
     return {
+      tabs: ["週報内容", "勤務時間内容"],
+      active: null,
       targetDate: 0,
       targetWeek: 0,
       basicWorkDay: 0,
       oldestWorkdate: null,
       weekList: [],
-      tableheaders: [],
+      workScheduleHeaders: [
+        { text: "ID", value: "id" },
+        { text: "ユーザ名", sortable: false },
+        { text: "勤務時間グラフ", sortable: false },
+        { text: "勤務時間(当月累計)", sortable: false },
+        { text: "基本勤務時間", sortable: false },
+        { text: "当月残り勤務時間", sortable: false },
+        { text: "超過時間(当月累計)", sortable: false },
+        { text: "出勤日数(当月累計)" },
+        { text: "欠勤日数(当月累計)" },
+        { text: "超過日数(当月累計)" }
+      ],
+      weeklyReportHeaders: [
+        { text: "ID", value: "id" },
+        { text: "ユーザ名", sortable: false },
+        { text: "プロジェクト名", sortable: false },
+        { text: "来週の作業", sortable: false },
+        { text: "今月の休暇", sortable: false },
+        { text: "現場情報", sortable: false },
+        { text: "所感", sortable: false },
+        { text: "提出状況", value: "weekly_report.is_subumited" }
+      ],
       user: [],
       projects: [],
       holidays: [],
       workschedules: [],
-      weeklyreport: [],
+      weeklyreports: [],
       worktimes: [0],
       projectWorktimes: [],
+      allUserWorktimes: [],
+      allUserProjectWorktimes: [],
       worktimeSum: 0,
       pagination: { rowsPerPage: 200 },
       rules: {
@@ -186,6 +181,11 @@ export default {
     /** 日付変換 */
     dateformat(date) {
       return moment(date).format("DD(ddd)");
+    },
+
+    /** 週報提出チェック */
+    isSubmitted(is_subumited) {
+      return is_subumited ? "提出済" : "未提出";
     },
 
     /** 週番号から日付に変換 */
@@ -232,115 +232,95 @@ export default {
       this.weekList = weekList;
     },
 
-    /** 基本勤務日数計算 */
-    culBasicWorkDay() {
-      this.basicWorkDay = 0;
-      const year = this.targetDate.format("YYYY");
-      const weaknumber = this.targetDate.format("WW");
-      const startDate = moment(year)
-        .add(weaknumber - 1, "weeks")
-        .startOf("isoweek");
-
-      for (let i = 0; i < 7; i++) {
-        !this.isHoliday(startDate.format("YYYY-MM-DD"))
-          ? this.basicWorkDay++
-          : null;
-        startDate.add(1, "days");
-      }
-    },
-
-    /** 出勤日数計算 */
-    WorktingDay() {
-      return this.worktimes.reduce(function(total, data, index) {
-        return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
-      });
-    },
-
-    /** 欠勤日数計算 */
-    AbsenceDay() {
-      return this.basicWorkDay - this.WorktingDay();
-    },
-
     /** 休日チェック */
     isHoliday(date) {
       return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
     },
 
-    /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
-    isSameWorkingTime(index) {
-      let projectWorktime = 0;
-      this.projectWorktimes[index].forEach((val_1, idx_1, arr_1) => {
-        projectWorktime = projectWorktime + parseFloat(val_1.worktime);
-      });
-
-      return this.worktimes[index] === projectWorktime ? true : false;
-    },
-
     /** 勤務表データ作成 */
     createWorkSchedule: function(responseData) {
-      if (responseData.length === 0) {
-        responseData = [];
-        const year = this.targetDate.format("YYYY");
-        const weaknumber = this.targetDate.format("WW");
-        const startDate = moment(year)
-          .add(weaknumber - 1, "weeks")
-          .startOf("isoweek");
-        // 当月分のデータが存在しない場合、デフォルト値で作成
-        for (let i = 0; i < 7; i++) {
-          let isHoliday = this.isHoliday(startDate.format("YYYY-MM-DD"));
+      responseData.forEach((val_1, idx_1, arr_1) => {
+        let work_schedule = [];
+        if (val_1.work_schedule.length === 0) {
+          const startDate = this.targetDate
+            .endOf("isoweek")
+            .startOf("month")
+            .clone();
+          const endDate = this.targetDate
+            .endOf("isoweek")
+            .endOf("month")
+            .clone();
 
-          responseData.push({
-            id: null,
-            user_id: this.user.id,
-            week_number: startDate.format("ggggWW"),
-            workdate: startDate.format("YYYY-MM-DD"),
-            is_paid_holiday: false,
-            starttime_hh: isHoliday ? null : "09",
-            starttime_mm: isHoliday ? null : "00",
-            endtime_hh: isHoliday ? null : "18",
-            endtime_mm: isHoliday ? null : "00",
-            breaktime: isHoliday ? null : 1,
-            breaktime_midnight: isHoliday ? null : 0,
-            project_work: [
-              {
-                work_schedule_id: null,
-                project_id: 1,
-                worktime: isHoliday ? 0 : 8
-              }
-            ],
-            detail: null
-          });
-          startDate.add(1, "days");
+          // 当月分のデータが存在しない場合、デフォルト値で作成
+          while (startDate.unix() <= endDate.unix()) {
+            work_schedule.push({
+              id: null,
+              user_id: this.user.id,
+              week_number: startDate.format("ggggWW"),
+              workdate: startDate.format("YYYY-MM-DD"),
+              is_paid_holiday: false,
+              starttime_hh: null,
+              starttime_mm: null,
+              endtime_hh: null,
+              endtime_mm: null,
+              breaktime: null,
+              breaktime_midnight: null,
+              project_work: [
+                {
+                  work_schedule_id: null,
+                  project_id: 1,
+                  worktime: 0
+                }
+              ],
+              detail: null
+            });
+            // 1日加算
+            startDate.add(1, "days");
+          }
+
+          responseData[idx_1].work_schedule = work_schedule;
         }
-      }
+      });
 
       return responseData;
     },
 
     /** 週報データ作成 */
     createWeeklyReport: function(responseData) {
-      if (responseData.length === 0) {
-        responseData = {
-          id: null,
-          user_id: this.user.id,
-          week_number: this.targetDate.format("ggggWW"),
-          project_id: 1,
-          nextweek_schedule: null,
-          site_information: null,
-          thismonth_dayoff: null,
-          opinion: null,
-          is_subumited: false
-        };
-      }
+      responseData.forEach((val_1, idx_1, arr_1) => {
+        if (val_1.weekly_report === null) {
+          responseData[idx_1].weekly_report = {
+            id: null,
+            project_id: null,
+            user_id: null,
+            week_number: null,
+            nextweek_schedule: null, //
+            site_information: null, //
+            thismonth_dayoff: null, //
+            opinion: null, //
+            is_subumited: false, //
+            project: [
+              {
+                id: null,
+                code: null, //
+                name: null, //
+                category_id: null,
+                company_id: null,
+                user_id: null,
+                status_id: null,
+                is_deleted: null
+              }
+            ]
+          };
+        }
+      });
 
       return responseData;
     },
 
-    /** ユーザデータ取得 */
+    /** 全ユーザデータ取得 */
     async fetchUser() {
-      const response = await axios.post(`/api/user/get`, {
-        userId: this.$store.state.auth.user.id
-      });
+      const response = await axios.get(`/api/user/get`);
 
       if (response.status !== OK) {
         this.$store.commit("error/setCode", response.status);
@@ -405,11 +385,10 @@ export default {
       this.createWeekList(this.oldestWorkdate);
     },
 
-    /** 勤務表データ取得 */
+    /** 全ユーザ勤務表データ取得 */
     async fetchWorkSchedules() {
-      const response = await axios.post(`/api/workschedule/getweek`, {
-        userId: this.$store.state.auth.user.id,
-        weekNumber: this.targetWeek
+      const response = await axios.post(`/api/workschedule/getalluser`, {
+        yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
       });
 
       if (response.status !== OK) {
@@ -417,23 +396,39 @@ export default {
         return false;
       }
 
-      // 勤務表データ
+      // 全ユーザの勤務表データ
       this.workschedules = this.createWorkSchedule(response.data);
-      // 勤務時間初期化
-      this.worktimes = Array(this.workschedules.length).fill(0);
-      // プロジェクト時間
+      // 全ユーザの勤務時間初期化
+      this.allUserWorktimes = this.workschedules.map(item => {
+        return {
+          user_id: item["id"],
+          worktimes: Array(this.workschedules[0].work_schedule.length).fill(0)
+        };
+      });
+
+      // 全ユーザのプロジェクト時間
+      this.allUserProjectWorktimes = this.workschedules.map(item => {
+        return {
+          user_id: item["id"],
+          worktimes: item["work_schedule"].map(item2 => {
+            return item2["project_work"];
+          })
+        };
+      });
+
       this.projectWorktimes = this.workschedules.map(item => {
         return item["project_work"];
       });
-      // テーブルヘッダー作成
-      this.tableheaders = this.createTableHeaders(
-        this.workschedules[0].project_work.length
-      );
+
       // 勤務情報再計算
       this.culBasicWorkDay();
+      // 基本勤務日数計算
+      this.culBasicWorktimeAMonth();
+      // 勤務時間計算
+      this.culWorktimes();
     },
 
-    /** 週報データ取得 */
+    /** 全ユーザ週報データ取得 */
     async fetchWeeklyReport() {
       const response = await axios.post(`/api/weeklyreport/getalluser`, {
         weekNumber: this.targetWeek
@@ -444,83 +439,136 @@ export default {
         return false;
       }
       // 週報データ
-      console.log(response.data);
-      //this.weeklyreport = this.createWeeklyReport(response.data);
+      this.weeklyreports = this.createWeeklyReport(response.data);
     },
 
-    /** 週報登録 */
-    async save() {
-      this.weeklyreport.is_subumited = false;
-      this.store();
-    },
+    /** 基本勤務日数計算 */
+    culBasicWorkDay() {
+      this.basicWorkDay = 0;
+      const startDate = this.targetDate
+        .endOf("isoweek")
+        .startOf("month")
+        .clone();
+      const endDate = this.targetDate
+        .endOf("isoweek")
+        .endOf("month")
+        .clone();
 
-    /** 週報提出 */
-    async submit() {
-      this.weeklyreport.is_subumited = true;
-      this.store();
-    },
-
-    /** 週報データ登録 */
-    async store() {
-      const response = await axios.post(`/api/weeklyreport/store`, {
-        weeklyreport: this.weeklyreport
-      });
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
+      // 1日ずつインクリメントして配列へpush
+      while (startDate.unix() <= endDate.unix()) {
+        !this.isHoliday(startDate.format("YYYY-MM-DD"))
+          ? this.basicWorkDay++
+          : null;
+        startDate.add(1, "days");
       }
-
-      // 週報データ更新
-      this.fetchWeeklyReport();
     },
 
-    /** テーブルヘッダー */
-    createTableHeaders: function(projectMaxCount) {
-      let tableheaders = [
-        { text: "日付", sortable: false },
-        { text: "有給", sortable: false },
-        { text: "開始時間", sortable: false },
-        { text: "終了時間", sortable: false },
-        { text: "休憩時間(h)", sortable: false },
-        { text: "深夜休憩時間", sortable: false },
-        { text: "勤務時間", sortable: false },
-        { text: "PJ合計時間", sortable: false }
-      ];
-
-      for (let i = 1; i <= projectMaxCount; i++) {
-        tableheaders[tableheaders.length] = {
-          text: "PJ時間" + i,
-          sortable: false
-        };
-      }
-      tableheaders[tableheaders.length] = { text: "内容", sortable: false };
-
-      return tableheaders;
-    },
-
-    /** 勤務時間計算 */
-    worktimeADay: function(index) {
-      // リアクティブデータコピー
-      let worktime_array = this.worktimes;
-      // 1日の勤務時間計算
-      worktime_array[index] = getWorktime(
-        this.workschedules[index].starttime_hh,
-        this.workschedules[index].starttime_mm,
-        this.workschedules[index].endtime_hh,
-        this.workschedules[index].endtime_mm,
-        this.workschedules[index].breaktime,
-        this.workschedules[index].breaktime_midnight
-      );
-
-      // リアクティブデータに登録
-      this.worktimes = worktime_array;
-      // 1月の合計勤務時間計算
-      this.worktimeSum = this.worktimes.reduce(function(total, data) {
-        return total + data;
+    /** 基本勤務時間作成 */
+    culBasicWorktimeAMonth() {
+      /** 今月の勤務時間数 */
+      this.workschedules.forEach((val_1, idx_1, arr_1) => {
+        if (val_1.workingtime_type === 1) {
+          this.$set(
+            this.workschedules[idx_1],
+            "workingtimeMin",
+            this.basicWorkDay * val_1.worktime_day
+          );
+          this.$set(
+            this.workschedules[idx_1],
+            "workingtimeMax",
+            val_1.workingtimeMin + val_1.maxworktime_month
+          );
+        } else if (val_1.workingtime_type === 2) {
+          this.$set(
+            this.workschedules[idx_1],
+            "workingtimeMin",
+            val_1.workingtime_min
+          );
+          this.$set(
+            this.workschedules[idx_1],
+            "workingtimeMax",
+            val_1.workingtime_max
+          );
+        }
       });
+    },
 
-      return this.worktimes[index];
+    /** 全ユーザ合計勤務時間計算 */
+    culWorktimes: function() {
+      this.workschedules.forEach((val_1, idx_1, arr_1) => {
+        val_1.work_schedule.forEach((val_2, idx_2, arr_2) => {
+          // 各ユーザの1日の勤務時間の計算
+          this.$set(
+            this.allUserWorktimes[idx_1].worktimes,
+            idx_2,
+            getWorktime(
+              val_2.starttime_hh,
+              val_2.starttime_mm,
+              val_2.endtime_hh,
+              val_2.endtime_mm,
+              val_2.breaktime,
+              val_2.breaktime_midnight
+            )
+          );
+        });
+        // 1月の合計勤務時間計算
+        this.$set(
+          this.workschedules[idx_1],
+          "worktimeSum",
+          this.allUserWorktimes[idx_1].worktimes.reduce(function(total, data) {
+            return total + data;
+          })
+        );
+        // 超過時間計算
+        this.$set(
+          this.workschedules[idx_1],
+          "overTime",
+          this.workschedules[idx_1].worktimeSum >
+            this.workschedules[idx_1].workingtimeMax
+            ? this.workschedules[idx_1].worktimeSum -
+                this.workschedules[idx_1].workingtimeMax
+            : 0
+        );
+        // 不足時間計算
+        this.$set(
+          this.workschedules[idx_1],
+          "shortageTime",
+          this.workschedules[idx_1].worktimeSum <
+            this.workschedules[idx_1].workingtimeMin
+            ? this.workschedules[idx_1].workingtimeMin -
+                this.workschedules[idx_1].worktimeSum
+            : 0
+        );
+        // 出勤日数計算
+        this.$set(
+          this.workschedules[idx_1],
+          "WorktingDay",
+          this.WorktingDay(this.allUserWorktimes[idx_1].worktimes)
+        );
+        // 欠勤日数計算
+        this.$set(
+          this.workschedules[idx_1],
+          "AbsenceDay",
+          this.workschedules[idx_1].WorktingDay < this.basicWorkDay
+            ? this.basicWorkDay - this.workschedules[idx_1].WorktingDay
+            : 0
+        );
+        // 超過日数計算
+        this.$set(
+          this.workschedules[idx_1],
+          "OverDay",
+          this.workschedules[idx_1].WorktingDay > this.basicWorkDay
+            ? this.workschedules[idx_1].WorktingDay - this.basicWorkDay
+            : 0
+        );
+      });
+    },
+
+    /** 出勤日数計算 */
+    WorktingDay(worktimes) {
+      return worktimes.reduce(function(total, data, index) {
+        return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
+      });
     },
 
     /** 1日のプロジェクト時間計算 */

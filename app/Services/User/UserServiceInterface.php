@@ -6,7 +6,7 @@ interface UserServiceInterface
 {
     public function find(int $userId): \App\Repositories\Models\User;
 
-    public function getAllUser(): \Illuminate\Database\Eloquent\Collection;
+    public function all(): \Illuminate\Database\Eloquent\Collection;
 
     public function store(array $requestArray): void;
 

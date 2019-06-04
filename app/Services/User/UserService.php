@@ -41,7 +41,7 @@ class UserService implements UserServiceInterface
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAllUser(): \Illuminate\Database\Eloquent\Collection
+    public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
             return $this->userRepositoryInterface->all();

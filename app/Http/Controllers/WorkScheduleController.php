@@ -15,7 +15,6 @@ class WorkScheduleController extends Controller
         WorkScheduleServiceInterface $workScheduleServiceInterface
     ) {
         $this->workScheduleServiceInterface = $workScheduleServiceInterface;
-
         // 認証が必要
         $this->middleware('auth')->except(['index', 'download', 'show']);
     }
@@ -67,6 +66,25 @@ class WorkScheduleController extends Controller
         $oldestWrokdate = $this->workScheduleServiceInterface->getOldestWorkdateByUserId($userId);
 
         return $oldestWrokdate ?? abort(404);
+    }
+
+    /**
+     * 全ユーザ勤務表データ取得（週報管理画面用）
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getAllUser(Request $request)
+    {
+        $requestArray = $request->all();
+        $yearmonth = $requestArray['yearmonth'];
+
+        $date = (isset($yearmonth)) ? new \Carbon\Carbon($yearmonth . '01') : \Carbon\Carbon::now();
+
+        $dateFrom = $date->copy()->startOfMonth();
+        $dateTo = $date->copy()->endOfMonth();
+
+        $workSchedule = $this->workScheduleServiceInterface->getAllUser($dateFrom, $dateTo);
+
+        return $workSchedule ?? abort(404);
     }
 
     /**

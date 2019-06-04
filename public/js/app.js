@@ -5537,36 +5537,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 
@@ -5584,19 +5554,75 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   data: function data() {
     return {
+      tabs: ["週報内容", "勤務時間内容"],
+      active: null,
       targetDate: 0,
       targetWeek: 0,
       basicWorkDay: 0,
       oldestWorkdate: null,
       weekList: [],
-      tableheaders: [],
+      workScheduleHeaders: [{
+        text: "ID",
+        value: "id"
+      }, {
+        text: "ユーザ名",
+        sortable: false
+      }, {
+        text: "勤務時間グラフ",
+        sortable: false
+      }, {
+        text: "勤務時間(当月累計)",
+        sortable: false
+      }, {
+        text: "基本勤務時間",
+        sortable: false
+      }, {
+        text: "当月残り勤務時間",
+        sortable: false
+      }, {
+        text: "超過時間(当月累計)",
+        sortable: false
+      }, {
+        text: "出勤日数(当月累計)"
+      }, {
+        text: "欠勤日数(当月累計)"
+      }, {
+        text: "超過日数(当月累計)"
+      }],
+      weeklyReportHeaders: [{
+        text: "ID",
+        value: "id"
+      }, {
+        text: "ユーザ名",
+        sortable: false
+      }, {
+        text: "プロジェクト名",
+        sortable: false
+      }, {
+        text: "来週の作業",
+        sortable: false
+      }, {
+        text: "今月の休暇",
+        sortable: false
+      }, {
+        text: "現場情報",
+        sortable: false
+      }, {
+        text: "所感",
+        sortable: false
+      }, {
+        text: "提出状況",
+        value: "weekly_report.is_subumited"
+      }],
       user: [],
       projects: [],
       holidays: [],
       workschedules: [],
-      weeklyreport: [],
+      weeklyreports: [],
       worktimes: [0],
       projectWorktimes: [],
+      allUserWorktimes: [],
+      allUserProjectWorktimes: [],
       worktimeSum: 0,
       pagination: {
         rowsPerPage: 200
@@ -5623,6 +5649,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     /** 日付変換 */
     dateformat: function dateformat(date) {
       return moment(date).format("DD(ddd)");
+    },
+
+    /** 週報提出チェック */
+    isSubmitted: function isSubmitted(is_subumited) {
+      return is_subumited ? "提出済" : "未提出";
     },
 
     /** 週番号から日付に変換 */
@@ -5681,101 +5712,92 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return createWeekList;
     }(),
 
-    /** 基本勤務日数計算 */
-    culBasicWorkDay: function culBasicWorkDay() {
-      this.basicWorkDay = 0;
-      var year = this.targetDate.format("YYYY");
-      var weaknumber = this.targetDate.format("WW");
-      var startDate = moment(year).add(weaknumber - 1, "weeks").startOf("isoweek");
-
-      for (var i = 0; i < 7; i++) {
-        !this.isHoliday(startDate.format("YYYY-MM-DD")) ? this.basicWorkDay++ : null;
-        startDate.add(1, "days");
-      }
-    },
-
-    /** 出勤日数計算 */
-    WorktingDay: function WorktingDay() {
-      return this.worktimes.reduce(function (total, data, index) {
-        return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
-      });
-    },
-
-    /** 欠勤日数計算 */
-    AbsenceDay: function AbsenceDay() {
-      return this.basicWorkDay - this.WorktingDay();
-    },
-
     /** 休日チェック */
     isHoliday: function isHoliday(date) {
       return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
     },
 
-    /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
-    isSameWorkingTime: function isSameWorkingTime(index) {
-      var projectWorktime = 0;
-      this.projectWorktimes[index].forEach(function (val_1, idx_1, arr_1) {
-        projectWorktime = projectWorktime + parseFloat(val_1.worktime);
-      });
-      return this.worktimes[index] === projectWorktime ? true : false;
-    },
-
     /** 勤務表データ作成 */
     createWorkSchedule: function createWorkSchedule(responseData) {
-      if (responseData.length === 0) {
-        responseData = [];
-        var year = this.targetDate.format("YYYY");
-        var weaknumber = this.targetDate.format("WW");
-        var startDate = moment(year).add(weaknumber - 1, "weeks").startOf("isoweek"); // 当月分のデータが存在しない場合、デフォルト値で作成
+      var _this = this;
 
-        for (var i = 0; i < 7; i++) {
-          var isHoliday = this.isHoliday(startDate.format("YYYY-MM-DD"));
-          responseData.push({
-            id: null,
-            user_id: this.user.id,
-            week_number: startDate.format("ggggWW"),
-            workdate: startDate.format("YYYY-MM-DD"),
-            is_paid_holiday: false,
-            starttime_hh: isHoliday ? null : "09",
-            starttime_mm: isHoliday ? null : "00",
-            endtime_hh: isHoliday ? null : "18",
-            endtime_mm: isHoliday ? null : "00",
-            breaktime: isHoliday ? null : 1,
-            breaktime_midnight: isHoliday ? null : 0,
-            project_work: [{
-              work_schedule_id: null,
-              project_id: 1,
-              worktime: isHoliday ? 0 : 8
-            }],
-            detail: null
-          });
-          startDate.add(1, "days");
+      responseData.forEach(function (val_1, idx_1, arr_1) {
+        var work_schedule = [];
+
+        if (val_1.work_schedule.length === 0) {
+          var startDate = _this.targetDate.endOf("isoweek").startOf("month").clone();
+
+          var endDate = _this.targetDate.endOf("isoweek").endOf("month").clone(); // 当月分のデータが存在しない場合、デフォルト値で作成
+
+
+          while (startDate.unix() <= endDate.unix()) {
+            work_schedule.push({
+              id: null,
+              user_id: _this.user.id,
+              week_number: startDate.format("ggggWW"),
+              workdate: startDate.format("YYYY-MM-DD"),
+              is_paid_holiday: false,
+              starttime_hh: null,
+              starttime_mm: null,
+              endtime_hh: null,
+              endtime_mm: null,
+              breaktime: null,
+              breaktime_midnight: null,
+              project_work: [{
+                work_schedule_id: null,
+                project_id: 1,
+                worktime: 0
+              }],
+              detail: null
+            }); // 1日加算
+
+            startDate.add(1, "days");
+          }
+
+          responseData[idx_1].work_schedule = work_schedule;
         }
-      }
-
+      });
       return responseData;
     },
 
     /** 週報データ作成 */
     createWeeklyReport: function createWeeklyReport(responseData) {
-      if (responseData.length === 0) {
-        responseData = {
-          id: null,
-          user_id: this.user.id,
-          week_number: this.targetDate.format("ggggWW"),
-          project_id: 1,
-          nextweek_schedule: null,
-          site_information: null,
-          thismonth_dayoff: null,
-          opinion: null,
-          is_subumited: false
-        };
-      }
-
+      responseData.forEach(function (val_1, idx_1, arr_1) {
+        if (val_1.weekly_report === null) {
+          responseData[idx_1].weekly_report = {
+            id: null,
+            project_id: null,
+            user_id: null,
+            week_number: null,
+            nextweek_schedule: null,
+            //
+            site_information: null,
+            //
+            thismonth_dayoff: null,
+            //
+            opinion: null,
+            //
+            is_subumited: false,
+            //
+            project: [{
+              id: null,
+              code: null,
+              //
+              name: null,
+              //
+              category_id: null,
+              company_id: null,
+              user_id: null,
+              status_id: null,
+              is_deleted: null
+            }]
+          };
+        }
+      });
       return responseData;
     },
 
-    /** ユーザデータ取得 */
+    /** 全ユーザデータ取得 */
     fetchUser: function () {
       var _fetchUser = _asyncToGenerator(
       /*#__PURE__*/
@@ -5786,9 +5808,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return axios.post("/api/user/get", {
-                  userId: this.$store.state.auth.user.id
-                });
+                return axios.get("/api/user/get");
 
               case 2:
                 response = _context2.sent;
@@ -5963,20 +5983,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return fetchOldestWorkdate;
     }(),
 
-    /** 勤務表データ取得 */
+    /** 全ユーザ勤務表データ取得 */
     fetchWorkSchedules: function () {
       var _fetchWorkSchedules = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        var _this2 = this;
+
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
                 _context6.next = 2;
-                return axios.post("/api/workschedule/getweek", {
-                  userId: this.$store.state.auth.user.id,
-                  weekNumber: this.targetWeek
+                return axios.post("/api/workschedule/getalluser", {
+                  yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
                 });
 
               case 2:
@@ -5991,20 +6012,35 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context6.abrupt("return", false);
 
               case 6:
-                // 勤務表データ
-                this.workschedules = this.createWorkSchedule(response.data); // 勤務時間初期化
+                // 全ユーザの勤務表データ
+                this.workschedules = this.createWorkSchedule(response.data); // 全ユーザの勤務時間初期化
 
-                this.worktimes = Array(this.workschedules.length).fill(0); // プロジェクト時間
+                this.allUserWorktimes = this.workschedules.map(function (item) {
+                  return {
+                    user_id: item["id"],
+                    worktimes: Array(_this2.workschedules[0].work_schedule.length).fill(0)
+                  };
+                }); // 全ユーザのプロジェクト時間
 
+                this.allUserProjectWorktimes = this.workschedules.map(function (item) {
+                  return {
+                    user_id: item["id"],
+                    worktimes: item["work_schedule"].map(function (item2) {
+                      return item2["project_work"];
+                    })
+                  };
+                });
                 this.projectWorktimes = this.workschedules.map(function (item) {
                   return item["project_work"];
-                }); // テーブルヘッダー作成
+                }); // 勤務情報再計算
 
-                this.tableheaders = this.createTableHeaders(this.workschedules[0].project_work.length); // 勤務情報再計算
+                this.culBasicWorkDay(); // 基本勤務日数計算
 
-                this.culBasicWorkDay();
+                this.culBasicWorktimeAMonth(); // 勤務時間計算
 
-              case 11:
+                this.culWorktimes();
+
+              case 13:
               case "end":
                 return _context6.stop();
             }
@@ -6019,7 +6055,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return fetchWorkSchedules;
     }(),
 
-    /** 週報データ取得 */
+    /** 全ユーザ週報データ取得 */
     fetchWeeklyReport: function () {
       var _fetchWeeklyReport = _asyncToGenerator(
       /*#__PURE__*/
@@ -6047,7 +6083,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 // 週報データ
-                console.log(response.data); //this.weeklyreport = this.createWeeklyReport(response.data);
+                this.weeklyreports = this.createWeeklyReport(response.data);
 
               case 7:
               case "end":
@@ -6064,160 +6100,72 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return fetchWeeklyReport;
     }(),
 
-    /** 週報登録 */
-    save: function () {
-      var _save = _asyncToGenerator(
-      /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
-          while (1) {
-            switch (_context8.prev = _context8.next) {
-              case 0:
-                this.weeklyreport.is_subumited = false;
-                this.store();
+    /** 基本勤務日数計算 */
+    culBasicWorkDay: function culBasicWorkDay() {
+      this.basicWorkDay = 0;
+      var startDate = this.targetDate.endOf("isoweek").startOf("month").clone();
+      var endDate = this.targetDate.endOf("isoweek").endOf("month").clone(); // 1日ずつインクリメントして配列へpush
 
-              case 2:
-              case "end":
-                return _context8.stop();
-            }
-          }
-        }, _callee8, this);
-      }));
-
-      function save() {
-        return _save.apply(this, arguments);
+      while (startDate.unix() <= endDate.unix()) {
+        !this.isHoliday(startDate.format("YYYY-MM-DD")) ? this.basicWorkDay++ : null;
+        startDate.add(1, "days");
       }
-
-      return save;
-    }(),
-
-    /** 週報提出 */
-    submit: function () {
-      var _submit = _asyncToGenerator(
-      /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee9() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee9$(_context9) {
-          while (1) {
-            switch (_context9.prev = _context9.next) {
-              case 0:
-                this.weeklyreport.is_subumited = true;
-                this.store();
-
-              case 2:
-              case "end":
-                return _context9.stop();
-            }
-          }
-        }, _callee9, this);
-      }));
-
-      function submit() {
-        return _submit.apply(this, arguments);
-      }
-
-      return submit;
-    }(),
-
-    /** 週報データ登録 */
-    store: function () {
-      var _store = _asyncToGenerator(
-      /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee10() {
-        var response;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee10$(_context10) {
-          while (1) {
-            switch (_context10.prev = _context10.next) {
-              case 0:
-                _context10.next = 2;
-                return axios.post("/api/weeklyreport/store", {
-                  weeklyreport: this.weeklyreport
-                });
-
-              case 2:
-                response = _context10.sent;
-
-                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
-                  _context10.next = 6;
-                  break;
-                }
-
-                this.$store.commit("error/setCode", response.status);
-                return _context10.abrupt("return", false);
-
-              case 6:
-                // 週報データ更新
-                this.fetchWeeklyReport();
-
-              case 7:
-              case "end":
-                return _context10.stop();
-            }
-          }
-        }, _callee10, this);
-      }));
-
-      function store() {
-        return _store.apply(this, arguments);
-      }
-
-      return store;
-    }(),
-
-    /** テーブルヘッダー */
-    createTableHeaders: function createTableHeaders(projectMaxCount) {
-      var tableheaders = [{
-        text: "日付",
-        sortable: false
-      }, {
-        text: "有給",
-        sortable: false
-      }, {
-        text: "開始時間",
-        sortable: false
-      }, {
-        text: "終了時間",
-        sortable: false
-      }, {
-        text: "休憩時間(h)",
-        sortable: false
-      }, {
-        text: "深夜休憩時間",
-        sortable: false
-      }, {
-        text: "勤務時間",
-        sortable: false
-      }, {
-        text: "PJ合計時間",
-        sortable: false
-      }];
-
-      for (var i = 1; i <= projectMaxCount; i++) {
-        tableheaders[tableheaders.length] = {
-          text: "PJ時間" + i,
-          sortable: false
-        };
-      }
-
-      tableheaders[tableheaders.length] = {
-        text: "内容",
-        sortable: false
-      };
-      return tableheaders;
     },
 
-    /** 勤務時間計算 */
-    worktimeADay: function worktimeADay(index) {
-      // リアクティブデータコピー
-      var worktime_array = this.worktimes; // 1日の勤務時間計算
+    /** 基本勤務時間作成 */
+    culBasicWorktimeAMonth: function culBasicWorktimeAMonth() {
+      var _this3 = this;
 
-      worktime_array[index] = Object(_util__WEBPACK_IMPORTED_MODULE_1__["getWorktime"])(this.workschedules[index].starttime_hh, this.workschedules[index].starttime_mm, this.workschedules[index].endtime_hh, this.workschedules[index].endtime_mm, this.workschedules[index].breaktime, this.workschedules[index].breaktime_midnight); // リアクティブデータに登録
+      /** 今月の勤務時間数 */
+      this.workschedules.forEach(function (val_1, idx_1, arr_1) {
+        if (val_1.workingtime_type === 1) {
+          _this3.$set(_this3.workschedules[idx_1], "workingtimeMin", _this3.basicWorkDay * val_1.worktime_day);
 
-      this.worktimes = worktime_array; // 1月の合計勤務時間計算
+          _this3.$set(_this3.workschedules[idx_1], "workingtimeMax", val_1.workingtimeMin + val_1.maxworktime_month);
+        } else if (val_1.workingtime_type === 2) {
+          _this3.$set(_this3.workschedules[idx_1], "workingtimeMin", val_1.workingtime_min);
 
-      this.worktimeSum = this.worktimes.reduce(function (total, data) {
-        return total + data;
+          _this3.$set(_this3.workschedules[idx_1], "workingtimeMax", val_1.workingtime_max);
+        }
       });
-      return this.worktimes[index];
+    },
+
+    /** 全ユーザ合計勤務時間計算 */
+    culWorktimes: function culWorktimes() {
+      var _this4 = this;
+
+      this.workschedules.forEach(function (val_1, idx_1, arr_1) {
+        val_1.work_schedule.forEach(function (val_2, idx_2, arr_2) {
+          // 各ユーザの1日の勤務時間の計算
+          _this4.$set(_this4.allUserWorktimes[idx_1].worktimes, idx_2, Object(_util__WEBPACK_IMPORTED_MODULE_1__["getWorktime"])(val_2.starttime_hh, val_2.starttime_mm, val_2.endtime_hh, val_2.endtime_mm, val_2.breaktime, val_2.breaktime_midnight));
+        }); // 1月の合計勤務時間計算
+
+        _this4.$set(_this4.workschedules[idx_1], "worktimeSum", _this4.allUserWorktimes[idx_1].worktimes.reduce(function (total, data) {
+          return total + data;
+        })); // 超過時間計算
+
+
+        _this4.$set(_this4.workschedules[idx_1], "overTime", _this4.workschedules[idx_1].worktimeSum > _this4.workschedules[idx_1].workingtimeMax ? _this4.workschedules[idx_1].worktimeSum - _this4.workschedules[idx_1].workingtimeMax : 0); // 不足時間計算
+
+
+        _this4.$set(_this4.workschedules[idx_1], "shortageTime", _this4.workschedules[idx_1].worktimeSum < _this4.workschedules[idx_1].workingtimeMin ? _this4.workschedules[idx_1].workingtimeMin - _this4.workschedules[idx_1].worktimeSum : 0); // 出勤日数計算
+
+
+        _this4.$set(_this4.workschedules[idx_1], "WorktingDay", _this4.WorktingDay(_this4.allUserWorktimes[idx_1].worktimes)); // 欠勤日数計算
+
+
+        _this4.$set(_this4.workschedules[idx_1], "AbsenceDay", _this4.workschedules[idx_1].WorktingDay < _this4.basicWorkDay ? _this4.basicWorkDay - _this4.workschedules[idx_1].WorktingDay : 0); // 超過日数計算
+
+
+        _this4.$set(_this4.workschedules[idx_1], "OverDay", _this4.workschedules[idx_1].WorktingDay > _this4.basicWorkDay ? _this4.workschedules[idx_1].WorktingDay - _this4.basicWorkDay : 0);
+      });
+    },
+
+    /** 出勤日数計算 */
+    WorktingDay: function WorktingDay(worktimes) {
+      return worktimes.reduce(function (total, data, index) {
+        return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
+      });
     },
 
     /** 1日のプロジェクト時間計算 */
@@ -6245,40 +6193,40 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       handler: function () {
         var _handler = _asyncToGenerator(
         /*#__PURE__*/
-        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee11() {
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee11$(_context11) {
+        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
             while (1) {
-              switch (_context11.prev = _context11.next) {
+              switch (_context8.prev = _context8.next) {
                 case 0:
-                  _context11.next = 2;
+                  _context8.next = 2;
                   return this.fetchUser();
 
                 case 2:
-                  _context11.next = 4;
+                  _context8.next = 4;
                   return this.fetchHolidays();
 
                 case 4:
-                  _context11.next = 6;
+                  _context8.next = 6;
                   return this.fetchProjects();
 
                 case 6:
-                  _context11.next = 8;
+                  _context8.next = 8;
                   return this.fetchOldestWorkdate();
 
                 case 8:
-                  _context11.next = 10;
+                  _context8.next = 10;
                   return this.fetchWorkSchedules();
 
                 case 10:
-                  _context11.next = 12;
+                  _context8.next = 12;
                   return this.fetchWeeklyReport();
 
                 case 12:
                 case "end":
-                  return _context11.stop();
+                  return _context8.stop();
               }
             }
-          }, _callee11, this);
+          }, _callee8, this);
         }));
 
         function handler() {
@@ -7773,7 +7721,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 this.projectWorktimes = this.workschedules.map(function (item) {
                   return item["project_work"];
-                }); // プロジェクトコード
+                });
+                console.log("this.projectWorktimes", this.projectWorktimes); // プロジェクトコード
 
                 this.selected = this.workschedules[0].project_work.map(function (item) {
                   return {
@@ -7786,7 +7735,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 this.culBasicWorkDay();
                 this.culBasicWorktimeAMonth();
 
-              case 13:
+              case 14:
               case "end":
                 return _context5.stop();
             }
@@ -16030,7 +15979,7 @@ exports.push([module.i, "/*!\n* Vuetify v1.5.14\n* Forged by John Leider\n* Rele
 
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
 // Module
-exports.push([module.i, "\n.holiday[data-v-7c11fd52] {\n  background: lightgray;\n}\n.notsame[data-v-7c11fd52] {\n  color: red;\n}\n", ""]);
+exports.push([module.i, "\n.holiday[data-v-7c11fd52] {\n  background: lightgray;\n}\n.is_submitted[data-v-7c11fd52] {\n  color: red;\n  font-weight: bold;\n}\n", ""]);
 
 
 
@@ -33119,7 +33068,7 @@ var render = function() {
         [
           _c(
             "v-container",
-            { attrs: { "grid-list-md": "", "text-xs-left": "" } },
+            { attrs: { "grid-list-md": "", "text-xs-left": "", fluid: "" } },
             [
               _c(
                 "v-layout",
@@ -33140,38 +33089,7 @@ var render = function() {
                               attrs: { inset: "", vertical: "" }
                             }),
                             _vm._v(" "),
-                            _c("v-spacer", [
-                              _vm._v(_vm._s(_vm.weekformat(_vm.targetWeek)))
-                            ])
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "v-flex",
-                          { attrs: { xs6: "" } },
-                          [
-                            _c(
-                              "v-alert",
-                              {
-                                attrs: {
-                                  value: this.weeklyreport.is_subumited,
-                                  type: "success"
-                                }
-                              },
-                              [_vm._v("当週分の週報は提出済みです")]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "v-alert",
-                              {
-                                attrs: {
-                                  value: !this.weeklyreport.is_subumited,
-                                  type: "warning"
-                                }
-                              },
-                              [_vm._v("当週分の週報は未提出です")]
-                            )
+                            _c("v-spacer")
                           ],
                           1
                         ),
@@ -33205,573 +33123,379 @@ var render = function() {
                           1
                         ),
                         _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "基本勤務日数：" + _vm._s(this.basicWorkDay) + " 日"
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "出勤日数：" + _vm._s(_vm.WorktingDay()) + " 日"
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "欠勤日数：" + _vm._s(_vm.AbsenceDay()) + " 日"
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "総勤務時間：" + _vm._s(this.worktimeSum) + " 時間"
-                          )
-                        ]),
-                        _vm._v(" "),
                         _c(
-                          "v-flex",
-                          { attrs: { xs6: "" } },
-                          [
-                            _c("v-select", {
-                              attrs: {
-                                items: _vm.projects,
-                                "item-value": "id",
-                                "item-text": "name",
-                                label: "プロジェクト",
-                                box: ""
+                          "v-tabs",
+                          {
+                            attrs: {
+                              color: "cyan",
+                              dark: "",
+                              "slider-color": "yellow"
+                            },
+                            model: {
+                              value: _vm.active,
+                              callback: function($$v) {
+                                _vm.active = $$v
                               },
-                              model: {
-                                value: _vm.weeklyreport.project_id,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.weeklyreport, "project_id", $$v)
-                                },
-                                expression: "weeklyreport.project_id"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _vm._l(_vm.projectWorktimes[0], function(
-                          projectWorktime,
-                          index
-                        ) {
-                          return _c("div", { key: projectWorktime.key }, [
-                            _c("p", [
-                              _vm._v(
-                                "プロジェクト" +
-                                  _vm._s(index + 1) +
-                                  " " +
-                                  _vm._s(
-                                    _vm.projects[projectWorktime.project_id - 1]
-                                      .name
-                                  )
-                              )
-                            ])
-                          ])
-                        }),
-                        _vm._v(" "),
-                        _c(
-                          "v-btn",
-                          {
-                            attrs: { color: "success" },
-                            on: {
-                              click: function($event) {
-                                return _vm.save()
-                              }
+                              expression: "active"
                             }
                           },
-                          [_vm._v("週報保存")]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "v-btn",
-                          {
-                            attrs: { color: "info" },
-                            on: {
-                              click: function($event) {
-                                return _vm.submit()
-                              }
-                            }
-                          },
-                          [_vm._v("週報提出")]
-                        ),
-                        _vm._v(" "),
-                        _c("v-data-table", {
-                          staticClass: "elevation-1",
-                          attrs: {
-                            headers: this.tableheaders,
-                            items: _vm.workschedules,
-                            "rows-per-page-items": [],
-                            pagination: _vm.pagination
-                          },
-                          on: {
-                            "update:pagination": function($event) {
-                              _vm.pagination = $event
-                            }
-                          },
-                          scopedSlots: _vm._u([
-                            {
-                              key: "items",
-                              fn: function(props) {
-                                return [
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "5%" }
-                                    },
-                                    [
+                          [
+                            _vm._l(_vm.tabs, function(tab) {
+                              return _c("v-tab", { key: tab }, [
+                                _vm._v(_vm._s(tab))
+                              ])
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "v-tab-item",
+                              [
+                                _c(
+                                  "v-card",
+                                  { attrs: { flat: "" } },
+                                  [
+                                    _c("v-card-text", [
                                       _vm._v(
-                                        _vm._s(
-                                          _vm.dateformat(props.item.workdate)
-                                        )
+                                        "基本勤務日数：" +
+                                          _vm._s(this.basicWorkDay) +
+                                          " 日"
                                       )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "3%" }
-                                    },
-                                    [
-                                      _c("v-checkbox", {
-                                        attrs: { disabled: "" },
-                                        model: {
-                                          value: props.item.is_paid_holiday,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "is_paid_holiday",
-                                              $$v
-                                            )
+                                    ]),
+                                    _vm._v(" "),
+                                    _c(
+                                      "v-card-text",
+                                      [
+                                        _c("v-data-table", {
+                                          staticClass: "elevation-1",
+                                          attrs: {
+                                            headers: _vm.weeklyReportHeaders,
+                                            items: _vm.weeklyreports,
+                                            pagination: _vm.pagination
                                           },
-                                          expression:
-                                            "props.item.is_paid_holiday"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "10%" }
-                                    },
-                                    [
-                                      _c(
-                                        "div",
-                                        { staticStyle: { display: "flex" } },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.starttime_hh,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "starttime_hh",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.starttime_hh"
+                                          on: {
+                                            "update:pagination": function(
+                                              $event
+                                            ) {
+                                              _vm.pagination = $event
                                             }
-                                          }),
-                                          _vm._v(":\n                    "),
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.starttime_mm,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "starttime_mm",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.starttime_mm"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "10%" }
-                                    },
-                                    [
-                                      _c(
-                                        "div",
-                                        { staticStyle: { display: "flex" } },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.endtime_hh,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "endtime_hh",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.endtime_hh"
-                                            }
-                                          }),
-                                          _vm._v(":\n                    "),
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.endtime_mm,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "endtime_mm",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.endtime_mm"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c("v-text-field", {
-                                        attrs: { type: "Number", disabled: "" },
-                                        model: {
-                                          value: props.item.breaktime,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "breaktime",
-                                              $$v
-                                            )
                                           },
-                                          expression: "props.item.breaktime"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c("v-text-field", {
-                                        attrs: { type: "Number", disabled: "" },
-                                        model: {
-                                          value: props.item.breaktime_midnight,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "breaktime_midnight",
-                                              $$v
-                                            )
-                                          },
-                                          expression:
-                                            "props.item.breaktime_midnight"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c(
-                                        "font",
-                                        {
-                                          class: {
-                                            notsame: !_vm.isSameWorkingTime(
-                                              props.index
-                                            )
-                                          }
-                                        },
-                                        [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.worktimeADay(props.index)
-                                            )
-                                          )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c(
-                                        "font",
-                                        {
-                                          class: {
-                                            notsame: !_vm.isSameWorkingTime(
-                                              props.index
-                                            )
-                                          }
-                                        },
-                                        [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.PJWorktimeADay(props.index)
-                                            )
-                                          )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _vm._l(
-                                    _vm.projectWorktimes[props.index],
-                                    function(projectWorktime) {
-                                      return _c(
-                                        "td",
-                                        {
-                                          key: projectWorktime.key,
-                                          class: {
-                                            holiday: _vm.isHoliday(
-                                              props.item.workdate
-                                            )
-                                          },
-                                          attrs: { width: "7%" }
-                                        },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: projectWorktime.worktime,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  projectWorktime,
-                                                  "worktime",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "projectWorktime.worktime"
+                                          scopedSlots: _vm._u([
+                                            {
+                                              key: "items",
+                                              fn: function(props) {
+                                                return [
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "2%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(props.item.id)
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(props.item.name)
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "20%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .weekly_report
+                                                            .project.code
+                                                        ) +
+                                                          " : " +
+                                                          _vm._s(
+                                                            props.item
+                                                              .weekly_report
+                                                              .project.name
+                                                          )
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "20%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .weekly_report
+                                                            .nextweek_schedule
+                                                        )
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "20%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .weekly_report
+                                                            .site_information
+                                                        )
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "13%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .weekly_report
+                                                            .thismonth_dayoff
+                                                        )
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "15%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .weekly_report
+                                                            .opinion
+                                                        )
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "3%" } },
+                                                    [
+                                                      _c(
+                                                        "font",
+                                                        {
+                                                          class: {
+                                                            is_submitted: !props
+                                                              .item
+                                                              .weekly_report
+                                                              .is_subumited
+                                                          }
+                                                        },
+                                                        [
+                                                          _vm._v(
+                                                            _vm._s(
+                                                              _vm.isSubmitted(
+                                                                props.item
+                                                                  .weekly_report
+                                                                  .is_subumited
+                                                              )
+                                                            )
+                                                          )
+                                                        ]
+                                                      )
+                                                    ],
+                                                    1
+                                                  )
+                                                ]
+                                              }
                                             }
-                                          })
-                                        ],
-                                        1
+                                          ])
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "v-tab-item",
+                              [
+                                _c(
+                                  "v-card",
+                                  { attrs: { flat: "" } },
+                                  [
+                                    _c("v-card-text", [
+                                      _vm._v(
+                                        "基本勤務日数：" +
+                                          _vm._s(this.basicWorkDay) +
+                                          " 日"
                                       )
-                                    }
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "30%" }
-                                    },
-                                    [
-                                      _c("v-textarea", {
-                                        attrs: {
-                                          solo: "",
-                                          rows: "1",
-                                          disabled: ""
-                                        },
-                                        model: {
-                                          value: props.item.detail,
-                                          callback: function($$v) {
-                                            _vm.$set(props.item, "detail", $$v)
+                                    ]),
+                                    _vm._v(" "),
+                                    _c(
+                                      "v-card-text",
+                                      [
+                                        _c("v-data-table", {
+                                          staticClass: "elevation-1",
+                                          attrs: {
+                                            headers: _vm.workScheduleHeaders,
+                                            items: _vm.workschedules,
+                                            pagination: _vm.pagination
                                           },
-                                          expression: "props.item.detail"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  )
-                                ]
-                              }
-                            }
-                          ])
-                        }),
-                        _vm._v(" "),
-                        _c("v-textarea", {
-                          attrs: {
-                            outline: "",
-                            rows: "2",
-                            label: "現場の情報"
-                          },
-                          model: {
-                            value: _vm.weeklyreport.nextweek_schedule,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.weeklyreport,
-                                "nextweek_schedule",
-                                $$v
-                              )
-                            },
-                            expression: "weeklyreport.nextweek_schedule"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("v-textarea", {
-                          attrs: {
-                            outline: "",
-                            rows: "2",
-                            label: "現場の情報"
-                          },
-                          model: {
-                            value: _vm.weeklyreport.site_information,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.weeklyreport,
-                                "site_information",
-                                $$v
-                              )
-                            },
-                            expression: "weeklyreport.site_information"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("v-textarea", {
-                          attrs: {
-                            outline: "",
-                            rows: "2",
-                            label: "今月の休み"
-                          },
-                          model: {
-                            value: _vm.weeklyreport.thismonth_dayoff,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.weeklyreport,
-                                "thismonth_dayoff",
-                                $$v
-                              )
-                            },
-                            expression: "weeklyreport.thismonth_dayoff"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("v-textarea", {
-                          attrs: { outline: "", rows: "2", label: "所感" },
-                          model: {
-                            value: _vm.weeklyreport.opinion,
-                            callback: function($$v) {
-                              _vm.$set(_vm.weeklyreport, "opinion", $$v)
-                            },
-                            expression: "weeklyreport.opinion"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c(
-                          "v-btn",
-                          {
-                            attrs: { color: "success" },
-                            on: {
-                              click: function($event) {
-                                return _vm.save()
-                              }
-                            }
-                          },
-                          [_vm._v("週報保存")]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "v-btn",
-                          {
-                            attrs: { color: "info" },
-                            on: {
-                              click: function($event) {
-                                return _vm.submit()
-                              }
-                            }
-                          },
-                          [_vm._v("週報提出")]
+                                          on: {
+                                            "update:pagination": function(
+                                              $event
+                                            ) {
+                                              _vm.pagination = $event
+                                            }
+                                          },
+                                          scopedSlots: _vm._u([
+                                            {
+                                              key: "items",
+                                              fn: function(props) {
+                                                return [
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "3%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(props.item.id)
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "5%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(props.item.name)
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [_vm._v("グラフ")]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item.worktimeSum
+                                                        ) + " h"
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "10%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .workingtimeMin
+                                                        ) +
+                                                          " h 〜 " +
+                                                          _vm._s(
+                                                            props.item
+                                                              .workingtimeMax
+                                                          ) +
+                                                          " h"
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "10%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item
+                                                            .shortageTime
+                                                        ) + " h"
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item.overTime
+                                                        ) + " h"
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item.WorktingDay
+                                                        ) + " 日"
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item.AbsenceDay
+                                                        ) + " 日"
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "td",
+                                                    { attrs: { width: "7%" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          props.item.OverDay
+                                                        ) + " 日"
+                                                      )
+                                                    ]
+                                                  )
+                                                ]
+                                              }
+                                            }
+                                          ])
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          ],
+                          2
                         )
                       ],
-                      2
+                      1
                     )
                   ])
                 ],
@@ -34001,7 +33725,7 @@ var render = function() {
                         _c("v-data-table", {
                           staticClass: "elevation-1",
                           attrs: {
-                            headers: this.tableheaders,
+                            headers: _vm.tableheaders,
                             items: _vm.workschedules,
                             "rows-per-page-items": [],
                             pagination: _vm.pagination
@@ -34787,7 +34511,7 @@ var render = function() {
                         _c("v-data-table", {
                           staticClass: "elevation-1",
                           attrs: {
-                            headers: this.tableheaders,
+                            headers: _vm.tableheaders,
                             items: _vm.workschedules,
                             "rows-per-page-items": [],
                             pagination: _vm.pagination

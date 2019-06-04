@@ -74,7 +74,7 @@ class User extends Authenticatable
 
     public function weeklyReport()
     {
-        return $this->hasMany('App\Repositories\Models\WeeklyReport', 'user_id');
+        return $this->hasOne('App\Repositories\Models\WeeklyReport', 'user_id');
     }
 
     public function userType()
