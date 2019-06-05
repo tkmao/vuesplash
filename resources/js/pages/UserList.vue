@@ -146,7 +146,12 @@
           </v-dialog>
         </v-toolbar>
 
-        <v-data-table :headers="headers" :items="users" class="elevation-1">
+        <v-data-table
+          :headers="headers"
+          :items="users"
+          :pagination.sync="pagination"
+          class="elevation-1"
+        >
           <template v-slot:items="props">
             <td class="text-xs-right">{{ props.item.id }}</td>
             <td>{{ props.item.name }}</td>
@@ -275,6 +280,7 @@ export default {
         { text: "編集", value: 0, sortable: false },
         { text: "削除", value: 0, sortable: false }
       ],
+      pagination: { rowsPerPage: -1 },
       users: [],
       editedIndex: -1,
       editedItem: {

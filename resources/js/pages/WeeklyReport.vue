@@ -35,12 +35,13 @@
                   box
                 ></v-select>
               </v-flex>
-
-              <p>基本勤務日数：{{ this.basicWorkDay }} 日</p>
-              <p>出勤日数：{{ WorktingDay() }} 日</p>
-              <p>欠勤日数：{{ AbsenceDay() }} 日</p>
-              <p>総勤務時間：{{ this.worktimeSum }} 時間</p>
-
+              基本勤務日数：{{ this.basicWorkDay }} 日
+              <br>
+              出勤日数：{{ WorktingDay() }} 日
+              <br>
+              欠勤日数：{{ AbsenceDay() }} 日
+              <br>
+              総勤務時間：{{ this.worktimeSum }} 時間
               <v-flex xs6>
                 <v-select
                   v-model="weeklyreport.project_id"
@@ -69,6 +70,7 @@
                 :pagination.sync="pagination"
                 class="elevation-1"
               >
+                <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
                 <template v-slot:items="props">
                   <td
                     width="5%"
@@ -95,12 +97,20 @@
                   <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
                     <v-text-field v-model="props.item.breaktime_midnight" type="Number" disabled></v-text-field>
                   </td>
-                  <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                  <td
+                    width="7%"
+                    :class="{ holiday: isHoliday(props.item.workdate) }"
+                    class="text-xs-right"
+                  >
                     <font
                       :class="{ notsame: !isSameWorkingTime(props.index) }"
                     >{{ worktimeADay(props.index) }}</font>
                   </td>
-                  <td width="7%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                  <td
+                    width="7%"
+                    :class="{ holiday: isHoliday(props.item.workdate) }"
+                    class="text-xs-right"
+                  >
                     <font
                       :class="{ notsame: !isSameWorkingTime(props.index) }"
                     >{{ PJWorktimeADay(props.index) }}</font>

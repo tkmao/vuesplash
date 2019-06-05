@@ -25,14 +25,21 @@
                 <v-alert :value="!this.isSubmitted" type="warning">当月分の勤務表は未提出です</v-alert>
               </v-flex>
               <v-card-text>
-                <p>基本勤務日数：{{ this.basicWorkDay }} 日</p>
-                <p>出勤日数：{{ WorktingDay() }} 日</p>
-                <p>欠勤日数：{{ AbsenceDay() }} 日</p>
-                <p>今月の勤務時間：下限 {{ this.workingtimeMin }} h 〜 上限 {{ this.workingtimeMax }} h</p>
-                <p>総勤務時間：{{ this.worktimeSum }} 時間</p>
-                <p>不足時間：{{ ShortageTime() }} h</p>
-                <p>超過時間：{{ OverTime() }} h</p>
-                <p>残有給日数：{{ this.user.paid_holiday }} 日 (今月 {{ paidHolidayThisMonth() }} 日 使用)</p>
+                基本勤務日数：{{ this.basicWorkDay }} 日
+                <br>
+                出勤日数：{{ WorktingDay() }} 日
+                <br>
+                欠勤日数：{{ AbsenceDay() }} 日
+                <br>
+                今月の勤務時間：下限 {{ this.workingtimeMin }} h 〜 上限 {{ this.workingtimeMax }} h
+                <br>
+                総勤務時間：{{ this.worktimeSum }} 時間
+                <br>
+                不足時間：{{ ShortageTime() }} h
+                <br>
+                超過時間：{{ OverTime() }} h
+                <br>
+                残有給日数：{{ this.user.paid_holiday }} 日 (今月 {{ paidHolidayThisMonth() }} 日 使用)
               </v-card-text>
 
               <v-btn color="info" @click="changeMonth(-1)">先月</v-btn>
@@ -61,7 +68,12 @@
                 <v-btn color="success" :disabled="!isSameWorkingTimeAMonth()" @click="save()">勤務表保存</v-btn>
                 <v-btn color="info" :disabled="!isSameWorkingTimeAMonth()" @click="submit()">勤務表提出</v-btn>
               </v-flex>
-              <v-alert :value="!isSameWorkingTimeAMonth()" type="warning">総勤務時間と総プロジェクト時間が一致していません。</v-alert>
+              <v-flex xs6>
+                <v-alert
+                  :value="!isSameWorkingTimeAMonth()"
+                  type="warning"
+                >総勤務時間と総プロジェクト時間が一致していません。</v-alert>
+              </v-flex>
 
               <v-data-table
                 :headers="tableheaders"
@@ -70,6 +82,7 @@
                 :pagination.sync="pagination"
                 class="elevation-1"
               >
+                <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
                 <template v-slot:items="props">
                   <td
                     width="3%"
@@ -122,13 +135,21 @@
                       step="0.25"
                     ></v-text-field>
                   </td>
-                  <td width="5%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                  <td
+                    width="5%"
+                    :class="{ holiday: isHoliday(props.item.workdate) }"
+                    class="text-xs-right"
+                  >
                     <font
                       size="4"
                       :class="{ notsame: !isSameWorkingTime(props.index) }"
                     >{{ worktimeADay(props.index) }}</font>
                   </td>
-                  <td width="5%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                  <td
+                    width="5%"
+                    :class="{ holiday: isHoliday(props.item.workdate) }"
+                    class="text-xs-right"
+                  >
                     <font
                       size="4"
                       :class="{ notsame: !isSameWorkingTime(props.index) }"
@@ -507,7 +528,7 @@ export default {
           sortable: false
         };
       }
-      tableheaders[tableheaders.length] = { text: "内容", sortable: false };
+      tableheaders[tableheaders.length] = { text: "業務詳細", sortable: false };
 
       return tableheaders;
     },

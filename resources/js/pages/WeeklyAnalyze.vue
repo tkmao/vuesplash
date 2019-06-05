@@ -45,6 +45,15 @@
                       週報提出：{{ peopleSubmit() }} 人
                     </v-card-text>
 
+                    <v-card-title>
+                      <v-text-field
+                        v-model="searchWeeklyReport"
+                        append-icon="search"
+                        label="Search"
+                        single-line
+                        hide-details
+                      ></v-text-field>
+                    </v-card-title>
                     <v-card-text>
                       <v-data-table
                         :headers="weeklyReportHeaders"
@@ -52,13 +61,14 @@
                         hide-actions
                         :pagination.sync="pagination"
                         class="elevation-1"
+                        :search="searchWeeklyReport"
                       >
+                        <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
                         <template v-slot:items="props">
                           <td width="2%">{{ props.item.id }}</td>
                           <td width="7%">{{ props.item.name }}</td>
-                          <td
-                            width="20%"
-                          >{{ props.item.weekly_report.project.code }} : {{ props.item.weekly_report.project.name }}</td>
+                          <td width="5%">{{ props.item.weekly_report.project.code }}</td>
+                          <td width="15%">{{ props.item.weekly_report.project.name }}</td>
                           <td width="20%">{{ props.item.weekly_report.nextweek_schedule }}</td>
                           <td width="20%">{{ props.item.weekly_report.site_information }}</td>
                           <td width="13%">{{ props.item.weekly_report.thismonth_dayoff }}</td>
@@ -68,6 +78,13 @@
                               :class="{ is_submitted: !props.item.weekly_report.is_subumited }"
                             >{{ isSubmitted(props.item.weekly_report.is_subumited) }}</font>
                           </td>
+                        </template>
+                        <template v-slot:no-results>
+                          <v-alert
+                            :value="true"
+                            color="error"
+                            icon="warning"
+                          >"{{ searchWeeklyReport }}" と一致するデータは存在していません。</v-alert>
                         </template>
                       </v-data-table>
                     </v-card-text>
@@ -82,6 +99,15 @@
                     </v-card-text>
                     <v-card-text>※ 当月累計</v-card-text>
 
+                    <v-card-title>
+                      <v-text-field
+                        v-model="searchworkSchedule"
+                        append-icon="search"
+                        label="Search"
+                        single-line
+                        hide-details
+                      ></v-text-field>
+                    </v-card-title>
                     <v-card-text>
                       <v-data-table
                         :headers="workScheduleHeaders"
@@ -89,20 +115,29 @@
                         hide-actions
                         :pagination.sync="pagination"
                         class="elevation-1"
+                        :search="searchworkSchedule"
                       >
+                        <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
                         <template v-slot:items="props">
                           <td width="3%">{{ props.item.id }}</td>
                           <td width="5%">{{ props.item.name }}</td>
                           <td width="7%">グラフ</td>
-                          <td width="7%">{{ props.item.worktimeSum }} h</td>
+                          <td class="text-xs-right" width="7%">{{ props.item.worktimeSum }} h</td>
                           <td
                             width="10%"
                           >{{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h</td>
-                          <td width="10%">{{ props.item.shortageTime }} h</td>
-                          <td width="7%">{{ props.item.overTime }} h</td>
-                          <td width="7%">{{ props.item.WorktingDay }} 日</td>
-                          <td width="7%">{{ props.item.AbsenceDay }} 日</td>
-                          <td width="7%">{{ props.item.OverDay }} 日</td>
+                          <td class="text-xs-right" width="10%">{{ props.item.shortageTime }} h</td>
+                          <td class="text-xs-right" width="7%">{{ props.item.overTime }} h</td>
+                          <td class="text-xs-right" width="7%">{{ props.item.WorktingDay }} 日</td>
+                          <td class="text-xs-right" width="7%">{{ props.item.AbsenceDay }} 日</td>
+                          <td class="text-xs-right" width="7%">{{ props.item.OverDay }} 日</td>
+                        </template>
+                        <template v-slot:no-results>
+                          <v-alert
+                            :value="true"
+                            color="error"
+                            icon="warning"
+                          >"{{ searchworkSchedule }}" と一致するデータは存在していません。</v-alert>
                         </template>
                       </v-data-table>
                     </v-card-text>
@@ -115,11 +150,17 @@
                       <br>
                       社員数：{{ this.workschedules.length }} 人
                       <br>
-                      平均勤務時間：{{ this.grossAllProjectWorktime / this.workschedules.length }} 時間
+                      平均勤務時間：{{ averageWorktime() }} 時間
                     </v-card-text>
 
-                    <v-btn color="success" @click="headerSortByWorktime()">時間でソート（ヘッダー）</v-btn>
-                    <v-btn color="success" @click="headerSortByProjectCode()">プロジェクトコードでソート（ヘッダー）</v-btn>
+                    <v-btn
+                      color="success"
+                      @click="headerSortByProjectCode()"
+                    >{{ buttonNameProjectCode() }}</v-btn>
+                    <v-btn
+                      color="success"
+                      @click="headerSortByWorktime()"
+                    >{{ buttonNameWorktime() }}</v-btn>
 
                     <v-expansion-panel v-model="panel" expand>
                       <v-expansion-panel-content
@@ -150,10 +191,10 @@
                               class="elevation-1"
                             >
                               <template v-slot:items="props">
-                                <td width="5%">{{ props.item.user_id }}</td>
+                                <td class="text-xs-right" width="5%">{{ props.item.user_id }}</td>
                                 <td width="10%">{{ props.item.user_name }}</td>
-                                <td width="10%">{{ props.item.worktime }} h</td>
-                                <td width="10%">{{ props.item.percent }} %</td>
+                                <td class="text-xs-right" width="10%">{{ props.item.worktime }} h</td>
+                                <td class="text-xs-right" width="10%">{{ props.item.percent }} %</td>
                               </template>
                             </v-data-table>
                           </v-card-text>
@@ -190,7 +231,7 @@ export default {
   },
   data() {
     return {
-      tabs: ["週報内容", "勤務時間内容", "プロジェクトの割合"],
+      tabs: ["週報内容", "勤務時間内容", "プロジェクト割合"],
       panel: [false, false],
       active: null,
       isAscProjectCode: false,
@@ -201,6 +242,9 @@ export default {
       grossAllProjectWorktime: 0,
       oldestWorkdate: null,
       weekList: [],
+      searchProject: "",
+      searchworkSchedule: "",
+      searchWeeklyReport: "",
       tableheaders: [
         { text: "ID", value: "user_id" },
         { text: "社員名", value: "user_name" },
@@ -209,7 +253,7 @@ export default {
       ],
       workScheduleHeaders: [
         { text: "ID", value: "id" },
-        { text: "社員名", sortable: false },
+        { text: "社員名", value: "name", sortable: false },
         { text: "勤務時間グラフ", sortable: false },
         { text: "勤務時間(※)", value: "worktimeSum" },
         { text: "基本勤務時間", sortable: false },
@@ -221,12 +265,32 @@ export default {
       ],
       weeklyReportHeaders: [
         { text: "ID", value: "id" },
-        { text: "社員名", sortable: false },
-        { text: "プロジェクト名", sortable: false },
-        { text: "来週の作業", sortable: false },
-        { text: "今月の休暇", sortable: false },
-        { text: "現場情報", sortable: false },
-        { text: "所感", sortable: false },
+        { text: "社員名", value: "name", sortable: false },
+        {
+          text: "PJ CD",
+          value: "weekly_report.project.code"
+        },
+        {
+          text: "PJ名",
+          value: "weekly_report.project.name",
+          sortable: false
+        },
+        {
+          text: "来週の作業",
+          value: "weekly_report.nextweek_schedule",
+          sortable: false
+        },
+        {
+          text: "今月の休暇",
+          value: "weekly_report.site_information",
+          sortable: false
+        },
+        {
+          text: "現場情報",
+          value: "weekly_report.thismonth_dayoff",
+          sortable: false
+        },
+        { text: "所感", value: "naweekly_report.opinion", sortable: false },
         { text: "提出状況", value: "weekly_report.is_subumited" }
       ],
       user: [],
@@ -302,7 +366,7 @@ export default {
       this.isAscProjectCode = !this.isAscProjectCode;
       const asc = this.isAscProjectCode;
       this.projectWorktimesHeader.sort(function(a, b) {
-        return a.project_code > b.project_code ? (asc ? 1 : -1) : asc ? -1 : 1;
+        return a.project_code > b.project_code ? (asc ? -1 : 1) : asc ? 1 : -1;
       });
     },
 
@@ -311,13 +375,32 @@ export default {
       this.isAscWorktime = !this.isAscWorktime;
       const asc = this.isAscWorktime;
       this.projectWorktimesHeader.sort(function(a, b) {
-        return a.worktime > b.worktime ? (asc ? 1 : -1) : asc ? -1 : 1;
+        return a.worktime > b.worktime ? (asc ? -1 : 1) : asc ? 1 : -1;
       });
+    },
+
+    /** プロジェクトコードボタン名
+     */
+    buttonNameProjectCode() {
+      return this.isAscProjectCode ? "PJ CD(昇順)" : "PJ CD(降順)";
+    },
+
+    /** プロジェクト時間ボタン名
+     */
+    buttonNameWorktime() {
+      return this.isAscWorktime ? "時間(昇順)" : "時間(降順)";
     },
 
     /** 週報提出チェック */
     isSubmitted(is_subumited) {
       return is_subumited ? "提出済" : "未提出";
+    },
+
+    /** 平均勤務時間 */
+    averageWorktime() {
+      return this.workschedules.length === 0
+        ? 0
+        : (this.grossAllProjectWorktime / this.workschedules.length).toFixed(1);
     },
 
     /** 総プロジェクト時間割合 */

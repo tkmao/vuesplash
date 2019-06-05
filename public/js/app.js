@@ -4944,6 +4944,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 
@@ -5069,6 +5074,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         value: 0,
         sortable: false
       }],
+      pagination: {
+        rowsPerPage: -1
+      },
       users: [],
       editedIndex: -1,
       editedItem: {
@@ -5606,6 +5614,47 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -5623,7 +5672,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   data: function data() {
     return {
-      tabs: ["週報内容", "勤務時間内容", "プロジェクトの割合"],
+      tabs: ["週報内容", "勤務時間内容", "プロジェクト割合"],
       panel: [false, false],
       active: null,
       isAscProjectCode: false,
@@ -5634,6 +5683,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       grossAllProjectWorktime: 0,
       oldestWorkdate: null,
       weekList: [],
+      searchProject: "",
+      searchworkSchedule: "",
+      searchWeeklyReport: "",
       tableheaders: [{
         text: "ID",
         value: "user_id"
@@ -5652,6 +5704,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         value: "id"
       }, {
         text: "社員名",
+        value: "name",
         sortable: false
       }, {
         text: "勤務時間グラフ",
@@ -5683,21 +5736,30 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         value: "id"
       }, {
         text: "社員名",
+        value: "name",
         sortable: false
       }, {
-        text: "プロジェクト名",
+        text: "PJ CD",
+        value: "weekly_report.project.code"
+      }, {
+        text: "PJ名",
+        value: "weekly_report.project.name",
         sortable: false
       }, {
         text: "来週の作業",
+        value: "weekly_report.nextweek_schedule",
         sortable: false
       }, {
         text: "今月の休暇",
+        value: "weekly_report.site_information",
         sortable: false
       }, {
         text: "現場情報",
+        value: "weekly_report.thismonth_dayoff",
         sortable: false
       }, {
         text: "所感",
+        value: "naweekly_report.opinion",
         sortable: false
       }, {
         text: "提出状況",
@@ -5773,7 +5835,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.isAscProjectCode = !this.isAscProjectCode;
       var asc = this.isAscProjectCode;
       this.projectWorktimesHeader.sort(function (a, b) {
-        return a.project_code > b.project_code ? asc ? 1 : -1 : asc ? -1 : 1;
+        return a.project_code > b.project_code ? asc ? -1 : 1 : asc ? 1 : -1;
       });
     },
 
@@ -5782,13 +5844,30 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.isAscWorktime = !this.isAscWorktime;
       var asc = this.isAscWorktime;
       this.projectWorktimesHeader.sort(function (a, b) {
-        return a.worktime > b.worktime ? asc ? 1 : -1 : asc ? -1 : 1;
+        return a.worktime > b.worktime ? asc ? -1 : 1 : asc ? 1 : -1;
       });
+    },
+
+    /** プロジェクトコードボタン名
+     */
+    buttonNameProjectCode: function buttonNameProjectCode() {
+      return this.isAscProjectCode ? "PJ CD(昇順)" : "PJ CD(降順)";
+    },
+
+    /** プロジェクト時間ボタン名
+     */
+    buttonNameWorktime: function buttonNameWorktime() {
+      return this.isAscWorktime ? "時間(昇順)" : "時間(降順)";
     },
 
     /** 週報提出チェック */
     isSubmitted: function isSubmitted(is_subumited) {
       return is_subumited ? "提出済" : "未提出";
+    },
+
+    /** 平均勤務時間 */
+    averageWorktime: function averageWorktime() {
+      return this.workschedules.length === 0 ? 0 : (this.grossAllProjectWorktime / this.workschedules.length).toFixed(1);
     },
 
     /** 総プロジェクト時間割合 */
@@ -6423,6 +6502,16 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -7478,6 +7567,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -8046,7 +8156,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
 
       tableheaders[tableheaders.length] = {
-        text: "内容",
+        text: "業務詳細",
         sortable: false
       };
       return tableheaders;
@@ -33081,7 +33191,16 @@ var render = function() {
             _vm._v(" "),
             _c("v-data-table", {
               staticClass: "elevation-1",
-              attrs: { headers: _vm.headers, items: _vm.users },
+              attrs: {
+                headers: _vm.headers,
+                items: _vm.users,
+                pagination: _vm.pagination
+              },
+              on: {
+                "update:pagination": function($event) {
+                  _vm.pagination = $event
+                }
+              },
               scopedSlots: _vm._u([
                 {
                   key: "items",
@@ -33336,158 +33455,257 @@ var render = function() {
                                     ]),
                                     _vm._v(" "),
                                     _c(
+                                      "v-card-title",
+                                      [
+                                        _c("v-text-field", {
+                                          attrs: {
+                                            "append-icon": "search",
+                                            label: "Search",
+                                            "single-line": "",
+                                            "hide-details": ""
+                                          },
+                                          model: {
+                                            value: _vm.searchWeeklyReport,
+                                            callback: function($$v) {
+                                              _vm.searchWeeklyReport = $$v
+                                            },
+                                            expression: "searchWeeklyReport"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
                                       "v-card-text",
                                       [
-                                        _c("v-data-table", {
-                                          staticClass: "elevation-1",
-                                          attrs: {
-                                            headers: _vm.weeklyReportHeaders,
-                                            items: _vm.weeklyreports,
-                                            "hide-actions": "",
-                                            pagination: _vm.pagination
-                                          },
-                                          on: {
-                                            "update:pagination": function(
-                                              $event
-                                            ) {
-                                              _vm.pagination = $event
-                                            }
-                                          },
-                                          scopedSlots: _vm._u([
-                                            {
-                                              key: "items",
-                                              fn: function(props) {
-                                                return [
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "2%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(props.item.id)
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(props.item.name)
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "20%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .weekly_report
-                                                            .project.code
-                                                        ) +
-                                                          " : " +
+                                        _c(
+                                          "v-data-table",
+                                          {
+                                            staticClass: "elevation-1",
+                                            attrs: {
+                                              headers: _vm.weeklyReportHeaders,
+                                              items: _vm.weeklyreports,
+                                              "hide-actions": "",
+                                              pagination: _vm.pagination,
+                                              search: _vm.searchWeeklyReport
+                                            },
+                                            on: {
+                                              "update:pagination": function(
+                                                $event
+                                              ) {
+                                                _vm.pagination = $event
+                                              }
+                                            },
+                                            scopedSlots: _vm._u([
+                                              {
+                                                key: "items",
+                                                fn: function(props) {
+                                                  return [
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "2%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(props.item.id)
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item.name
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "5%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .weekly_report
+                                                              .project.code
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "15%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
                                                           _vm._s(
                                                             props.item
                                                               .weekly_report
                                                               .project.name
                                                           )
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "20%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .weekly_report
-                                                            .nextweek_schedule
                                                         )
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "20%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .weekly_report
-                                                            .site_information
-                                                        )
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "13%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .weekly_report
-                                                            .thismonth_dayoff
-                                                        )
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "15%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .weekly_report
-                                                            .opinion
-                                                        )
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "3%" } },
-                                                    [
-                                                      _c(
-                                                        "font",
-                                                        {
-                                                          class: {
-                                                            is_submitted: !props
-                                                              .item
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "20%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
                                                               .weekly_report
-                                                              .is_subumited
-                                                          }
-                                                        },
-                                                        [
-                                                          _vm._v(
-                                                            _vm._s(
-                                                              _vm.isSubmitted(
-                                                                props.item
-                                                                  .weekly_report
-                                                                  .is_subumited
+                                                              .nextweek_schedule
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "20%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .weekly_report
+                                                              .site_information
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "13%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .weekly_report
+                                                              .thismonth_dayoff
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "15%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .weekly_report
+                                                              .opinion
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "3%" }
+                                                      },
+                                                      [
+                                                        _c(
+                                                          "font",
+                                                          {
+                                                            class: {
+                                                              is_submitted: !props
+                                                                .item
+                                                                .weekly_report
+                                                                .is_subumited
+                                                            }
+                                                          },
+                                                          [
+                                                            _vm._v(
+                                                              _vm._s(
+                                                                _vm.isSubmitted(
+                                                                  props.item
+                                                                    .weekly_report
+                                                                    .is_subumited
+                                                                )
                                                               )
                                                             )
-                                                          )
-                                                        ]
-                                                      )
-                                                    ],
-                                                    1
-                                                  )
-                                                ]
+                                                          ]
+                                                        )
+                                                      ],
+                                                      1
+                                                    )
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                key: "no-results",
+                                                fn: function() {
+                                                  return [
+                                                    _c(
+                                                      "v-alert",
+                                                      {
+                                                        attrs: {
+                                                          value: true,
+                                                          color: "error",
+                                                          icon: "warning"
+                                                        }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          '"' +
+                                                            _vm._s(
+                                                              _vm.searchWeeklyReport
+                                                            ) +
+                                                            '" と一致するデータは存在していません。'
+                                                        )
+                                                      ]
+                                                    )
+                                                  ]
+                                                },
+                                                proxy: true
                                               }
-                                            }
-                                          ])
-                                        })
+                                            ])
+                                          },
+                                          [
+                                            _c("v-progress-linear", {
+                                              attrs: {
+                                                color: "blue",
+                                                indeterminate: ""
+                                              },
+                                              scopedSlots: _vm._u([
+                                                {
+                                                  key: "progress",
+                                                  fn: function() {
+                                                    return undefined
+                                                  },
+                                                  proxy: true
+                                                }
+                                              ])
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     )
@@ -33522,150 +33740,258 @@ var render = function() {
                                     _c("v-card-text", [_vm._v("※ 当月累計")]),
                                     _vm._v(" "),
                                     _c(
+                                      "v-card-title",
+                                      [
+                                        _c("v-text-field", {
+                                          attrs: {
+                                            "append-icon": "search",
+                                            label: "Search",
+                                            "single-line": "",
+                                            "hide-details": ""
+                                          },
+                                          model: {
+                                            value: _vm.searchworkSchedule,
+                                            callback: function($$v) {
+                                              _vm.searchworkSchedule = $$v
+                                            },
+                                            expression: "searchworkSchedule"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
                                       "v-card-text",
                                       [
-                                        _c("v-data-table", {
-                                          staticClass: "elevation-1",
-                                          attrs: {
-                                            headers: _vm.workScheduleHeaders,
-                                            items: _vm.workschedules,
-                                            "hide-actions": "",
-                                            pagination: _vm.pagination
-                                          },
-                                          on: {
-                                            "update:pagination": function(
-                                              $event
-                                            ) {
-                                              _vm.pagination = $event
-                                            }
-                                          },
-                                          scopedSlots: _vm._u([
-                                            {
-                                              key: "items",
-                                              fn: function(props) {
-                                                return [
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "3%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(props.item.id)
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "5%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(props.item.name)
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [_vm._v("グラフ")]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item.worktimeSum
-                                                        ) + " h"
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "10%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .workingtimeMin
-                                                        ) +
-                                                          " h 〜 " +
+                                        _c(
+                                          "v-data-table",
+                                          {
+                                            staticClass: "elevation-1",
+                                            attrs: {
+                                              headers: _vm.workScheduleHeaders,
+                                              items: _vm.workschedules,
+                                              "hide-actions": "",
+                                              pagination: _vm.pagination,
+                                              search: _vm.searchworkSchedule
+                                            },
+                                            on: {
+                                              "update:pagination": function(
+                                                $event
+                                              ) {
+                                                _vm.pagination = $event
+                                              }
+                                            },
+                                            scopedSlots: _vm._u([
+                                              {
+                                                key: "items",
+                                                fn: function(props) {
+                                                  return [
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "3%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(props.item.id)
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "5%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item.name
+                                                          )
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [_vm._v("グラフ")]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        staticClass:
+                                                          "text-xs-right",
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
                                                           _vm._s(
                                                             props.item
-                                                              .workingtimeMax
+                                                              .worktimeSum
+                                                          ) + " h"
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        attrs: { width: "10%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .workingtimeMin
                                                           ) +
-                                                          " h"
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "10%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item
-                                                            .shortageTime
-                                                        ) + " h"
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item.overTime
-                                                        ) + " h"
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item.WorktingDay
-                                                        ) + " 日"
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item.AbsenceDay
-                                                        ) + " 日"
-                                                      )
-                                                    ]
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "td",
-                                                    { attrs: { width: "7%" } },
-                                                    [
-                                                      _vm._v(
-                                                        _vm._s(
-                                                          props.item.OverDay
-                                                        ) + " 日"
-                                                      )
-                                                    ]
-                                                  )
-                                                ]
+                                                            " h 〜 " +
+                                                            _vm._s(
+                                                              props.item
+                                                                .workingtimeMax
+                                                            ) +
+                                                            " h"
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        staticClass:
+                                                          "text-xs-right",
+                                                        attrs: { width: "10%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .shortageTime
+                                                          ) + " h"
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        staticClass:
+                                                          "text-xs-right",
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item.overTime
+                                                          ) + " h"
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        staticClass:
+                                                          "text-xs-right",
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .WorktingDay
+                                                          ) + " 日"
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        staticClass:
+                                                          "text-xs-right",
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item
+                                                              .AbsenceDay
+                                                          ) + " 日"
+                                                        )
+                                                      ]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
+                                                      "td",
+                                                      {
+                                                        staticClass:
+                                                          "text-xs-right",
+                                                        attrs: { width: "7%" }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            props.item.OverDay
+                                                          ) + " 日"
+                                                        )
+                                                      ]
+                                                    )
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                key: "no-results",
+                                                fn: function() {
+                                                  return [
+                                                    _c(
+                                                      "v-alert",
+                                                      {
+                                                        attrs: {
+                                                          value: true,
+                                                          color: "error",
+                                                          icon: "warning"
+                                                        }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          '"' +
+                                                            _vm._s(
+                                                              _vm.searchworkSchedule
+                                                            ) +
+                                                            '" と一致するデータは存在していません。'
+                                                        )
+                                                      ]
+                                                    )
+                                                  ]
+                                                },
+                                                proxy: true
                                               }
-                                            }
-                                          ])
-                                        })
+                                            ])
+                                          },
+                                          [
+                                            _c("v-progress-linear", {
+                                              attrs: {
+                                                color: "blue",
+                                                indeterminate: ""
+                                              },
+                                              scopedSlots: _vm._u([
+                                                {
+                                                  key: "progress",
+                                                  fn: function() {
+                                                    return undefined
+                                                  },
+                                                  proxy: true
+                                                }
+                                              ])
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     )
@@ -33695,26 +34021,10 @@ var render = function() {
                                     _c("br"),
                                     _vm._v(
                                       "\n                    平均勤務時間：" +
-                                        _vm._s(
-                                          this.grossAllProjectWorktime /
-                                            this.workschedules.length
-                                        ) +
+                                        _vm._s(_vm.averageWorktime()) +
                                         " 時間\n                  "
                                     )
                                   ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-btn",
-                                    {
-                                      attrs: { color: "success" },
-                                      on: {
-                                        click: function($event) {
-                                          return _vm.headerSortByWorktime()
-                                        }
-                                      }
-                                    },
-                                    [_vm._v("時間でソート（ヘッダー）")]
-                                  ),
                                   _vm._v(" "),
                                   _c(
                                     "v-btn",
@@ -33728,9 +34038,22 @@ var render = function() {
                                     },
                                     [
                                       _vm._v(
-                                        "プロジェクトコードでソート（ヘッダー）"
+                                        _vm._s(_vm.buttonNameProjectCode())
                                       )
                                     ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { color: "success" },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.headerSortByWorktime()
+                                        }
+                                      }
+                                    },
+                                    [_vm._v(_vm._s(_vm.buttonNameWorktime()))]
                                   ),
                                   _vm._v(" "),
                                   _c(
@@ -33900,6 +34223,8 @@ var render = function() {
                                                               _c(
                                                                 "td",
                                                                 {
+                                                                  staticClass:
+                                                                    "text-xs-right",
                                                                   attrs: {
                                                                     width: "5%"
                                                                   }
@@ -33934,6 +34259,8 @@ var render = function() {
                                                               _c(
                                                                 "td",
                                                                 {
+                                                                  staticClass:
+                                                                    "text-xs-right",
                                                                   attrs: {
                                                                     width: "10%"
                                                                   }
@@ -33951,6 +34278,8 @@ var render = function() {
                                                               _c(
                                                                 "td",
                                                                 {
+                                                                  staticClass:
+                                                                    "text-xs-right",
                                                                   attrs: {
                                                                     width: "10%"
                                                                   }
@@ -34125,31 +34454,29 @@ var render = function() {
                           ],
                           1
                         ),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "基本勤務日数：" + _vm._s(this.basicWorkDay) + " 日"
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "出勤日数：" + _vm._s(_vm.WorktingDay()) + " 日"
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "欠勤日数：" + _vm._s(_vm.AbsenceDay()) + " 日"
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c("p", [
-                          _vm._v(
-                            "総勤務時間：" + _vm._s(this.worktimeSum) + " 時間"
-                          )
-                        ]),
-                        _vm._v(" "),
+                        _vm._v(
+                          "\n            基本勤務日数：" +
+                            _vm._s(this.basicWorkDay) +
+                            " 日\n            "
+                        ),
+                        _c("br"),
+                        _vm._v(
+                          "\n            出勤日数：" +
+                            _vm._s(_vm.WorktingDay()) +
+                            " 日\n            "
+                        ),
+                        _c("br"),
+                        _vm._v(
+                          "\n            欠勤日数：" +
+                            _vm._s(_vm.AbsenceDay()) +
+                            " 日\n            "
+                        ),
+                        _c("br"),
+                        _vm._v(
+                          "\n            総勤務時間：" +
+                            _vm._s(this.worktimeSum) +
+                            " 時間\n            "
+                        ),
                         _c(
                           "v-flex",
                           { attrs: { xs6: "" } },
@@ -34219,384 +34546,415 @@ var render = function() {
                           [_vm._v("週報提出")]
                         ),
                         _vm._v(" "),
-                        _c("v-data-table", {
-                          staticClass: "elevation-1",
-                          attrs: {
-                            headers: _vm.tableheaders,
-                            items: _vm.workschedules,
-                            "hide-actions": "",
-                            pagination: _vm.pagination
-                          },
-                          on: {
-                            "update:pagination": function($event) {
-                              _vm.pagination = $event
-                            }
-                          },
-                          scopedSlots: _vm._u([
-                            {
-                              key: "items",
-                              fn: function(props) {
-                                return [
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "5%" }
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.dateformat(props.item.workdate)
-                                        )
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "3%" }
-                                    },
-                                    [
-                                      _c("v-checkbox", {
-                                        attrs: { disabled: "" },
-                                        model: {
-                                          value: props.item.is_paid_holiday,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "is_paid_holiday",
-                                              $$v
-                                            )
-                                          },
-                                          expression:
-                                            "props.item.is_paid_holiday"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "10%" }
-                                    },
-                                    [
-                                      _c(
-                                        "div",
-                                        { staticStyle: { display: "flex" } },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.starttime_hh,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "starttime_hh",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.starttime_hh"
-                                            }
-                                          }),
-                                          _vm._v(":\n                    "),
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.starttime_mm,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "starttime_mm",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.starttime_mm"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "10%" }
-                                    },
-                                    [
-                                      _c(
-                                        "div",
-                                        { staticStyle: { display: "flex" } },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.endtime_hh,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "endtime_hh",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.endtime_hh"
-                                            }
-                                          }),
-                                          _vm._v(":\n                    "),
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: props.item.endtime_mm,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "endtime_mm",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.endtime_mm"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c("v-text-field", {
-                                        attrs: { type: "Number", disabled: "" },
-                                        model: {
-                                          value: props.item.breaktime,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "breaktime",
-                                              $$v
-                                            )
-                                          },
-                                          expression: "props.item.breaktime"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c("v-text-field", {
-                                        attrs: { type: "Number", disabled: "" },
-                                        model: {
-                                          value: props.item.breaktime_midnight,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "breaktime_midnight",
-                                              $$v
-                                            )
-                                          },
-                                          expression:
-                                            "props.item.breaktime_midnight"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c(
-                                        "font",
-                                        {
-                                          class: {
-                                            notsame: !_vm.isSameWorkingTime(
-                                              props.index
-                                            )
-                                          }
-                                        },
-                                        [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.worktimeADay(props.index)
-                                            )
-                                          )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "7%" }
-                                    },
-                                    [
-                                      _c(
-                                        "font",
-                                        {
-                                          class: {
-                                            notsame: !_vm.isSameWorkingTime(
-                                              props.index
-                                            )
-                                          }
-                                        },
-                                        [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.PJWorktimeADay(props.index)
-                                            )
-                                          )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _vm._l(
-                                    _vm.projectWorktimes[props.index],
-                                    function(projectWorktime) {
-                                      return _c(
-                                        "td",
-                                        {
-                                          key: projectWorktime.key,
-                                          class: {
-                                            holiday: _vm.isHoliday(
-                                              props.item.workdate
-                                            )
-                                          },
-                                          attrs: { width: "7%" }
-                                        },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              disabled: ""
-                                            },
-                                            model: {
-                                              value: projectWorktime.worktime,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  projectWorktime,
-                                                  "worktime",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "projectWorktime.worktime"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    }
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "30%" }
-                                    },
-                                    [
-                                      _c("v-textarea", {
-                                        attrs: {
-                                          solo: "",
-                                          rows: "1",
-                                          disabled: ""
-                                        },
-                                        model: {
-                                          value: props.item.detail,
-                                          callback: function($$v) {
-                                            _vm.$set(props.item, "detail", $$v)
-                                          },
-                                          expression: "props.item.detail"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  )
-                                ]
+                        _c(
+                          "v-data-table",
+                          {
+                            staticClass: "elevation-1",
+                            attrs: {
+                              headers: _vm.tableheaders,
+                              items: _vm.workschedules,
+                              "hide-actions": "",
+                              pagination: _vm.pagination
+                            },
+                            on: {
+                              "update:pagination": function($event) {
+                                _vm.pagination = $event
                               }
-                            }
-                          ])
-                        }),
+                            },
+                            scopedSlots: _vm._u([
+                              {
+                                key: "items",
+                                fn: function(props) {
+                                  return [
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "5%" }
+                                      },
+                                      [
+                                        _vm._v(
+                                          _vm._s(
+                                            _vm.dateformat(props.item.workdate)
+                                          )
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "3%" }
+                                      },
+                                      [
+                                        _c("v-checkbox", {
+                                          attrs: { disabled: "" },
+                                          model: {
+                                            value: props.item.is_paid_holiday,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "is_paid_holiday",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "props.item.is_paid_holiday"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "10%" }
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticStyle: { display: "flex" } },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                disabled: ""
+                                              },
+                                              model: {
+                                                value: props.item.starttime_hh,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "starttime_hh",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.starttime_hh"
+                                              }
+                                            }),
+                                            _vm._v(":\n                    "),
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                disabled: ""
+                                              },
+                                              model: {
+                                                value: props.item.starttime_mm,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "starttime_mm",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.starttime_mm"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "10%" }
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticStyle: { display: "flex" } },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                disabled: ""
+                                              },
+                                              model: {
+                                                value: props.item.endtime_hh,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "endtime_hh",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.endtime_hh"
+                                              }
+                                            }),
+                                            _vm._v(":\n                    "),
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                disabled: ""
+                                              },
+                                              model: {
+                                                value: props.item.endtime_mm,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "endtime_mm",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.endtime_mm"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "7%" }
+                                      },
+                                      [
+                                        _c("v-text-field", {
+                                          attrs: {
+                                            type: "Number",
+                                            disabled: ""
+                                          },
+                                          model: {
+                                            value: props.item.breaktime,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "breaktime",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "props.item.breaktime"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "7%" }
+                                      },
+                                      [
+                                        _c("v-text-field", {
+                                          attrs: {
+                                            type: "Number",
+                                            disabled: ""
+                                          },
+                                          model: {
+                                            value:
+                                              props.item.breaktime_midnight,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "breaktime_midnight",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "props.item.breaktime_midnight"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-xs-right",
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "7%" }
+                                      },
+                                      [
+                                        _c(
+                                          "font",
+                                          {
+                                            class: {
+                                              notsame: !_vm.isSameWorkingTime(
+                                                props.index
+                                              )
+                                            }
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.worktimeADay(props.index)
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-xs-right",
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "7%" }
+                                      },
+                                      [
+                                        _c(
+                                          "font",
+                                          {
+                                            class: {
+                                              notsame: !_vm.isSameWorkingTime(
+                                                props.index
+                                              )
+                                            }
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.PJWorktimeADay(props.index)
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _vm._l(
+                                      _vm.projectWorktimes[props.index],
+                                      function(projectWorktime) {
+                                        return _c(
+                                          "td",
+                                          {
+                                            key: projectWorktime.key,
+                                            class: {
+                                              holiday: _vm.isHoliday(
+                                                props.item.workdate
+                                              )
+                                            },
+                                            attrs: { width: "7%" }
+                                          },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                disabled: ""
+                                              },
+                                              model: {
+                                                value: projectWorktime.worktime,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    projectWorktime,
+                                                    "worktime",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "projectWorktime.worktime"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      }
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "30%" }
+                                      },
+                                      [
+                                        _c("v-textarea", {
+                                          attrs: {
+                                            solo: "",
+                                            rows: "1",
+                                            disabled: ""
+                                          },
+                                          model: {
+                                            value: props.item.detail,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "detail",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "props.item.detail"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ]
+                                }
+                              }
+                            ])
+                          },
+                          [
+                            _c("v-progress-linear", {
+                              attrs: { color: "blue", indeterminate: "" },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "progress",
+                                  fn: function() {
+                                    return undefined
+                                  },
+                                  proxy: true
+                                }
+                              ])
+                            })
+                          ],
+                          1
+                        ),
                         _vm._v(" "),
                         _c("v-textarea", {
                           attrs: {
@@ -34804,63 +35162,57 @@ var render = function() {
                         ),
                         _vm._v(" "),
                         _c("v-card-text", [
-                          _c("p", [
-                            _vm._v(
-                              "基本勤務日数：" +
-                                _vm._s(this.basicWorkDay) +
-                                " 日"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v(
-                              "出勤日数：" + _vm._s(_vm.WorktingDay()) + " 日"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v(
-                              "欠勤日数：" + _vm._s(_vm.AbsenceDay()) + " 日"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v(
-                              "今月の勤務時間：下限 " +
-                                _vm._s(this.workingtimeMin) +
-                                " h 〜 上限 " +
-                                _vm._s(this.workingtimeMax) +
-                                " h"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v(
-                              "総勤務時間：" +
-                                _vm._s(this.worktimeSum) +
-                                " 時間"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v(
-                              "不足時間：" + _vm._s(_vm.ShortageTime()) + " h"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v("超過時間：" + _vm._s(_vm.OverTime()) + " h")
-                          ]),
-                          _vm._v(" "),
-                          _c("p", [
-                            _vm._v(
-                              "残有給日数：" +
-                                _vm._s(this.user.paid_holiday) +
-                                " 日 (今月 " +
-                                _vm._s(_vm.paidHolidayThisMonth()) +
-                                " 日 使用)"
-                            )
-                          ])
+                          _vm._v(
+                            "\n              基本勤務日数：" +
+                              _vm._s(this.basicWorkDay) +
+                              " 日\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              出勤日数：" +
+                              _vm._s(_vm.WorktingDay()) +
+                              " 日\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              欠勤日数：" +
+                              _vm._s(_vm.AbsenceDay()) +
+                              " 日\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              今月の勤務時間：下限 " +
+                              _vm._s(this.workingtimeMin) +
+                              " h 〜 上限 " +
+                              _vm._s(this.workingtimeMax) +
+                              " h\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              総勤務時間：" +
+                              _vm._s(this.worktimeSum) +
+                              " 時間\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              不足時間：" +
+                              _vm._s(_vm.ShortageTime()) +
+                              " h\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              超過時間：" +
+                              _vm._s(_vm.OverTime()) +
+                              " h\n              "
+                          ),
+                          _c("br"),
+                          _vm._v(
+                            "\n              残有給日数：" +
+                              _vm._s(this.user.paid_holiday) +
+                              " 日 (今月 " +
+                              _vm._s(_vm.paidHolidayThisMonth()) +
+                              " 日 使用)\n            "
+                          )
                         ]),
                         _vm._v(" "),
                         _c(
@@ -34991,428 +35343,460 @@ var render = function() {
                         ),
                         _vm._v(" "),
                         _c(
-                          "v-alert",
-                          {
-                            attrs: {
-                              value: !_vm.isSameWorkingTimeAMonth(),
-                              type: "warning"
-                            }
-                          },
+                          "v-flex",
+                          { attrs: { xs6: "" } },
                           [
-                            _vm._v(
-                              "総勤務時間と総プロジェクト時間が一致していません。"
+                            _c(
+                              "v-alert",
+                              {
+                                attrs: {
+                                  value: !_vm.isSameWorkingTimeAMonth(),
+                                  type: "warning"
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "総勤務時間と総プロジェクト時間が一致していません。"
+                                )
+                              ]
                             )
-                          ]
+                          ],
+                          1
                         ),
                         _vm._v(" "),
-                        _c("v-data-table", {
-                          staticClass: "elevation-1",
-                          attrs: {
-                            headers: _vm.tableheaders,
-                            items: _vm.workschedules,
-                            "hide-actions": "",
-                            pagination: _vm.pagination
-                          },
-                          on: {
-                            "update:pagination": function($event) {
-                              _vm.pagination = $event
-                            }
-                          },
-                          scopedSlots: _vm._u([
-                            {
-                              key: "items",
-                              fn: function(props) {
-                                return [
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "3%" }
-                                    },
-                                    [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.dateformat(props.item.workdate)
-                                        )
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "2%" }
-                                    },
-                                    [
-                                      _c("v-checkbox", {
-                                        attrs: {
-                                          disabled: _vm.isHoliday(
+                        _c(
+                          "v-data-table",
+                          {
+                            staticClass: "elevation-1",
+                            attrs: {
+                              headers: _vm.tableheaders,
+                              items: _vm.workschedules,
+                              "hide-actions": "",
+                              pagination: _vm.pagination
+                            },
+                            on: {
+                              "update:pagination": function($event) {
+                                _vm.pagination = $event
+                              }
+                            },
+                            scopedSlots: _vm._u([
+                              {
+                                key: "items",
+                                fn: function(props) {
+                                  return [
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
                                             props.item.workdate
                                           )
                                         },
-                                        on: {
-                                          change: function($event) {
-                                            return _vm.changePaidHoliday(
-                                              props.index
-                                            )
-                                          }
-                                        },
-                                        model: {
-                                          value: props.item.is_paid_holiday,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "is_paid_holiday",
-                                              $$v
-                                            )
-                                          },
-                                          expression:
-                                            "props.item.is_paid_holiday"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
+                                        attrs: { width: "3%" }
                                       },
-                                      attrs: { width: "12%" }
-                                    },
-                                    [
-                                      _c(
-                                        "div",
-                                        { staticStyle: { display: "flex" } },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              min: "0",
-                                              max: "30"
-                                            },
-                                            model: {
-                                              value: props.item.starttime_hh,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "starttime_hh",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.starttime_hh"
-                                            }
-                                          }),
-                                          _vm._v(":\n                    "),
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              min: "0",
-                                              max: "45",
-                                              step: "15"
-                                            },
-                                            model: {
-                                              value: props.item.starttime_mm,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "starttime_mm",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.starttime_mm"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "12%" }
-                                    },
-                                    [
-                                      _c(
-                                        "div",
-                                        { staticStyle: { display: "flex" } },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              min: "0",
-                                              max: "30"
-                                            },
-                                            model: {
-                                              value: props.item.endtime_hh,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "endtime_hh",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.endtime_hh"
-                                            }
-                                          }),
-                                          _vm._v(":\n                    "),
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              min: "0",
-                                              max: "45",
-                                              step: "15"
-                                            },
-                                            model: {
-                                              value: props.item.endtime_mm,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  props.item,
-                                                  "endtime_mm",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "props.item.endtime_mm"
-                                            }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "5%" }
-                                    },
-                                    [
-                                      _c("v-text-field", {
-                                        attrs: {
-                                          type: "Number",
-                                          min: "0",
-                                          step: "0.25"
-                                        },
-                                        model: {
-                                          value: props.item.breaktime,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "breaktime",
-                                              $$v
-                                            )
-                                          },
-                                          expression: "props.item.breaktime"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "5%" }
-                                    },
-                                    [
-                                      _c("v-text-field", {
-                                        attrs: {
-                                          type: "Number",
-                                          min: "0",
-                                          step: "0.25"
-                                        },
-                                        model: {
-                                          value: props.item.breaktime_midnight,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              props.item,
-                                              "breaktime_midnight",
-                                              $$v
-                                            )
-                                          },
-                                          expression:
-                                            "props.item.breaktime_midnight"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "5%" }
-                                    },
-                                    [
-                                      _c(
-                                        "font",
-                                        {
-                                          class: {
-                                            notsame: !_vm.isSameWorkingTime(
-                                              props.index
-                                            )
-                                          },
-                                          attrs: { size: "4" }
-                                        },
-                                        [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.worktimeADay(props.index)
-                                            )
+                                      [
+                                        _vm._v(
+                                          _vm._s(
+                                            _vm.dateformat(props.item.workdate)
                                           )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
                                         )
-                                      },
-                                      attrs: { width: "5%" }
-                                    },
-                                    [
-                                      _c(
-                                        "font",
-                                        {
-                                          class: {
-                                            notsame: !_vm.isSameWorkingTime(
-                                              props.index
-                                            )
-                                          },
-                                          attrs: { size: "4" }
-                                        },
-                                        [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.PJWorktimeADay(props.index)
-                                            )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
                                           )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _vm._l(
-                                    _vm.projectWorktimes[props.index],
-                                    function(projectWorktime) {
-                                      return _c(
-                                        "td",
-                                        {
-                                          key: projectWorktime.key,
-                                          class: {
-                                            holiday: _vm.isHoliday(
+                                        },
+                                        attrs: { width: "2%" }
+                                      },
+                                      [
+                                        _c("v-checkbox", {
+                                          attrs: {
+                                            disabled: _vm.isHoliday(
                                               props.item.workdate
                                             )
                                           },
-                                          attrs: { width: "5%" }
-                                        },
-                                        [
-                                          _c("v-text-field", {
-                                            attrs: {
-                                              type: "Number",
-                                              min: "0",
-                                              step: "0.25"
-                                            },
-                                            model: {
-                                              value: projectWorktime.worktime,
-                                              callback: function($$v) {
-                                                _vm.$set(
-                                                  projectWorktime,
-                                                  "worktime",
-                                                  $$v
-                                                )
-                                              },
-                                              expression:
-                                                "projectWorktime.worktime"
+                                          on: {
+                                            change: function($event) {
+                                              return _vm.changePaidHoliday(
+                                                props.index
+                                              )
                                             }
-                                          })
-                                        ],
-                                        1
-                                      )
-                                    }
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      class: {
-                                        holiday: _vm.isHoliday(
-                                          props.item.workdate
-                                        )
-                                      },
-                                      attrs: { width: "30%" }
-                                    },
-                                    [
-                                      _c("v-textarea", {
-                                        attrs: {
-                                          solo: "",
-                                          rows: "2",
-                                          name: "detail",
-                                          label: "詳細",
-                                          value: ""
-                                        },
-                                        model: {
-                                          value: props.item.detail,
-                                          callback: function($$v) {
-                                            _vm.$set(props.item, "detail", $$v)
                                           },
-                                          expression: "props.item.detail"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  )
-                                ]
+                                          model: {
+                                            value: props.item.is_paid_holiday,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "is_paid_holiday",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "props.item.is_paid_holiday"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "12%" }
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticStyle: { display: "flex" } },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                min: "0",
+                                                max: "30"
+                                              },
+                                              model: {
+                                                value: props.item.starttime_hh,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "starttime_hh",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.starttime_hh"
+                                              }
+                                            }),
+                                            _vm._v(":\n                    "),
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                min: "0",
+                                                max: "45",
+                                                step: "15"
+                                              },
+                                              model: {
+                                                value: props.item.starttime_mm,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "starttime_mm",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.starttime_mm"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "12%" }
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticStyle: { display: "flex" } },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                min: "0",
+                                                max: "30"
+                                              },
+                                              model: {
+                                                value: props.item.endtime_hh,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "endtime_hh",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.endtime_hh"
+                                              }
+                                            }),
+                                            _vm._v(":\n                    "),
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                min: "0",
+                                                max: "45",
+                                                step: "15"
+                                              },
+                                              model: {
+                                                value: props.item.endtime_mm,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    props.item,
+                                                    "endtime_mm",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "props.item.endtime_mm"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "5%" }
+                                      },
+                                      [
+                                        _c("v-text-field", {
+                                          attrs: {
+                                            type: "Number",
+                                            min: "0",
+                                            step: "0.25"
+                                          },
+                                          model: {
+                                            value: props.item.breaktime,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "breaktime",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "props.item.breaktime"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "5%" }
+                                      },
+                                      [
+                                        _c("v-text-field", {
+                                          attrs: {
+                                            type: "Number",
+                                            min: "0",
+                                            step: "0.25"
+                                          },
+                                          model: {
+                                            value:
+                                              props.item.breaktime_midnight,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "breaktime_midnight",
+                                                $$v
+                                              )
+                                            },
+                                            expression:
+                                              "props.item.breaktime_midnight"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-xs-right",
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "5%" }
+                                      },
+                                      [
+                                        _c(
+                                          "font",
+                                          {
+                                            class: {
+                                              notsame: !_vm.isSameWorkingTime(
+                                                props.index
+                                              )
+                                            },
+                                            attrs: { size: "4" }
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.worktimeADay(props.index)
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-xs-right",
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "5%" }
+                                      },
+                                      [
+                                        _c(
+                                          "font",
+                                          {
+                                            class: {
+                                              notsame: !_vm.isSameWorkingTime(
+                                                props.index
+                                              )
+                                            },
+                                            attrs: { size: "4" }
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.PJWorktimeADay(props.index)
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _vm._l(
+                                      _vm.projectWorktimes[props.index],
+                                      function(projectWorktime) {
+                                        return _c(
+                                          "td",
+                                          {
+                                            key: projectWorktime.key,
+                                            class: {
+                                              holiday: _vm.isHoliday(
+                                                props.item.workdate
+                                              )
+                                            },
+                                            attrs: { width: "5%" }
+                                          },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                type: "Number",
+                                                min: "0",
+                                                step: "0.25"
+                                              },
+                                              model: {
+                                                value: projectWorktime.worktime,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    projectWorktime,
+                                                    "worktime",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "projectWorktime.worktime"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      }
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        class: {
+                                          holiday: _vm.isHoliday(
+                                            props.item.workdate
+                                          )
+                                        },
+                                        attrs: { width: "30%" }
+                                      },
+                                      [
+                                        _c("v-textarea", {
+                                          attrs: {
+                                            solo: "",
+                                            rows: "2",
+                                            name: "detail",
+                                            label: "詳細",
+                                            value: ""
+                                          },
+                                          model: {
+                                            value: props.item.detail,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                props.item,
+                                                "detail",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "props.item.detail"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ]
+                                }
                               }
-                            }
-                          ])
-                        }),
+                            ])
+                          },
+                          [
+                            _c("v-progress-linear", {
+                              attrs: { color: "blue", indeterminate: "" },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "progress",
+                                  fn: function() {
+                                    return undefined
+                                  },
+                                  proxy: true
+                                }
+                              ])
+                            })
+                          ],
+                          1
+                        ),
                         _vm._v(" "),
                         _c(
                           "v-btn",
