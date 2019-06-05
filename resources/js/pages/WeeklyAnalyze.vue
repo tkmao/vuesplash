@@ -37,11 +37,19 @@
                 <v-tab v-for="tab in tabs" :key="tab">{{ tab }}</v-tab>
                 <v-tab-item>
                   <v-card flat>
-                    <v-card-text>基本勤務日数：{{ this.basicWorkDay }} 日</v-card-text>
+                    <v-card-text>
+                      基本勤務日数：{{ this.basicWorkDay }} 日
+                      <br>
+                      社員数：{{ this.workschedules.length }} 人
+                      <br>
+                      週報提出：{{ peopleSubmit() }} 人
+                    </v-card-text>
+
                     <v-card-text>
                       <v-data-table
                         :headers="weeklyReportHeaders"
                         :items="weeklyreports"
+                        hide-actions
                         :pagination.sync="pagination"
                         class="elevation-1"
                       >
@@ -67,11 +75,18 @@
                 </v-tab-item>
                 <v-tab-item>
                   <v-card flat>
-                    <v-card-text>基本勤務日数：{{ this.basicWorkDay }} 日</v-card-text>
+                    <v-card-text>
+                      基本勤務日数：{{ this.basicWorkDay }} 日
+                      <br>
+                      社員数：{{ this.workschedules.length }} 人
+                    </v-card-text>
+                    <v-card-text>※ 当月累計</v-card-text>
+
                     <v-card-text>
                       <v-data-table
                         :headers="workScheduleHeaders"
                         :items="workschedules"
+                        hide-actions
                         :pagination.sync="pagination"
                         class="elevation-1"
                       >
@@ -92,6 +107,60 @@
                       </v-data-table>
                     </v-card-text>
                   </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                  <div>
+                    <v-card-text>
+                      総勤務時間：{{ this.grossAllProjectWorktime }} 時間
+                      <br>
+                      社員数：{{ this.workschedules.length }} 人
+                      <br>
+                      平均勤務時間：{{ this.grossAllProjectWorktime / this.workschedules.length }} 時間
+                    </v-card-text>
+
+                    <v-btn color="success" @click="headerSortByWorktime()">時間でソート（ヘッダー）</v-btn>
+                    <v-btn color="success" @click="headerSortByProjectCode()">プロジェクトコードでソート（ヘッダー）</v-btn>
+
+                    <v-expansion-panel v-model="panel" expand>
+                      <v-expansion-panel-content
+                        v-for="(projectWorktimes, i) in projectWorktimesHeader"
+                        :key="i"
+                      >
+                        <template v-slot:header>
+                          <table border="1">
+                            <tr>
+                              <td align="center" nowrap width="5%">{{i + 1}}</td>
+                              <td align="left" width="10%">{{ projectWorktimes.project_code }}</td>
+                              <td align="left" width="65%">{{ projectWorktimes.project_name }}</td>
+                              <td align="right" width="10%">{{ projectWorktimes.worktime }} 時間</td>
+                              <td
+                                align="right"
+                                width="10%"
+                              >{{ percentageOfAllProjectwork(projectWorktimes.worktime) }} %</td>
+                            </tr>
+                          </table>
+                        </template>
+                        <v-card>
+                          <v-card-text class="grey lighten-3">
+                            <v-data-table
+                              :headers="tableheaders"
+                              :items="projectParticipants(projectWorktimes.project_id)"
+                              hide-actions
+                              :pagination.sync="pagination"
+                              class="elevation-1"
+                            >
+                              <template v-slot:items="props">
+                                <td width="5%">{{ props.item.user_id }}</td>
+                                <td width="10%">{{ props.item.user_name }}</td>
+                                <td width="10%">{{ props.item.worktime }} h</td>
+                                <td width="10%">{{ props.item.percent }} %</td>
+                              </template>
+                            </v-data-table>
+                          </v-card-text>
+                        </v-card>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                  </div>
                 </v-tab-item>
               </v-tabs>
             </div>
@@ -121,28 +190,38 @@ export default {
   },
   data() {
     return {
-      tabs: ["週報内容", "勤務時間内容"],
+      tabs: ["週報内容", "勤務時間内容", "プロジェクトの割合"],
+      panel: [false, false],
       active: null,
+      isAscProjectCode: false,
+      isAscWorktime: false,
       targetDate: 0,
       targetWeek: 0,
       basicWorkDay: 0,
+      grossAllProjectWorktime: 0,
       oldestWorkdate: null,
       weekList: [],
+      tableheaders: [
+        { text: "ID", value: "user_id" },
+        { text: "社員名", value: "user_name" },
+        { text: "勤務時間(※)", value: "worktime" },
+        { text: "割合(%)", value: "percent" }
+      ],
       workScheduleHeaders: [
         { text: "ID", value: "id" },
-        { text: "ユーザ名", sortable: false },
+        { text: "社員名", sortable: false },
         { text: "勤務時間グラフ", sortable: false },
-        { text: "勤務時間(当月累計)", sortable: false },
+        { text: "勤務時間(※)", value: "worktimeSum" },
         { text: "基本勤務時間", sortable: false },
-        { text: "当月残り勤務時間", sortable: false },
-        { text: "超過時間(当月累計)", sortable: false },
-        { text: "出勤日数(当月累計)" },
-        { text: "欠勤日数(当月累計)" },
-        { text: "超過日数(当月累計)" }
+        { text: "当月残り勤務時間", value: "shortageTime" },
+        { text: "超過時間(※)", value: "overTime" },
+        { text: "出勤日数(※)", value: "WorktingDay" },
+        { text: "欠勤日数(※)", value: "AbsenceDay" },
+        { text: "超過日数(※)", value: "OverDay" }
       ],
       weeklyReportHeaders: [
         { text: "ID", value: "id" },
-        { text: "ユーザ名", sortable: false },
+        { text: "社員名", sortable: false },
         { text: "プロジェクト名", sortable: false },
         { text: "来週の作業", sortable: false },
         { text: "今月の休暇", sortable: false },
@@ -151,16 +230,14 @@ export default {
         { text: "提出状況", value: "weekly_report.is_subumited" }
       ],
       user: [],
-      projects: [],
       holidays: [],
       workschedules: [],
       weeklyreports: [],
       worktimes: [0],
-      projectWorktimes: [],
+      projectWorktimesHeader: [],
+      projectWorktimesDetail: [],
       allUserWorktimes: [],
-      allUserProjectWorktimes: [],
-      worktimeSum: 0,
-      pagination: { rowsPerPage: 200 },
+      pagination: { rowsPerPage: -1, sortBy: "worktime", descending: true },
       rules: {
         required: value => !!value || "This field is required."
       }
@@ -181,11 +258,6 @@ export default {
     /** 日付変換 */
     dateformat(date) {
       return moment(date).format("DD(ddd)");
-    },
-
-    /** 週報提出チェック */
-    isSubmitted(is_subumited) {
-      return is_subumited ? "提出済" : "未提出";
     },
 
     /** 週番号から日付に変換 */
@@ -213,6 +285,63 @@ export default {
       );
     },
 
+    /** 休日チェック */
+    isHoliday(date) {
+      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+    },
+
+    /** プロジェクト参加者（特定のプロジェクトIDを引っ張る） */
+    projectParticipants(project_id) {
+      return this.projectWorktimesDetail.filter(function(item, index) {
+        return item.project_id == project_id;
+      });
+    },
+
+    /** プロジェクトコードでソート（ヘッダー） */
+    headerSortByProjectCode() {
+      this.isAscProjectCode = !this.isAscProjectCode;
+      const asc = this.isAscProjectCode;
+      this.projectWorktimesHeader.sort(function(a, b) {
+        return a.project_code > b.project_code ? (asc ? 1 : -1) : asc ? -1 : 1;
+      });
+    },
+
+    /** プロジェクト時間でソート（ヘッダー） */
+    headerSortByWorktime() {
+      this.isAscWorktime = !this.isAscWorktime;
+      const asc = this.isAscWorktime;
+      this.projectWorktimesHeader.sort(function(a, b) {
+        return a.worktime > b.worktime ? (asc ? 1 : -1) : asc ? -1 : 1;
+      });
+    },
+
+    /** 週報提出チェック */
+    isSubmitted(is_subumited) {
+      return is_subumited ? "提出済" : "未提出";
+    },
+
+    /** 総プロジェクト時間割合 */
+    percentageOfAllProjectwork(worktime) {
+      return this.grossAllProjectWorktime === 0
+        ? 0
+        : ((worktime / this.grossAllProjectWorktime) * 100).toFixed(1);
+    },
+
+    /** 週報提出人数 */
+    peopleSubmit() {
+      return this.weeklyreports.length === 0
+        ? 0
+        : this.weeklyreports.reduce(function(total, data, index) {
+            return (
+              (index === 1
+                ? total.weekly_report.is_subumited
+                  ? 1
+                  : 0
+                : total) + (data.weekly_report.is_subumited ? 1 : 0)
+            );
+          });
+    },
+
     /** 週報リスト作成 */
     async createWeekList(oldestWorkdate) {
       let weekList = [];
@@ -229,12 +358,9 @@ export default {
       }
 
       // 週リスト
-      this.weekList = weekList;
-    },
-
-    /** 休日チェック */
-    isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+      this.weekList = weekList.sort(function(a, b) {
+        return a.week_number > b.week_number ? -1 : 1;
+      });
     },
 
     /** 勤務表データ作成 */
@@ -255,9 +381,9 @@ export default {
           while (startDate.unix() <= endDate.unix()) {
             work_schedule.push({
               id: null,
-              user_id: this.user.id,
-              week_number: startDate.format("ggggWW"),
-              workdate: startDate.format("YYYY-MM-DD"),
+              user_id: this.user.id, //
+              week_number: startDate.format("ggggWW"), //
+              workdate: startDate.format("YYYY-MM-DD"), //
               is_paid_holiday: false,
               starttime_hh: null,
               starttime_mm: null,
@@ -268,8 +394,18 @@ export default {
               project_work: [
                 {
                   work_schedule_id: null,
-                  project_id: 1,
-                  worktime: 0
+                  project_id: 1, //
+                  worktime: 0, //
+                  project: {
+                    id: 1,
+                    code: "00000", //
+                    name: "未設定", //
+                    company_id: null,
+                    category_id: null,
+                    status_id: null,
+                    user_id: null,
+                    is_deleted: null
+                  }
                 }
               ],
               detail: null
@@ -349,25 +485,6 @@ export default {
       this.holidays = holidays;
     },
 
-    /** プロジェクトデータ取得 */
-    async fetchProjects() {
-      const response = await axios.get(`/api/project/getall`);
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-
-      // プロジェクトデータ
-      this.projects = response.data.map(item => {
-        return {
-          id: item.id,
-          code: item.code,
-          name: item.code + " : " + item.name
-        };
-      });
-    },
-
     /** 最古の勤務表データ取得 */
     async fetchOldestWorkdate() {
       const response = await axios.post(`/api/workschedule/getoldestworkdate`, {
@@ -404,20 +521,6 @@ export default {
           user_id: item["id"],
           worktimes: Array(this.workschedules[0].work_schedule.length).fill(0)
         };
-      });
-
-      // 全ユーザのプロジェクト時間
-      this.allUserProjectWorktimes = this.workschedules.map(item => {
-        return {
-          user_id: item["id"],
-          worktimes: item["work_schedule"].map(item2 => {
-            return item2["project_work"];
-          })
-        };
-      });
-
-      this.projectWorktimes = this.workschedules.map(item => {
-        return item["project_work"];
       });
 
       // 勤務情報再計算
@@ -495,8 +598,22 @@ export default {
 
     /** 全ユーザ合計勤務時間計算 */
     culWorktimes: function() {
+      let projectWorktime = [];
       this.workschedules.forEach((val_1, idx_1, arr_1) => {
         val_1.work_schedule.forEach((val_2, idx_2, arr_2) => {
+          val_2.project_work.forEach((val_3, idx_3, arr_3) => {
+            // プロジェクト時間リスト作成
+            projectWorktime.push({
+              user_id: val_1.id,
+              user_name: val_1.name,
+              workdate: val_2.workdate,
+              week_number: val_2.week_number,
+              project_id: val_3.project_id,
+              project_code: val_3.project.code,
+              project_name: val_3.project.name,
+              worktime: val_3.worktime
+            });
+          });
           // 各ユーザの1日の勤務時間の計算
           this.$set(
             this.allUserWorktimes[idx_1].worktimes,
@@ -543,7 +660,7 @@ export default {
         this.$set(
           this.workschedules[idx_1],
           "WorktingDay",
-          this.WorktingDay(this.allUserWorktimes[idx_1].worktimes)
+          this.culWorktingDay(this.allUserWorktimes[idx_1].worktimes)
         );
         // 欠勤日数計算
         this.$set(
@@ -562,27 +679,110 @@ export default {
             : 0
         );
       });
+
+      // プロジェクト毎にgroup化
+      // プロジェクト毎にgroup化 ヘッダー
+      this.projectWorktimesHeader = projectWorktime.reduce(
+        (result, current) => {
+          const element = result.find(p => p.project_id === current.project_id);
+          if (element) {
+            element.count++; // count
+            element.worktime += current.worktime; // sum
+          } else {
+            result.push({
+              project_id: current.project_id,
+              project_code: current.project_code,
+              project_name: current.project_name,
+              count: 1,
+              worktime: current.worktime
+            });
+          }
+          return result;
+        },
+        []
+      );
+
+      // project_code でソート
+      this.projectWorktimesHeader.sort(function(a, b) {
+        return a.project_code < b.project_code ? -1 : 1;
+      });
+
+      // 総プロジェクト時間計算
+      this.grossAllProjectWorktime = this.culGrossAllProjectWorktime();
+
+      // プロジェクト毎にgroup化 詳細
+      this.projectWorktimesDetail = projectWorktime.reduce(
+        (result, current) => {
+          const element = result.find(
+            p =>
+              p.project_id === current.project_id &&
+              p.user_id === current.user_id
+          );
+          if (element) {
+            element.count++; // count
+            element.worktime += current.worktime; // sum
+          } else {
+            result.push({
+              project_id: current.project_id,
+              project_code: current.project_code,
+              project_name: current.project_name,
+              user_id: current.user_id,
+              user_name: current.user_name,
+              count: 1,
+              worktime: current.worktime
+            });
+          }
+          return result;
+        },
+        []
+      );
+
+      // プロジェクト毎にgroup化 詳細 パーセント表示追加
+      this.projectWorktimesDetail = this.projectWorktimesDetail.map(item => {
+        return {
+          project_id: item.project_id,
+          project_code: item.project_code,
+          project_name: item.project_name,
+          user_id: item.user_id,
+          user_name: item.user_name,
+          count: item.count,
+          worktime: item.worktime,
+          percent:
+            this.grossAllProjectWorktime === 0
+              ? 0
+              : (
+                  (item.worktime /
+                    this.projectWorktimesHeader.find(function(item2, index2) {
+                      return item2.project_id == item.project_id;
+                    }).worktime) *
+                  100
+                ).toFixed(1)
+        };
+      });
+
+      // project_id でソート
+      this.projectWorktimesDetail.sort(function(a, b) {
+        return a.project_id < b.project_id ? -1 : 1;
+      });
+    },
+
+    /** 総プロジェクト時間計算 */
+    culGrossAllProjectWorktime() {
+      return this.projectWorktimesHeader.length === 1
+        ? this.projectWorktimesHeader[0].worktime
+        : this.projectWorktimesHeader.reduce(function(total, data, index) {
+            return (
+              (index === 1 ? total.worktime : total) +
+              (index === 1 ? 0 : parseFloat(data.worktime))
+            );
+          });
     },
 
     /** 出勤日数計算 */
-    WorktingDay(worktimes) {
+    culWorktingDay(worktimes) {
       return worktimes.reduce(function(total, data, index) {
         return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
       });
-    },
-
-    /** 1日のプロジェクト時間計算 */
-    PJWorktimeADay: function(index) {
-      // プロジェクト時間を勤務表データに投入
-      this.workschedules[index].project_work = this.projectWorktimes[index];
-
-      // 1日のプロジェクト合計時間の計算
-      let projectWorktime = 0;
-      this.projectWorktimes[index].forEach((val_2, idx_2, arr_2) => {
-        projectWorktime = projectWorktime + parseFloat(val_2.worktime);
-      });
-
-      return projectWorktime;
     },
 
     /** 対象週select */
@@ -598,7 +798,6 @@ export default {
       async handler() {
         await this.fetchUser();
         await this.fetchHolidays();
-        await this.fetchProjects();
         await this.fetchOldestWorkdate();
         await this.fetchWorkSchedules();
         await this.fetchWeeklyReport();

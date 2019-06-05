@@ -15,7 +15,11 @@ class Project extends Model
         'company_id',
         'user_id',
         'status_id',
-        'is_deleted'
+        'is_deleted',
+        'category',
+        'company',
+        'user',
+        'projectStatus'
     ];
 
     public $sortable = [
@@ -23,7 +27,11 @@ class Project extends Model
         'category_id',
         'company_id',
         'user_id',
-        'status_id'
+        'status_id',
+        'category',
+        'company',
+        'user',
+        'projectStatus'
     ];
 
     protected $casts = [
@@ -32,21 +40,21 @@ class Project extends Model
 
     public function category()
     {
-        return $this->hasOne('App\Repositories\Models\Category', 'id', 'category_id');
+        return $this->belongsTo('App\Repositories\Models\Category', 'category_id', 'id');
     }
 
     public function company()
     {
-        return $this->hasOne('App\Repositories\Models\Company', 'id', 'company_id');
+        return $this->belongsTo('App\Repositories\Models\Company', 'company_id', 'id');
     }
 
     public function user()
     {
-        return $this->hasOne('App\Repositories\Models\User', 'id', 'user_id');
+        return $this->belongsTo('App\Repositories\Models\User', 'user_id', 'id');
     }
 
     public function projectStatus()
     {
-        return $this->hasOne('App\Repositories\Models\ProjectStatus', 'id', 'status_id');
+        return $this->belongsTo('App\Repositories\Models\ProjectStatus', 'status_id', 'id');
     }
 }

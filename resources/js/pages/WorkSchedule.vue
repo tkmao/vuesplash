@@ -66,7 +66,7 @@
               <v-data-table
                 :headers="tableheaders"
                 :items="workschedules"
-                :rows-per-page-items="[]"
+                hide-actions
                 :pagination.sync="pagination"
                 class="elevation-1"
               >
@@ -202,7 +202,7 @@ export default {
       projectWorktimes: [],
       worktimeSum: 0,
       selected: [],
-      pagination: { rowsPerPage: 200 },
+      pagination: { rowsPerPage: -1 },
       rules: {
         required: value => !!value || "This field is required."
       }
@@ -449,7 +449,6 @@ export default {
       this.projectWorktimes = this.workschedules.map(item => {
         return item["project_work"];
       });
-      console.log("this.projectWorktimes", this.projectWorktimes);
       // プロジェクトコード
       this.selected = this.workschedules[0].project_work.map(item => {
         return { project_id: item["project_id"] };

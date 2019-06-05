@@ -65,7 +65,7 @@
               <v-data-table
                 :headers="tableheaders"
                 :items="workschedules"
-                :rows-per-page-items="[]"
+                hide-actions
                 :pagination.sync="pagination"
                 class="elevation-1"
               >
@@ -165,7 +165,7 @@ export default {
       worktimes: [0],
       projectWorktimes: [],
       worktimeSum: 0,
-      pagination: { rowsPerPage: 200 },
+      pagination: { rowsPerPage: -1 },
       rules: {
         required: value => !!value || "This field is required."
       }
@@ -229,7 +229,9 @@ export default {
       }
 
       // 週リスト
-      this.weekList = weekList;
+      this.weekList = weekList.sort(function(a, b) {
+        return a.week_number > b.week_number ? -1 : 1;
+      });
     },
 
     /** 基本勤務日数計算 */

@@ -16,13 +16,15 @@ class ProjectWork extends Model
     protected $fillable = [
         'project_id',
         'work_schedule_id',
-        'worktime'
+        'worktime',
+        'project'
     ];
 
     public $sortable = [
         'project_id',
         'work_schedule_id',
-        'worktime'
+        'worktime',
+        'project'
     ];
 
     public function workSchedule()

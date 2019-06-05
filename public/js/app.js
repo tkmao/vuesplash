@@ -5537,6 +5537,75 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -5554,46 +5623,66 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   data: function data() {
     return {
-      tabs: ["週報内容", "勤務時間内容"],
+      tabs: ["週報内容", "勤務時間内容", "プロジェクトの割合"],
+      panel: [false, false],
       active: null,
+      isAscProjectCode: false,
+      isAscWorktime: false,
       targetDate: 0,
       targetWeek: 0,
       basicWorkDay: 0,
+      grossAllProjectWorktime: 0,
       oldestWorkdate: null,
       weekList: [],
+      tableheaders: [{
+        text: "ID",
+        value: "user_id"
+      }, {
+        text: "社員名",
+        value: "user_name"
+      }, {
+        text: "勤務時間(※)",
+        value: "worktime"
+      }, {
+        text: "割合(%)",
+        value: "percent"
+      }],
       workScheduleHeaders: [{
         text: "ID",
         value: "id"
       }, {
-        text: "ユーザ名",
+        text: "社員名",
         sortable: false
       }, {
         text: "勤務時間グラフ",
         sortable: false
       }, {
-        text: "勤務時間(当月累計)",
-        sortable: false
+        text: "勤務時間(※)",
+        value: "worktimeSum"
       }, {
         text: "基本勤務時間",
         sortable: false
       }, {
         text: "当月残り勤務時間",
-        sortable: false
+        value: "shortageTime"
       }, {
-        text: "超過時間(当月累計)",
-        sortable: false
+        text: "超過時間(※)",
+        value: "overTime"
       }, {
-        text: "出勤日数(当月累計)"
+        text: "出勤日数(※)",
+        value: "WorktingDay"
       }, {
-        text: "欠勤日数(当月累計)"
+        text: "欠勤日数(※)",
+        value: "AbsenceDay"
       }, {
-        text: "超過日数(当月累計)"
+        text: "超過日数(※)",
+        value: "OverDay"
       }],
       weeklyReportHeaders: [{
         text: "ID",
         value: "id"
       }, {
-        text: "ユーザ名",
+        text: "社員名",
         sortable: false
       }, {
         text: "プロジェクト名",
@@ -5615,17 +5704,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         value: "weekly_report.is_subumited"
       }],
       user: [],
-      projects: [],
       holidays: [],
       workschedules: [],
       weeklyreports: [],
       worktimes: [0],
-      projectWorktimes: [],
+      projectWorktimesHeader: [],
+      projectWorktimesDetail: [],
       allUserWorktimes: [],
-      allUserProjectWorktimes: [],
-      worktimeSum: 0,
       pagination: {
-        rowsPerPage: 200
+        rowsPerPage: -1,
+        sortBy: "worktime",
+        descending: true
       },
       rules: {
         required: function required(value) {
@@ -5651,11 +5740,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return moment(date).format("DD(ddd)");
     },
 
-    /** 週報提出チェック */
-    isSubmitted: function isSubmitted(is_subumited) {
-      return is_subumited ? "提出済" : "未提出";
-    },
-
     /** 週番号から日付に変換 */
     weekNumberToDate: function weekNumberToDate(weekNumber) {
       var year = weekNumber.substr(0, 4);
@@ -5670,6 +5754,53 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var startDate = moment(year).add(weak - 1, "weeks").startOf("isoweek");
       var endDate = moment(year).add(weak - 1, "weeks").endOf("isoweek");
       return startDate.format("YYYY-MM-DD (ddd)") + " 〜 " + endDate.format("YYYY-MM-DD (ddd)");
+    },
+
+    /** 休日チェック */
+    isHoliday: function isHoliday(date) {
+      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+    },
+
+    /** プロジェクト参加者（特定のプロジェクトIDを引っ張る） */
+    projectParticipants: function projectParticipants(project_id) {
+      return this.projectWorktimesDetail.filter(function (item, index) {
+        return item.project_id == project_id;
+      });
+    },
+
+    /** プロジェクトコードでソート（ヘッダー） */
+    headerSortByProjectCode: function headerSortByProjectCode() {
+      this.isAscProjectCode = !this.isAscProjectCode;
+      var asc = this.isAscProjectCode;
+      this.projectWorktimesHeader.sort(function (a, b) {
+        return a.project_code > b.project_code ? asc ? 1 : -1 : asc ? -1 : 1;
+      });
+    },
+
+    /** プロジェクト時間でソート（ヘッダー） */
+    headerSortByWorktime: function headerSortByWorktime() {
+      this.isAscWorktime = !this.isAscWorktime;
+      var asc = this.isAscWorktime;
+      this.projectWorktimesHeader.sort(function (a, b) {
+        return a.worktime > b.worktime ? asc ? 1 : -1 : asc ? -1 : 1;
+      });
+    },
+
+    /** 週報提出チェック */
+    isSubmitted: function isSubmitted(is_subumited) {
+      return is_subumited ? "提出済" : "未提出";
+    },
+
+    /** 総プロジェクト時間割合 */
+    percentageOfAllProjectwork: function percentageOfAllProjectwork(worktime) {
+      return this.grossAllProjectWorktime === 0 ? 0 : (worktime / this.grossAllProjectWorktime * 100).toFixed(1);
+    },
+
+    /** 週報提出人数 */
+    peopleSubmit: function peopleSubmit() {
+      return this.weeklyreports.length === 0 ? 0 : this.weeklyreports.reduce(function (total, data, index) {
+        return (index === 1 ? total.weekly_report.is_subumited ? 1 : 0 : total) + (data.weekly_report.is_subumited ? 1 : 0);
+      });
     },
 
     /** 週報リスト作成 */
@@ -5695,7 +5826,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 } // 週リスト
 
 
-                this.weekList = weekList;
+                this.weekList = weekList.sort(function (a, b) {
+                  return a.week_number > b.week_number ? -1 : 1;
+                });
 
               case 5:
               case "end":
@@ -5711,11 +5844,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       return createWeekList;
     }(),
-
-    /** 休日チェック */
-    isHoliday: function isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
-    },
 
     /** 勤務表データ作成 */
     createWorkSchedule: function createWorkSchedule(responseData) {
@@ -5734,8 +5862,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             work_schedule.push({
               id: null,
               user_id: _this.user.id,
+              //
               week_number: startDate.format("ggggWW"),
+              //
               workdate: startDate.format("YYYY-MM-DD"),
+              //
               is_paid_holiday: false,
               starttime_hh: null,
               starttime_mm: null,
@@ -5746,7 +5877,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               project_work: [{
                 work_schedule_id: null,
                 project_id: 1,
-                worktime: 0
+                //
+                worktime: 0,
+                //
+                project: {
+                  id: 1,
+                  code: "00000",
+                  //
+                  name: "未設定",
+                  //
+                  company_id: null,
+                  category_id: null,
+                  status_id: null,
+                  user_id: null,
+                  is_deleted: null
+                }
               }],
               detail: null
             }); // 1日加算
@@ -5887,9 +6032,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return fetchHolidays;
     }(),
 
-    /** プロジェクトデータ取得 */
-    fetchProjects: function () {
-      var _fetchProjects = _asyncToGenerator(
+    /** 最古の勤務表データ取得 */
+    fetchOldestWorkdate: function () {
+      var _fetchOldestWorkdate = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
         var response;
@@ -5898,7 +6043,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return axios.get("/api/project/getall");
+                return axios.post("/api/workschedule/getoldestworkdate", {
+                  userId: this.$store.state.auth.user.id
+                });
 
               case 2:
                 response = _context4.sent;
@@ -5912,16 +6059,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context4.abrupt("return", false);
 
               case 6:
-                // プロジェクトデータ
-                this.projects = response.data.map(function (item) {
-                  return {
-                    id: item.id,
-                    code: item.code,
-                    name: item.code + " : " + item.name
-                  };
-                });
+                // 最古の勤務表データ
+                this.oldestWorkdate = response.data; // 週リスト作成
 
-              case 7:
+                this.createWeekList(this.oldestWorkdate);
+
+              case 8:
               case "end":
                 return _context4.stop();
             }
@@ -5929,26 +6072,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee4, this);
       }));
 
-      function fetchProjects() {
-        return _fetchProjects.apply(this, arguments);
+      function fetchOldestWorkdate() {
+        return _fetchOldestWorkdate.apply(this, arguments);
       }
 
-      return fetchProjects;
+      return fetchOldestWorkdate;
     }(),
 
-    /** 最古の勤務表データ取得 */
-    fetchOldestWorkdate: function () {
-      var _fetchOldestWorkdate = _asyncToGenerator(
+    /** 全ユーザ勤務表データ取得 */
+    fetchWorkSchedules: function () {
+      var _fetchWorkSchedules = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
+        var _this2 = this;
+
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
                 _context5.next = 2;
-                return axios.post("/api/workschedule/getoldestworkdate", {
-                  userId: this.$store.state.auth.user.id
+                return axios.post("/api/workschedule/getalluser", {
+                  yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
                 });
 
               case 2:
@@ -5963,12 +6108,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context5.abrupt("return", false);
 
               case 6:
-                // 最古の勤務表データ
-                this.oldestWorkdate = response.data; // 週リスト作成
+                // 全ユーザの勤務表データ
+                this.workschedules = this.createWorkSchedule(response.data); // 全ユーザの勤務時間初期化
 
-                this.createWeekList(this.oldestWorkdate);
+                this.allUserWorktimes = this.workschedules.map(function (item) {
+                  return {
+                    user_id: item["id"],
+                    worktimes: Array(_this2.workschedules[0].work_schedule.length).fill(0)
+                  };
+                }); // 勤務情報再計算
 
-              case 8:
+                this.culBasicWorkDay(); // 基本勤務日数計算
+
+                this.culBasicWorktimeAMonth(); // 勤務時間計算
+
+                this.culWorktimes();
+
+              case 11:
               case "end":
                 return _context5.stop();
             }
@@ -5976,28 +6132,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee5, this);
       }));
 
-      function fetchOldestWorkdate() {
-        return _fetchOldestWorkdate.apply(this, arguments);
+      function fetchWorkSchedules() {
+        return _fetchWorkSchedules.apply(this, arguments);
       }
 
-      return fetchOldestWorkdate;
+      return fetchWorkSchedules;
     }(),
 
-    /** 全ユーザ勤務表データ取得 */
-    fetchWorkSchedules: function () {
-      var _fetchWorkSchedules = _asyncToGenerator(
+    /** 全ユーザ週報データ取得 */
+    fetchWeeklyReport: function () {
+      var _fetchWeeklyReport = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
-        var _this2 = this;
-
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
                 _context6.next = 2;
-                return axios.post("/api/workschedule/getalluser", {
-                  yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
+                return axios.post("/api/weeklyreport/getalluser", {
+                  weekNumber: this.targetWeek
                 });
 
               case 2:
@@ -6012,85 +6166,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context6.abrupt("return", false);
 
               case 6:
-                // 全ユーザの勤務表データ
-                this.workschedules = this.createWorkSchedule(response.data); // 全ユーザの勤務時間初期化
-
-                this.allUserWorktimes = this.workschedules.map(function (item) {
-                  return {
-                    user_id: item["id"],
-                    worktimes: Array(_this2.workschedules[0].work_schedule.length).fill(0)
-                  };
-                }); // 全ユーザのプロジェクト時間
-
-                this.allUserProjectWorktimes = this.workschedules.map(function (item) {
-                  return {
-                    user_id: item["id"],
-                    worktimes: item["work_schedule"].map(function (item2) {
-                      return item2["project_work"];
-                    })
-                  };
-                });
-                this.projectWorktimes = this.workschedules.map(function (item) {
-                  return item["project_work"];
-                }); // 勤務情報再計算
-
-                this.culBasicWorkDay(); // 基本勤務日数計算
-
-                this.culBasicWorktimeAMonth(); // 勤務時間計算
-
-                this.culWorktimes();
-
-              case 13:
-              case "end":
-                return _context6.stop();
-            }
-          }
-        }, _callee6, this);
-      }));
-
-      function fetchWorkSchedules() {
-        return _fetchWorkSchedules.apply(this, arguments);
-      }
-
-      return fetchWorkSchedules;
-    }(),
-
-    /** 全ユーザ週報データ取得 */
-    fetchWeeklyReport: function () {
-      var _fetchWeeklyReport = _asyncToGenerator(
-      /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
-        var response;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
-          while (1) {
-            switch (_context7.prev = _context7.next) {
-              case 0:
-                _context7.next = 2;
-                return axios.post("/api/weeklyreport/getalluser", {
-                  weekNumber: this.targetWeek
-                });
-
-              case 2:
-                response = _context7.sent;
-
-                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
-                  _context7.next = 6;
-                  break;
-                }
-
-                this.$store.commit("error/setCode", response.status);
-                return _context7.abrupt("return", false);
-
-              case 6:
                 // 週報データ
                 this.weeklyreports = this.createWeeklyReport(response.data);
 
               case 7:
               case "end":
-                return _context7.stop();
+                return _context6.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee6, this);
       }));
 
       function fetchWeeklyReport() {
@@ -6134,9 +6218,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     culWorktimes: function culWorktimes() {
       var _this4 = this;
 
+      var projectWorktime = [];
       this.workschedules.forEach(function (val_1, idx_1, arr_1) {
         val_1.work_schedule.forEach(function (val_2, idx_2, arr_2) {
-          // 各ユーザの1日の勤務時間の計算
+          val_2.project_work.forEach(function (val_3, idx_3, arr_3) {
+            // プロジェクト時間リスト作成
+            projectWorktime.push({
+              user_id: val_1.id,
+              user_name: val_1.name,
+              workdate: val_2.workdate,
+              week_number: val_2.week_number,
+              project_id: val_3.project_id,
+              project_code: val_3.project.code,
+              project_name: val_3.project.name,
+              worktime: val_3.worktime
+            });
+          }); // 各ユーザの1日の勤務時間の計算
+
           _this4.$set(_this4.allUserWorktimes[idx_1].worktimes, idx_2, Object(_util__WEBPACK_IMPORTED_MODULE_1__["getWorktime"])(val_2.starttime_hh, val_2.starttime_mm, val_2.endtime_hh, val_2.endtime_mm, val_2.breaktime, val_2.breaktime_midnight));
         }); // 1月の合計勤務時間計算
 
@@ -6151,33 +6249,100 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         _this4.$set(_this4.workschedules[idx_1], "shortageTime", _this4.workschedules[idx_1].worktimeSum < _this4.workschedules[idx_1].workingtimeMin ? _this4.workschedules[idx_1].workingtimeMin - _this4.workschedules[idx_1].worktimeSum : 0); // 出勤日数計算
 
 
-        _this4.$set(_this4.workschedules[idx_1], "WorktingDay", _this4.WorktingDay(_this4.allUserWorktimes[idx_1].worktimes)); // 欠勤日数計算
+        _this4.$set(_this4.workschedules[idx_1], "WorktingDay", _this4.culWorktingDay(_this4.allUserWorktimes[idx_1].worktimes)); // 欠勤日数計算
 
 
         _this4.$set(_this4.workschedules[idx_1], "AbsenceDay", _this4.workschedules[idx_1].WorktingDay < _this4.basicWorkDay ? _this4.basicWorkDay - _this4.workschedules[idx_1].WorktingDay : 0); // 超過日数計算
 
 
         _this4.$set(_this4.workschedules[idx_1], "OverDay", _this4.workschedules[idx_1].WorktingDay > _this4.basicWorkDay ? _this4.workschedules[idx_1].WorktingDay - _this4.basicWorkDay : 0);
+      }); // プロジェクト毎にgroup化
+      // プロジェクト毎にgroup化 ヘッダー
+
+      this.projectWorktimesHeader = projectWorktime.reduce(function (result, current) {
+        var element = result.find(function (p) {
+          return p.project_id === current.project_id;
+        });
+
+        if (element) {
+          element.count++; // count
+
+          element.worktime += current.worktime; // sum
+        } else {
+          result.push({
+            project_id: current.project_id,
+            project_code: current.project_code,
+            project_name: current.project_name,
+            count: 1,
+            worktime: current.worktime
+          });
+        }
+
+        return result;
+      }, []); // project_code でソート
+
+      this.projectWorktimesHeader.sort(function (a, b) {
+        return a.project_code < b.project_code ? -1 : 1;
+      }); // 総プロジェクト時間計算
+
+      this.grossAllProjectWorktime = this.culGrossAllProjectWorktime(); // プロジェクト毎にgroup化 詳細
+
+      this.projectWorktimesDetail = projectWorktime.reduce(function (result, current) {
+        var element = result.find(function (p) {
+          return p.project_id === current.project_id && p.user_id === current.user_id;
+        });
+
+        if (element) {
+          element.count++; // count
+
+          element.worktime += current.worktime; // sum
+        } else {
+          result.push({
+            project_id: current.project_id,
+            project_code: current.project_code,
+            project_name: current.project_name,
+            user_id: current.user_id,
+            user_name: current.user_name,
+            count: 1,
+            worktime: current.worktime
+          });
+        }
+
+        return result;
+      }, []); // プロジェクト毎にgroup化 詳細 パーセント表示追加
+
+      this.projectWorktimesDetail = this.projectWorktimesDetail.map(function (item) {
+        return {
+          project_id: item.project_id,
+          project_code: item.project_code,
+          project_name: item.project_name,
+          user_id: item.user_id,
+          user_name: item.user_name,
+          count: item.count,
+          worktime: item.worktime,
+          percent: _this4.grossAllProjectWorktime === 0 ? 0 : (item.worktime / _this4.projectWorktimesHeader.find(function (item2, index2) {
+            return item2.project_id == item.project_id;
+          }).worktime * 100).toFixed(1)
+        };
+      }); // project_id でソート
+
+      this.projectWorktimesDetail.sort(function (a, b) {
+        return a.project_id < b.project_id ? -1 : 1;
+      });
+    },
+
+    /** 総プロジェクト時間計算 */
+    culGrossAllProjectWorktime: function culGrossAllProjectWorktime() {
+      return this.projectWorktimesHeader.length === 1 ? this.projectWorktimesHeader[0].worktime : this.projectWorktimesHeader.reduce(function (total, data, index) {
+        return (index === 1 ? total.worktime : total) + (index === 1 ? 0 : parseFloat(data.worktime));
       });
     },
 
     /** 出勤日数計算 */
-    WorktingDay: function WorktingDay(worktimes) {
+    culWorktingDay: function culWorktingDay(worktimes) {
       return worktimes.reduce(function (total, data, index) {
         return (index === 1 && total > 0 ? 1 : total) + (data > 0 ? 1 : 0);
       });
-    },
-
-    /** 1日のプロジェクト時間計算 */
-    PJWorktimeADay: function PJWorktimeADay(index) {
-      // プロジェクト時間を勤務表データに投入
-      this.workschedules[index].project_work = this.projectWorktimes[index]; // 1日のプロジェクト合計時間の計算
-
-      var projectWorktime = 0;
-      this.projectWorktimes[index].forEach(function (val_2, idx_2, arr_2) {
-        projectWorktime = projectWorktime + parseFloat(val_2.worktime);
-      });
-      return projectWorktime;
     },
 
     /** 対象週select */
@@ -6193,40 +6358,36 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       handler: function () {
         var _handler = _asyncToGenerator(
         /*#__PURE__*/
-        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
+        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
             while (1) {
-              switch (_context8.prev = _context8.next) {
+              switch (_context7.prev = _context7.next) {
                 case 0:
-                  _context8.next = 2;
+                  _context7.next = 2;
                   return this.fetchUser();
 
                 case 2:
-                  _context8.next = 4;
+                  _context7.next = 4;
                   return this.fetchHolidays();
 
                 case 4:
-                  _context8.next = 6;
-                  return this.fetchProjects();
-
-                case 6:
-                  _context8.next = 8;
+                  _context7.next = 6;
                   return this.fetchOldestWorkdate();
 
-                case 8:
-                  _context8.next = 10;
+                case 6:
+                  _context7.next = 8;
                   return this.fetchWorkSchedules();
 
-                case 10:
-                  _context8.next = 12;
+                case 8:
+                  _context7.next = 10;
                   return this.fetchWeeklyReport();
 
-                case 12:
+                case 10:
                 case "end":
-                  return _context8.stop();
+                  return _context7.stop();
               }
             }
-          }, _callee8, this);
+          }, _callee7, this);
         }));
 
         function handler() {
@@ -6428,7 +6589,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       projectWorktimes: [],
       worktimeSum: 0,
       pagination: {
-        rowsPerPage: 200
+        rowsPerPage: -1
       },
       rules: {
         required: function required(value) {
@@ -6493,7 +6654,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 } // 週リスト
 
 
-                this.weekList = weekList;
+                this.weekList = weekList.sort(function (a, b) {
+                  return a.week_number > b.week_number ? -1 : 1;
+                });
 
               case 5:
               case "end":
@@ -7347,7 +7510,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       worktimeSum: 0,
       selected: [],
       pagination: {
-        rowsPerPage: 200
+        rowsPerPage: -1
       },
       rules: {
         required: function required(value) {
@@ -7721,8 +7884,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 this.projectWorktimes = this.workschedules.map(function (item) {
                   return item["project_work"];
-                });
-                console.log("this.projectWorktimes", this.projectWorktimes); // プロジェクトコード
+                }); // プロジェクトコード
 
                 this.selected = this.workschedules[0].project_work.map(function (item) {
                   return {
@@ -7735,7 +7897,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 this.culBasicWorkDay();
                 this.culBasicWorktimeAMonth();
 
-              case 14:
+              case 13:
               case "end":
                 return _context5.stop();
             }
@@ -33155,9 +33317,21 @@ var render = function() {
                                   [
                                     _c("v-card-text", [
                                       _vm._v(
-                                        "基本勤務日数：" +
+                                        "\n                    基本勤務日数：" +
                                           _vm._s(this.basicWorkDay) +
-                                          " 日"
+                                          " 日\n                    "
+                                      ),
+                                      _c("br"),
+                                      _vm._v(
+                                        "\n                    社員数：" +
+                                          _vm._s(this.workschedules.length) +
+                                          " 人\n                    "
+                                      ),
+                                      _c("br"),
+                                      _vm._v(
+                                        "\n                    週報提出：" +
+                                          _vm._s(_vm.peopleSubmit()) +
+                                          " 人\n                  "
                                       )
                                     ]),
                                     _vm._v(" "),
@@ -33169,6 +33343,7 @@ var render = function() {
                                           attrs: {
                                             headers: _vm.weeklyReportHeaders,
                                             items: _vm.weeklyreports,
+                                            "hide-actions": "",
                                             pagination: _vm.pagination
                                           },
                                           on: {
@@ -33332,11 +33507,19 @@ var render = function() {
                                   [
                                     _c("v-card-text", [
                                       _vm._v(
-                                        "基本勤務日数：" +
+                                        "\n                    基本勤務日数：" +
                                           _vm._s(this.basicWorkDay) +
-                                          " 日"
+                                          " 日\n                    "
+                                      ),
+                                      _c("br"),
+                                      _vm._v(
+                                        "\n                    社員数：" +
+                                          _vm._s(this.workschedules.length) +
+                                          " 人\n                  "
                                       )
                                     ]),
+                                    _vm._v(" "),
+                                    _c("v-card-text", [_vm._v("※ 当月累計")]),
                                     _vm._v(" "),
                                     _c(
                                       "v-card-text",
@@ -33346,6 +33529,7 @@ var render = function() {
                                           attrs: {
                                             headers: _vm.workScheduleHeaders,
                                             items: _vm.workschedules,
+                                            "hide-actions": "",
                                             pagination: _vm.pagination
                                           },
                                           on: {
@@ -33490,7 +33674,320 @@ var render = function() {
                                 )
                               ],
                               1
-                            )
+                            ),
+                            _vm._v(" "),
+                            _c("v-tab-item", [
+                              _c(
+                                "div",
+                                [
+                                  _c("v-card-text", [
+                                    _vm._v(
+                                      "\n                    総勤務時間：" +
+                                        _vm._s(this.grossAllProjectWorktime) +
+                                        " 時間\n                    "
+                                    ),
+                                    _c("br"),
+                                    _vm._v(
+                                      "\n                    社員数：" +
+                                        _vm._s(this.workschedules.length) +
+                                        " 人\n                    "
+                                    ),
+                                    _c("br"),
+                                    _vm._v(
+                                      "\n                    平均勤務時間：" +
+                                        _vm._s(
+                                          this.grossAllProjectWorktime /
+                                            this.workschedules.length
+                                        ) +
+                                        " 時間\n                  "
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { color: "success" },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.headerSortByWorktime()
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("時間でソート（ヘッダー）")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { color: "success" },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.headerSortByProjectCode()
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _vm._v(
+                                        "プロジェクトコードでソート（ヘッダー）"
+                                      )
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-expansion-panel",
+                                    {
+                                      attrs: { expand: "" },
+                                      model: {
+                                        value: _vm.panel,
+                                        callback: function($$v) {
+                                          _vm.panel = $$v
+                                        },
+                                        expression: "panel"
+                                      }
+                                    },
+                                    _vm._l(_vm.projectWorktimesHeader, function(
+                                      projectWorktimes,
+                                      i
+                                    ) {
+                                      return _c(
+                                        "v-expansion-panel-content",
+                                        {
+                                          key: i,
+                                          scopedSlots: _vm._u(
+                                            [
+                                              {
+                                                key: "header",
+                                                fn: function() {
+                                                  return [
+                                                    _c(
+                                                      "table",
+                                                      {
+                                                        attrs: { border: "1" }
+                                                      },
+                                                      [
+                                                        _c("tr", [
+                                                          _c(
+                                                            "td",
+                                                            {
+                                                              attrs: {
+                                                                align: "center",
+                                                                nowrap: "",
+                                                                width: "5%"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                _vm._s(i + 1)
+                                                              )
+                                                            ]
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "td",
+                                                            {
+                                                              attrs: {
+                                                                align: "left",
+                                                                width: "10%"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                _vm._s(
+                                                                  projectWorktimes.project_code
+                                                                )
+                                                              )
+                                                            ]
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "td",
+                                                            {
+                                                              attrs: {
+                                                                align: "left",
+                                                                width: "65%"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                _vm._s(
+                                                                  projectWorktimes.project_name
+                                                                )
+                                                              )
+                                                            ]
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "td",
+                                                            {
+                                                              attrs: {
+                                                                align: "right",
+                                                                width: "10%"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                _vm._s(
+                                                                  projectWorktimes.worktime
+                                                                ) + " 時間"
+                                                              )
+                                                            ]
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "td",
+                                                            {
+                                                              attrs: {
+                                                                align: "right",
+                                                                width: "10%"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                _vm._s(
+                                                                  _vm.percentageOfAllProjectwork(
+                                                                    projectWorktimes.worktime
+                                                                  )
+                                                                ) + " %"
+                                                              )
+                                                            ]
+                                                          )
+                                                        ])
+                                                      ]
+                                                    )
+                                                  ]
+                                                },
+                                                proxy: true
+                                              }
+                                            ],
+                                            null,
+                                            true
+                                          )
+                                        },
+                                        [
+                                          _vm._v(" "),
+                                          _c(
+                                            "v-card",
+                                            [
+                                              _c(
+                                                "v-card-text",
+                                                {
+                                                  staticClass: "grey lighten-3"
+                                                },
+                                                [
+                                                  _c("v-data-table", {
+                                                    staticClass: "elevation-1",
+                                                    attrs: {
+                                                      headers: _vm.tableheaders,
+                                                      items: _vm.projectParticipants(
+                                                        projectWorktimes.project_id
+                                                      ),
+                                                      "hide-actions": "",
+                                                      pagination: _vm.pagination
+                                                    },
+                                                    on: {
+                                                      "update:pagination": function(
+                                                        $event
+                                                      ) {
+                                                        _vm.pagination = $event
+                                                      }
+                                                    },
+                                                    scopedSlots: _vm._u(
+                                                      [
+                                                        {
+                                                          key: "items",
+                                                          fn: function(props) {
+                                                            return [
+                                                              _c(
+                                                                "td",
+                                                                {
+                                                                  attrs: {
+                                                                    width: "5%"
+                                                                  }
+                                                                },
+                                                                [
+                                                                  _vm._v(
+                                                                    _vm._s(
+                                                                      props.item
+                                                                        .user_id
+                                                                    )
+                                                                  )
+                                                                ]
+                                                              ),
+                                                              _vm._v(" "),
+                                                              _c(
+                                                                "td",
+                                                                {
+                                                                  attrs: {
+                                                                    width: "10%"
+                                                                  }
+                                                                },
+                                                                [
+                                                                  _vm._v(
+                                                                    _vm._s(
+                                                                      props.item
+                                                                        .user_name
+                                                                    )
+                                                                  )
+                                                                ]
+                                                              ),
+                                                              _vm._v(" "),
+                                                              _c(
+                                                                "td",
+                                                                {
+                                                                  attrs: {
+                                                                    width: "10%"
+                                                                  }
+                                                                },
+                                                                [
+                                                                  _vm._v(
+                                                                    _vm._s(
+                                                                      props.item
+                                                                        .worktime
+                                                                    ) + " h"
+                                                                  )
+                                                                ]
+                                                              ),
+                                                              _vm._v(" "),
+                                                              _c(
+                                                                "td",
+                                                                {
+                                                                  attrs: {
+                                                                    width: "10%"
+                                                                  }
+                                                                },
+                                                                [
+                                                                  _vm._v(
+                                                                    _vm._s(
+                                                                      props.item
+                                                                        .percent
+                                                                    ) + " %"
+                                                                  )
+                                                                ]
+                                                              )
+                                                            ]
+                                                          }
+                                                        }
+                                                      ],
+                                                      null,
+                                                      true
+                                                    )
+                                                  })
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    }),
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ])
                           ],
                           2
                         )
@@ -33727,7 +34224,7 @@ var render = function() {
                           attrs: {
                             headers: _vm.tableheaders,
                             items: _vm.workschedules,
-                            "rows-per-page-items": [],
+                            "hide-actions": "",
                             pagination: _vm.pagination
                           },
                           on: {
@@ -34513,7 +35010,7 @@ var render = function() {
                           attrs: {
                             headers: _vm.tableheaders,
                             items: _vm.workschedules,
-                            "rows-per-page-items": [],
+                            "hide-actions": "",
                             pagination: _vm.pagination
                           },
                           on: {
