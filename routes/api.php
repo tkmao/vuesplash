@@ -66,3 +66,5 @@ Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall'
 
 // ユーザ情報取得
 Route::post('/user/get', 'UserController@get')->name('user.get');
+// ユーザ一覧取得
+Route::get('/user/getall', 'UserController@getAll')->name('user.getall');

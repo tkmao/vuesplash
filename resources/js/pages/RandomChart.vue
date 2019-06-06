@@ -75,6 +75,26 @@ export default {
           }
         ]
       };
+
+      console.log("this.datacollection", this.datacollection);
+      console.log("labels", [min, max]);
+      console.log("datasets", datasets);
+      console.log(
+        "this.datacollection.datasets[0]",
+        this.datacollection.datasets[0]
+      );
+      console.log(
+        "this.datacollection.datasets[0].backgroundColor",
+        this.datacollection.datasets[0].backgroundColor
+      );
+      console.log(
+        "this.datacollection.datasets[0].data",
+        this.datacollection.datasets[0].data
+      );
+      console.log(
+        "this.datacollection.datasets[0].label",
+        this.datacollection.datasets[0].label
+      );
     },
     randomize() {
       this.lines = Math.floor(Math.random() * 10) + 1;

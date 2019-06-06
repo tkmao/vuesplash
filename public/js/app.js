@@ -4909,6 +4909,13 @@ __webpack_require__.r(__webpack_exports__);
           backgroundColor: dColors
         }]
       };
+      console.log("this.datacollection", this.datacollection);
+      console.log("labels", [min, max]);
+      console.log("datasets", datasets);
+      console.log("this.datacollection.datasets[0]", this.datacollection.datasets[0]);
+      console.log("this.datacollection.datasets[0].backgroundColor", this.datacollection.datasets[0].backgroundColor);
+      console.log("this.datacollection.datasets[0].data", this.datacollection.datasets[0].data);
+      console.log("this.datacollection.datasets[0].label", this.datacollection.datasets[0].label);
     },
     randomize: function randomize() {
       this.lines = Math.floor(Math.random() * 10) + 1;
@@ -5636,6 +5643,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util */ "./resources/js/util.js");
 /* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! crypto */ "./node_modules/crypto-browserify/index.js");
 /* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(crypto__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _LineChart_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../LineChart.js */ "./resources/js/LineChart.js");
+/* harmony import */ var _DoughnutChart_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../DoughnutChart.js */ "./resources/js/DoughnutChart.js");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -5856,11 +5865,53 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  components: {},
+  components: {
+    LineChart: _LineChart_js__WEBPACK_IMPORTED_MODULE_3__["default"],
+    DoughnutChart: _DoughnutChart_js__WEBPACK_IMPORTED_MODULE_4__["default"]
+  },
   props: {
     page: {
       type: Number,
@@ -5873,13 +5924,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   data: function data() {
     return {
-      tabs: ["週報内容", "勤務時間内容", "プロジェクト割合"],
+      tabs: ["週報内容", "勤務時間内容", "プロジェクト割合", "PJグラフ", "勤務表グラフ"],
       panel: [false, false],
       active: null,
       isAscProjectCode: false,
       isAscWorktime: false,
       targetDate: 0,
       targetWeek: 0,
+      targetProjectId: 1,
+      targetUserId: 1,
       basicWorkDay: 0,
       grossAllProjectWorktime: 0,
       oldestWorkdate: null,
@@ -5966,14 +6019,32 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         text: "提出状況",
         value: "weekly_report.is_subumited"
       }],
-      user: [],
+      users: [],
       holidays: [],
+      projects: [],
       workschedules: [],
       weeklyreports: [],
       worktimes: [0],
       projectWorktimesHeader: [],
       projectWorktimesDetail: [],
       allUserWorktimes: [],
+      datacollection: {
+        labels: [0],
+        datasets: [{
+          backgroundColor: "rgba(255,100,100,0.1)",
+          data: [0],
+          label: "default"
+        }]
+      },
+      doughnutcollection: {
+        labels: ["labels"],
+        datasets: [{
+          data: [0],
+          backgroundColor: ["rgba(255, 0, 0, 0)"]
+        }]
+      },
+      // ドーナツグラフ
+      //doughnutcollection: null,
       pagination: {
         rowsPerPage: -1,
         sortBy: "worktime",
@@ -5996,6 +6067,74 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     initialize: function initialize() {
       this.targetDate = moment();
       this.targetWeek = this.targetDate.format("ggggWW");
+    },
+
+    /** 線グラフ作成(勤務時間用) */
+    createWorktimeGraph: function createWorktimeGraph() {
+      var _this = this;
+
+      var lineData = this.allUserWorktimes.find(function (x) {
+        return x.user_id === _this.targetUserId;
+      }).worktimes;
+      var lineData2 = lineData.map(function (value1, index1, array1) {
+        return lineData.filter(function (value2, index2, array2) {
+          return index2 <= index1;
+        }).reduce(function (total3, data3, index3) {
+          return index3 === 0 ? 0 : total3 + data3;
+        });
+      });
+      this.datacollection = {
+        labels: lineData.map(function (value, index, array) {
+          return index + 1;
+        }),
+        // 横軸
+        datasets: [{
+          backgroundColor: "rgba(255,100,100,0.1)",
+          data: lineData2,
+          // 勤務時間加算したもの
+          label: this.users.find(function (x) {
+            return x.id === _this.targetUserId;
+          }).name // name
+
+        }]
+      };
+    },
+
+    /** ドーナツグラフ作成(プロジェクト時間用) */
+    createProjectWorklistDoughnut: function createProjectWorklistDoughnut() {
+      var _this2 = this;
+
+      var projectWorktimesDetail = this.projectWorktimesDetail;
+      var doughnutData = projectWorktimesDetail.filter(function (x) {
+        return x.project_id === _this2.targetProjectId;
+      }).sort(function (a, b) {
+        return a.worktime < b.worktime ? 1 : -1;
+      });
+      var dColors = [];
+
+      for (var i = 0; i < doughnutData.length; i++) {
+        var code = i * 5;
+        dColors.push("rgba(255," + code + "," + code + ",0.4)");
+      }
+
+      this.doughnutcollection = {
+        labels: doughnutData.map(function (y) {
+          return y.user_name;
+        }),
+        datasets: [{
+          data: doughnutData.map(function (y) {
+            return y.worktime;
+          }),
+          backgroundColor: dColors
+        }]
+      };
+    },
+
+    /** ドーナツグラフを表示できるか確認 */
+    canCreateDoughnut: function canCreateDoughnut(date) {
+      return this.doughnutcollection.datasets[0].data.length !== 0 ? this.doughnutcollection.datasets[0].data.reduce(function (a, b) {
+        return a > b ? a : b;
+      }) === 0 ? false : true : false;
     },
 
     /** 日付変換 */
@@ -6127,21 +6266,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     /** 勤務表データ作成 */
     createWorkSchedule: function createWorkSchedule(responseData) {
-      var _this = this;
+      var _this3 = this;
 
       responseData.forEach(function (val_1, idx_1, arr_1) {
         var work_schedule = [];
 
         if (val_1.work_schedule.length === 0) {
-          var startDate = _this.targetDate.endOf("isoweek").startOf("month").clone();
+          var startDate = _this3.targetDate.endOf("isoweek").startOf("month").clone();
 
-          var endDate = _this.targetDate.endOf("isoweek").endOf("month").clone(); // 当月分のデータが存在しない場合、デフォルト値で作成
+          var endDate = _this3.targetDate.endOf("isoweek").endOf("month").clone(); // 当月分のデータが存在しない場合、デフォルト値で作成
 
 
           while (startDate.unix() <= endDate.unix()) {
             work_schedule.push({
               id: null,
-              user_id: _this.user.id,
+              user_id: val_1.id,
               //
               week_number: startDate.format("ggggWW"),
               //
@@ -6223,8 +6362,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
 
     /** 全ユーザデータ取得 */
-    fetchUser: function () {
-      var _fetchUser = _asyncToGenerator(
+    fetchUsers: function () {
+      var _fetchUsers = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
         var response;
@@ -6233,7 +6372,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return axios.get("/api/user/get");
+                return axios.get("/api/user/getall");
 
               case 2:
                 response = _context2.sent;
@@ -6248,9 +6387,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 // ユーザデータ
-                this.user = response.data;
+                this.users = response.data;
+                console.log("this.users", this.users);
 
-              case 7:
+              case 8:
               case "end":
                 return _context2.stop();
             }
@@ -6258,11 +6398,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee2, this);
       }));
 
-      function fetchUser() {
-        return _fetchUser.apply(this, arguments);
+      function fetchUsers() {
+        return _fetchUsers.apply(this, arguments);
       }
 
-      return fetchUser;
+      return fetchUsers;
     }(),
 
     /** 休日データ取得 */
@@ -6312,9 +6452,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return fetchHolidays;
     }(),
 
-    /** 最古の勤務表データ取得 */
-    fetchOldestWorkdate: function () {
-      var _fetchOldestWorkdate = _asyncToGenerator(
+    /** プロジェクトデータ取得 */
+    fetchProjects: function () {
+      var _fetchProjects = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
         var response;
@@ -6323,9 +6463,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return axios.post("/api/workschedule/getoldestworkdate", {
-                  userId: this.$store.state.auth.user.id
-                });
+                return axios.get("/api/project/getall");
 
               case 2:
                 response = _context4.sent;
@@ -6339,12 +6477,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context4.abrupt("return", false);
 
               case 6:
-                // 最古の勤務表データ
-                this.oldestWorkdate = response.data; // 週リスト作成
+                // プロジェクトデータ
+                this.projects = response.data.map(function (item) {
+                  return {
+                    id: item.id,
+                    code: item.code,
+                    name: item.code + " : " + item.name
+                  };
+                });
 
-                this.createWeekList(this.oldestWorkdate);
-
-              case 8:
+              case 7:
               case "end":
                 return _context4.stop();
             }
@@ -6352,28 +6494,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee4, this);
       }));
 
-      function fetchOldestWorkdate() {
-        return _fetchOldestWorkdate.apply(this, arguments);
+      function fetchProjects() {
+        return _fetchProjects.apply(this, arguments);
       }
 
-      return fetchOldestWorkdate;
+      return fetchProjects;
     }(),
 
-    /** 全ユーザ勤務表データ取得 */
-    fetchWorkSchedules: function () {
-      var _fetchWorkSchedules = _asyncToGenerator(
+    /** 最古の勤務表データ取得 */
+    fetchOldestWorkdate: function () {
+      var _fetchOldestWorkdate = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
-        var _this2 = this;
-
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
                 _context5.next = 2;
-                return axios.post("/api/workschedule/getalluser", {
-                  yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
+                return axios.post("/api/workschedule/getoldestworkdate", {
+                  userId: this.$store.state.auth.user.id
                 });
 
               case 2:
@@ -6388,23 +6528,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context5.abrupt("return", false);
 
               case 6:
-                // 全ユーザの勤務表データ
-                this.workschedules = this.createWorkSchedule(response.data); // 全ユーザの勤務時間初期化
+                // 最古の勤務表データ
+                this.oldestWorkdate = response.data; // 週リスト作成
 
-                this.allUserWorktimes = this.workschedules.map(function (item) {
-                  return {
-                    user_id: item["id"],
-                    worktimes: Array(_this2.workschedules[0].work_schedule.length).fill(0)
-                  };
-                }); // 勤務情報再計算
+                this.createWeekList(this.oldestWorkdate);
 
-                this.culBasicWorkDay(); // 基本勤務日数計算
-
-                this.culBasicWorktimeAMonth(); // 勤務時間計算
-
-                this.culWorktimes();
-
-              case 11:
+              case 8:
               case "end":
                 return _context5.stop();
             }
@@ -6412,26 +6541,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee5, this);
       }));
 
-      function fetchWorkSchedules() {
-        return _fetchWorkSchedules.apply(this, arguments);
+      function fetchOldestWorkdate() {
+        return _fetchOldestWorkdate.apply(this, arguments);
       }
 
-      return fetchWorkSchedules;
+      return fetchOldestWorkdate;
     }(),
 
-    /** 全ユーザ週報データ取得 */
-    fetchWeeklyReport: function () {
-      var _fetchWeeklyReport = _asyncToGenerator(
+    /** 全ユーザ勤務表データ取得 */
+    fetchWorkSchedules: function () {
+      var _fetchWorkSchedules = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        var _this4 = this;
+
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
                 _context6.next = 2;
-                return axios.post("/api/weeklyreport/getalluser", {
-                  weekNumber: this.targetWeek
+                return axios.post("/api/workschedule/getalluser", {
+                  yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
                 });
 
               case 2:
@@ -6446,15 +6577,77 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context6.abrupt("return", false);
 
               case 6:
-                // 週報データ
-                this.weeklyreports = this.createWeeklyReport(response.data);
+                // 全ユーザの勤務表データ
+                this.workschedules = this.createWorkSchedule(response.data); // 全ユーザの勤務時間初期化
 
-              case 7:
+                this.allUserWorktimes = this.workschedules.map(function (item) {
+                  return {
+                    user_id: item["id"],
+                    worktimes: Array(_this4.workschedules[0].work_schedule.length).fill(0)
+                  };
+                }); // 勤務情報再計算
+
+                this.culBasicWorkDay(); // 基本勤務日数計算
+
+                this.culBasicWorktimeAMonth(); // 勤務時間計算
+
+                this.culWorktimes(); // ドーナツグラフ作成
+
+                this.createProjectWorklistDoughnut(1); // 線グラフ
+
+                this.createWorktimeGraph();
+
+              case 13:
               case "end":
                 return _context6.stop();
             }
           }
         }, _callee6, this);
+      }));
+
+      function fetchWorkSchedules() {
+        return _fetchWorkSchedules.apply(this, arguments);
+      }
+
+      return fetchWorkSchedules;
+    }(),
+
+    /** 全ユーザ週報データ取得 */
+    fetchWeeklyReport: function () {
+      var _fetchWeeklyReport = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                _context7.next = 2;
+                return axios.post("/api/weeklyreport/getalluser", {
+                  weekNumber: this.targetWeek
+                });
+
+              case 2:
+                response = _context7.sent;
+
+                if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
+                  _context7.next = 6;
+                  break;
+                }
+
+                this.$store.commit("error/setCode", response.status);
+                return _context7.abrupt("return", false);
+
+              case 6:
+                // 週報データ
+                this.weeklyreports = this.createWeeklyReport(response.data);
+
+              case 7:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
       }));
 
       function fetchWeeklyReport() {
@@ -6478,25 +6671,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     /** 基本勤務時間作成 */
     culBasicWorktimeAMonth: function culBasicWorktimeAMonth() {
-      var _this3 = this;
+      var _this5 = this;
 
       /** 今月の勤務時間数 */
       this.workschedules.forEach(function (val_1, idx_1, arr_1) {
         if (val_1.workingtime_type === 1) {
-          _this3.$set(_this3.workschedules[idx_1], "workingtimeMin", _this3.basicWorkDay * val_1.worktime_day);
+          _this5.$set(_this5.workschedules[idx_1], "workingtimeMin", _this5.basicWorkDay * val_1.worktime_day);
 
-          _this3.$set(_this3.workschedules[idx_1], "workingtimeMax", val_1.workingtimeMin + val_1.maxworktime_month);
+          _this5.$set(_this5.workschedules[idx_1], "workingtimeMax", val_1.workingtimeMin + val_1.maxworktime_month);
         } else if (val_1.workingtime_type === 2) {
-          _this3.$set(_this3.workschedules[idx_1], "workingtimeMin", val_1.workingtime_min);
+          _this5.$set(_this5.workschedules[idx_1], "workingtimeMin", val_1.workingtime_min);
 
-          _this3.$set(_this3.workschedules[idx_1], "workingtimeMax", val_1.workingtime_max);
+          _this5.$set(_this5.workschedules[idx_1], "workingtimeMax", val_1.workingtime_max);
         }
       });
     },
 
     /** 全ユーザ合計勤務時間計算 */
     culWorktimes: function culWorktimes() {
-      var _this4 = this;
+      var _this6 = this;
 
       var projectWorktime = [];
       this.workschedules.forEach(function (val_1, idx_1, arr_1) {
@@ -6515,27 +6708,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             });
           }); // 各ユーザの1日の勤務時間の計算
 
-          _this4.$set(_this4.allUserWorktimes[idx_1].worktimes, idx_2, Object(_util__WEBPACK_IMPORTED_MODULE_1__["getWorktime"])(val_2.starttime_hh, val_2.starttime_mm, val_2.endtime_hh, val_2.endtime_mm, val_2.breaktime, val_2.breaktime_midnight));
+          _this6.$set(_this6.allUserWorktimes[idx_1].worktimes, idx_2, Object(_util__WEBPACK_IMPORTED_MODULE_1__["getWorktime"])(val_2.starttime_hh, val_2.starttime_mm, val_2.endtime_hh, val_2.endtime_mm, val_2.breaktime, val_2.breaktime_midnight));
         }); // 1月の合計勤務時間計算
 
-        _this4.$set(_this4.workschedules[idx_1], "worktimeSum", _this4.allUserWorktimes[idx_1].worktimes.reduce(function (total, data) {
+        _this6.$set(_this6.workschedules[idx_1], "worktimeSum", _this6.allUserWorktimes[idx_1].worktimes.reduce(function (total, data) {
           return total + data;
         })); // 超過時間計算
 
 
-        _this4.$set(_this4.workschedules[idx_1], "overTime", _this4.workschedules[idx_1].worktimeSum > _this4.workschedules[idx_1].workingtimeMax ? _this4.workschedules[idx_1].worktimeSum - _this4.workschedules[idx_1].workingtimeMax : 0); // 不足時間計算
+        _this6.$set(_this6.workschedules[idx_1], "overTime", _this6.workschedules[idx_1].worktimeSum > _this6.workschedules[idx_1].workingtimeMax ? _this6.workschedules[idx_1].worktimeSum - _this6.workschedules[idx_1].workingtimeMax : 0); // 不足時間計算
 
 
-        _this4.$set(_this4.workschedules[idx_1], "shortageTime", _this4.workschedules[idx_1].worktimeSum < _this4.workschedules[idx_1].workingtimeMin ? _this4.workschedules[idx_1].workingtimeMin - _this4.workschedules[idx_1].worktimeSum : 0); // 出勤日数計算
+        _this6.$set(_this6.workschedules[idx_1], "shortageTime", _this6.workschedules[idx_1].worktimeSum < _this6.workschedules[idx_1].workingtimeMin ? _this6.workschedules[idx_1].workingtimeMin - _this6.workschedules[idx_1].worktimeSum : 0); // 出勤日数計算
 
 
-        _this4.$set(_this4.workschedules[idx_1], "WorktingDay", _this4.culWorktingDay(_this4.allUserWorktimes[idx_1].worktimes)); // 欠勤日数計算
+        _this6.$set(_this6.workschedules[idx_1], "WorktingDay", _this6.culWorktingDay(_this6.allUserWorktimes[idx_1].worktimes)); // 欠勤日数計算
 
 
-        _this4.$set(_this4.workschedules[idx_1], "AbsenceDay", _this4.workschedules[idx_1].WorktingDay < _this4.basicWorkDay ? _this4.basicWorkDay - _this4.workschedules[idx_1].WorktingDay : 0); // 超過日数計算
+        _this6.$set(_this6.workschedules[idx_1], "AbsenceDay", _this6.workschedules[idx_1].WorktingDay < _this6.basicWorkDay ? _this6.basicWorkDay - _this6.workschedules[idx_1].WorktingDay : 0); // 超過日数計算
 
 
-        _this4.$set(_this4.workschedules[idx_1], "OverDay", _this4.workschedules[idx_1].WorktingDay > _this4.basicWorkDay ? _this4.workschedules[idx_1].WorktingDay - _this4.basicWorkDay : 0);
+        _this6.$set(_this6.workschedules[idx_1], "OverDay", _this6.workschedules[idx_1].WorktingDay > _this6.basicWorkDay ? _this6.workschedules[idx_1].WorktingDay - _this6.basicWorkDay : 0);
       }); // プロジェクト毎にgroup化
       // プロジェクト毎にgroup化 ヘッダー
 
@@ -6600,7 +6793,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           user_name: item.user_name,
           count: item.count,
           worktime: item.worktime,
-          percent: _this4.grossAllProjectWorktime === 0 ? 0 : (item.worktime / _this4.projectWorktimesHeader.find(function (item2, index2) {
+          percent: _this6.grossAllProjectWorktime === 0 ? 0 : (item.worktime / _this6.projectWorktimesHeader.find(function (item2, index2) {
             return item2.project_id == item.project_id;
           }).worktime * 100).toFixed(1)
         };
@@ -6638,36 +6831,40 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       handler: function () {
         var _handler = _asyncToGenerator(
         /*#__PURE__*/
-        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
+        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
             while (1) {
-              switch (_context7.prev = _context7.next) {
+              switch (_context8.prev = _context8.next) {
                 case 0:
-                  _context7.next = 2;
-                  return this.fetchUser();
+                  _context8.next = 2;
+                  return this.fetchUsers();
 
                 case 2:
-                  _context7.next = 4;
+                  _context8.next = 4;
                   return this.fetchHolidays();
 
                 case 4:
-                  _context7.next = 6;
-                  return this.fetchOldestWorkdate();
+                  _context8.next = 6;
+                  return this.fetchProjects();
 
                 case 6:
-                  _context7.next = 8;
-                  return this.fetchWorkSchedules();
+                  _context8.next = 8;
+                  return this.fetchOldestWorkdate();
 
                 case 8:
-                  _context7.next = 10;
-                  return this.fetchWeeklyReport();
+                  _context8.next = 10;
+                  return this.fetchWorkSchedules();
 
                 case 10:
+                  _context8.next = 12;
+                  return this.fetchWeeklyReport();
+
+                case 12:
                 case "end":
-                  return _context7.stop();
+                  return _context8.stop();
               }
             }
-          }, _callee7, this);
+          }, _callee8, this);
         }));
 
         function handler() {
@@ -67206,7 +67403,126 @@ var render = function() {
                                 ],
                                 1
                               )
-                            ])
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "v-tab-item",
+                              [
+                                _c(
+                                  "v-flex",
+                                  { attrs: { xs6: "" } },
+                                  [
+                                    _c("v-select", {
+                                      attrs: {
+                                        items: _vm.projects,
+                                        "item-value": "id",
+                                        "item-text": "name",
+                                        label: "プロジェクト",
+                                        box: ""
+                                      },
+                                      on: {
+                                        change: function($event) {
+                                          return _vm.createProjectWorklistDoughnut()
+                                        }
+                                      },
+                                      model: {
+                                        value: _vm.targetProjectId,
+                                        callback: function($$v) {
+                                          _vm.targetProjectId = $$v
+                                        },
+                                        expression: "targetProjectId"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "half" }, [
+                                  _vm.canCreateDoughnut()
+                                    ? _c(
+                                        "div",
+                                        [
+                                          _c("doughnut-chart", {
+                                            attrs: {
+                                              "chart-data":
+                                                _vm.doughnutcollection
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    : _c(
+                                        "div",
+                                        [
+                                          _c(
+                                            "v-alert",
+                                            {
+                                              attrs: {
+                                                value: true,
+                                                type: "warning"
+                                              }
+                                            },
+                                            [
+                                              _vm._v(
+                                                "表示できるデータがありません。条件を変えて表示してください"
+                                              )
+                                            ]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                ])
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "v-tab-item",
+                              [
+                                _c(
+                                  "v-flex",
+                                  { attrs: { xs6: "" } },
+                                  [
+                                    _c("v-select", {
+                                      attrs: {
+                                        items: _vm.users,
+                                        "item-value": "id",
+                                        "item-text": "name",
+                                        label: "ユーザ",
+                                        box: ""
+                                      },
+                                      on: {
+                                        change: function($event) {
+                                          return _vm.createWorktimeGraph()
+                                        }
+                                      },
+                                      model: {
+                                        value: _vm.targetUserId,
+                                        callback: function($$v) {
+                                          _vm.targetUserId = $$v
+                                        },
+                                        expression: "targetUserId"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "div",
+                                  { staticClass: "half" },
+                                  [
+                                    _c("line-chart", {
+                                      attrs: {
+                                        "chart-data": _vm.datacollection
+                                      }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
                           ],
                           2
                         )

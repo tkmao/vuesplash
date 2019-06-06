@@ -203,6 +203,43 @@
                     </v-expansion-panel>
                   </div>
                 </v-tab-item>
+                <v-tab-item>
+                  <v-flex xs6>
+                    <v-select
+                      v-model="targetProjectId"
+                      :items="projects"
+                      @change="createProjectWorklistDoughnut()"
+                      item-value="id"
+                      item-text="name"
+                      label="プロジェクト"
+                      box
+                    ></v-select>
+                  </v-flex>
+                  <div class="half">
+                    <div v-if="canCreateDoughnut()">
+                      <doughnut-chart :chart-data="doughnutcollection"></doughnut-chart>
+                    </div>
+                    <div v-else>
+                      <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
+                    </div>
+                  </div>
+                </v-tab-item>
+                <v-tab-item>
+                  <v-flex xs6>
+                    <v-select
+                      v-model="targetUserId"
+                      :items="users"
+                      @change="createWorktimeGraph()"
+                      item-value="id"
+                      item-text="name"
+                      label="ユーザ"
+                      box
+                    ></v-select>
+                  </v-flex>
+                  <div class="half">
+                    <line-chart :chart-data="datacollection"></line-chart>
+                  </div>
+                </v-tab-item>
               </v-tabs>
             </div>
           </v-flex>
@@ -216,9 +253,11 @@
 import { OK } from "../util";
 import { getWorktime } from "../util";
 import { constants } from "crypto";
+import LineChart from "../LineChart.js";
+import DoughnutChart from "../DoughnutChart.js";
 
 export default {
-  components: {},
+  components: { LineChart, DoughnutChart },
   props: {
     page: {
       type: Number,
@@ -231,13 +270,21 @@ export default {
   },
   data() {
     return {
-      tabs: ["週報内容", "勤務時間内容", "プロジェクト割合"],
+      tabs: [
+        "週報内容",
+        "勤務時間内容",
+        "プロジェクト割合",
+        "PJグラフ",
+        "勤務表グラフ"
+      ],
       panel: [false, false],
       active: null,
       isAscProjectCode: false,
       isAscWorktime: false,
       targetDate: 0,
       targetWeek: 0,
+      targetProjectId: 1,
+      targetUserId: 1,
       basicWorkDay: 0,
       grossAllProjectWorktime: 0,
       oldestWorkdate: null,
@@ -293,14 +340,35 @@ export default {
         { text: "所感", value: "naweekly_report.opinion", sortable: false },
         { text: "提出状況", value: "weekly_report.is_subumited" }
       ],
-      user: [],
+      users: [],
       holidays: [],
+      projects: [],
       workschedules: [],
       weeklyreports: [],
       worktimes: [0],
       projectWorktimesHeader: [],
       projectWorktimesDetail: [],
       allUserWorktimes: [],
+      datacollection: {
+        labels: [0],
+        datasets: [
+          {
+            backgroundColor: "rgba(255,100,100,0.1)",
+            data: [0],
+            label: "default"
+          }
+        ]
+      },
+      doughnutcollection: {
+        labels: ["labels"],
+        datasets: [
+          {
+            data: [0],
+            backgroundColor: ["rgba(255, 0, 0, 0)"]
+          }
+        ]
+      }, // ドーナツグラフ
+      //doughnutcollection: null,
       pagination: { rowsPerPage: -1, sortBy: "worktime", descending: true },
       rules: {
         required: value => !!value || "This field is required."
@@ -317,6 +385,73 @@ export default {
     initialize() {
       this.targetDate = moment();
       this.targetWeek = this.targetDate.format("ggggWW");
+    },
+
+    /** 線グラフ作成(勤務時間用) */
+    createWorktimeGraph() {
+      const lineData = this.allUserWorktimes.find(
+        x => x.user_id === this.targetUserId
+      ).worktimes;
+
+      const lineData2 = lineData.map(function(value1, index1, array1) {
+        return lineData
+          .filter(function(value2, index2, array2) {
+            return index2 <= index1;
+          })
+          .reduce(function(total3, data3, index3) {
+            return index3 === 0 ? 0 : total3 + data3;
+          });
+      });
+
+      this.datacollection = {
+        labels: lineData.map(function(value, index, array) {
+          return index + 1;
+        }), // 横軸
+        datasets: [
+          {
+            backgroundColor: "rgba(255,100,100,0.1)",
+            data: lineData2, // 勤務時間加算したもの
+            label: this.users.find(x => x.id === this.targetUserId).name // name
+          }
+        ]
+      };
+    },
+
+    /** ドーナツグラフ作成(プロジェクト時間用) */
+    createProjectWorklistDoughnut() {
+      const projectWorktimesDetail = this.projectWorktimesDetail;
+      const doughnutData = projectWorktimesDetail
+        .filter(x => x.project_id === this.targetProjectId)
+        .sort(function(a, b) {
+          return a.worktime < b.worktime ? 1 : -1;
+        });
+
+      let dColors = [];
+      for (let i = 0; i < doughnutData.length; i++) {
+        let code = i * 5;
+        dColors.push("rgba(255," + code + "," + code + ",0.4)");
+      }
+
+      this.doughnutcollection = {
+        labels: doughnutData.map(y => y.user_name),
+        datasets: [
+          {
+            data: doughnutData.map(y => y.worktime),
+            backgroundColor: dColors
+          }
+        ]
+      };
+    },
+
+    /** ドーナツグラフを表示できるか確認 */
+    canCreateDoughnut(date) {
+      return this.doughnutcollection.datasets[0].data.length !== 0
+        ? this.doughnutcollection.datasets[0].data.reduce((a, b) =>
+            a > b ? a : b
+          ) === 0
+          ? false
+          : true
+        : false;
     },
 
     /** 日付変換 */
@@ -464,7 +599,7 @@ export default {
           while (startDate.unix() <= endDate.unix()) {
             work_schedule.push({
               id: null,
-              user_id: this.user.id, //
+              user_id: val_1.id, //
               week_number: startDate.format("ggggWW"), //
               workdate: startDate.format("YYYY-MM-DD"), //
               is_paid_holiday: false,
@@ -538,8 +673,8 @@ export default {
     },
 
     /** 全ユーザデータ取得 */
-    async fetchUser() {
-      const response = await axios.get(`/api/user/get`);
+    async fetchUsers() {
+      const response = await axios.get(`/api/user/getall`);
 
       if (response.status !== OK) {
         this.$store.commit("error/setCode", response.status);
@@ -547,7 +682,8 @@ export default {
       }
 
       // ユーザデータ
-      this.user = response.data;
+      this.users = response.data;
+      console.log("this.users", this.users);
     },
 
     /** 休日データ取得 */
@@ -566,6 +702,25 @@ export default {
       });
 
       this.holidays = holidays;
+    },
+
+    /** プロジェクトデータ取得 */
+    async fetchProjects() {
+      const response = await axios.get(`/api/project/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      // プロジェクトデータ
+      this.projects = response.data.map(item => {
+        return {
+          id: item.id,
+          code: item.code,
+          name: item.code + " : " + item.name
+        };
+      });
     },
 
     /** 最古の勤務表データ取得 */
@@ -612,6 +767,10 @@ export default {
       this.culBasicWorktimeAMonth();
       // 勤務時間計算
       this.culWorktimes();
+      // ドーナツグラフ作成
+      this.createProjectWorklistDoughnut(1);
+      // 線グラフ
+      this.createWorktimeGraph();
     },
 
     /** 全ユーザ週報データ取得 */
@@ -879,8 +1038,9 @@ export default {
   watch: {
     $route: {
       async handler() {
-        await this.fetchUser();
+        await this.fetchUsers();
         await this.fetchHolidays();
+        await this.fetchProjects();
         await this.fetchOldestWorkdate();
         await this.fetchWorkSchedules();
         await this.fetchWeeklyReport();
