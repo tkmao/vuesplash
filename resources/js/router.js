@@ -6,6 +6,7 @@ import PhotoDetail from './pages/PhotoDetail.vue'
 import WorkSchedule from './pages/WorkSchedule.vue'
 import WeeklyReport from './pages/WeeklyReport.vue'
 import WeeklyAnalyze from './pages/WeeklyAnalyze.vue'
+import RandomChart from './pages/RandomChart.vue'
 import UserList from './pages/UserList.vue'
 import Login from './pages/Login.vue'
 import SystemError from './pages/errors/System.vue'
@@ -19,6 +20,14 @@ const routes = [
   {
     path: '/',
     component: WorkSchedule,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
+    path: '/random',
+    component: RandomChart,
     props: route => {
       const page = route.query.page
       return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }

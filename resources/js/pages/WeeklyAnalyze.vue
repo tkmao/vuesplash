@@ -120,17 +120,17 @@
                         <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
                         <template v-slot:items="props">
                           <td width="3%">{{ props.item.id }}</td>
-                          <td width="5%">{{ props.item.name }}</td>
-                          <td width="7%">グラフ</td>
-                          <td class="text-xs-right" width="7%">{{ props.item.worktimeSum }} h</td>
+                          <td width="10%">{{ props.item.name }}</td>
+                          <td width="5%">グラフ</td>
+                          <td class="text-xs-right" width="5%">{{ props.item.worktimeSum }} h</td>
                           <td
-                            width="10%"
+                            width="5%"
                           >{{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h</td>
-                          <td class="text-xs-right" width="10%">{{ props.item.shortageTime }} h</td>
-                          <td class="text-xs-right" width="7%">{{ props.item.overTime }} h</td>
-                          <td class="text-xs-right" width="7%">{{ props.item.WorktingDay }} 日</td>
-                          <td class="text-xs-right" width="7%">{{ props.item.AbsenceDay }} 日</td>
-                          <td class="text-xs-right" width="7%">{{ props.item.OverDay }} 日</td>
+                          <td class="text-xs-right" width="5%">{{ props.item.shortageTime }} h</td>
+                          <td class="text-xs-right" width="5%">{{ props.item.overTime }} h</td>
+                          <td class="text-xs-right" width="5%">{{ props.item.WorktingDay }} 日</td>
+                          <td class="text-xs-right" width="5%">{{ props.item.AbsenceDay }} 日</td>
+                          <td class="text-xs-right" width="5%">{{ props.item.OverDay }} 日</td>
                         </template>
                         <template v-slot:no-results>
                           <v-alert
@@ -254,7 +254,7 @@ export default {
       workScheduleHeaders: [
         { text: "ID", value: "id" },
         { text: "社員名", value: "name", sortable: false },
-        { text: "勤務時間グラフ", sortable: false },
+        { text: "グラフ", sortable: false },
         { text: "勤務時間(※)", value: "worktimeSum" },
         { text: "基本勤務時間", sortable: false },
         { text: "当月残り勤務時間", value: "shortageTime" },
