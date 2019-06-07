@@ -5651,6 +5651,38 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -5923,10 +5955,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     this.initialize();
   },
   data: function data() {
-    return {
+    var _ref;
+
+    return _ref = {
       tabs: ["週報内容", "勤務時間内容", "プロジェクト割合", "PJグラフ", "勤務表グラフ"],
       panel: [false, false],
       active: null,
+      searchProject: null,
+      loadingProject: false,
+      searchUser: null,
+      loadingUser: false,
       isAscProjectCode: false,
       isAscWorktime: false,
       targetDate: 0,
@@ -5936,126 +5974,105 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       basicWorkDay: 0,
       grossAllProjectWorktime: 0,
       oldestWorkdate: null,
-      weekList: [],
-      searchProject: "",
-      searchworkSchedule: "",
-      searchWeeklyReport: "",
-      tableheaders: [{
-        text: "ID",
-        value: "user_id"
-      }, {
-        text: "社員名",
-        value: "user_name"
-      }, {
-        text: "勤務時間(※)",
-        value: "worktime"
-      }, {
-        text: "割合(%)",
-        value: "percent"
-      }],
-      workScheduleHeaders: [{
-        text: "ID",
-        value: "id"
-      }, {
-        text: "社員名",
-        value: "name",
-        sortable: false
-      }, {
-        text: "グラフ",
-        sortable: false
-      }, {
-        text: "勤務時間(※)",
-        value: "worktimeSum"
-      }, {
-        text: "基本勤務時間",
-        sortable: false
-      }, {
-        text: "当月残り勤務時間",
-        value: "shortageTime"
-      }, {
-        text: "超過時間(※)",
-        value: "overTime"
-      }, {
-        text: "出勤日数(※)",
-        value: "WorktingDay"
-      }, {
-        text: "欠勤日数(※)",
-        value: "AbsenceDay"
-      }, {
-        text: "超過日数(※)",
-        value: "OverDay"
-      }],
-      weeklyReportHeaders: [{
-        text: "ID",
-        value: "id"
-      }, {
-        text: "社員名",
-        value: "name",
-        sortable: false
-      }, {
-        text: "PJ CD",
-        value: "weekly_report.project.code"
-      }, {
-        text: "PJ名",
-        value: "weekly_report.project.name",
-        sortable: false
-      }, {
-        text: "来週の作業",
-        value: "weekly_report.nextweek_schedule",
-        sortable: false
-      }, {
-        text: "今月の休暇",
-        value: "weekly_report.site_information",
-        sortable: false
-      }, {
-        text: "現場情報",
-        value: "weekly_report.thismonth_dayoff",
-        sortable: false
-      }, {
-        text: "所感",
-        value: "naweekly_report.opinion",
-        sortable: false
-      }, {
-        text: "提出状況",
-        value: "weekly_report.is_subumited"
-      }],
-      users: [],
-      holidays: [],
-      projects: [],
-      workschedules: [],
-      weeklyreports: [],
-      worktimes: [0],
-      projectWorktimesHeader: [],
-      projectWorktimesDetail: [],
-      allUserWorktimes: [],
-      datacollection: {
-        labels: [0],
-        datasets: [{
-          backgroundColor: "rgba(255,100,100,0.1)",
-          data: [0],
-          label: "default"
-        }]
-      },
-      doughnutcollection: {
-        labels: ["labels"],
-        datasets: [{
-          data: [0],
-          backgroundColor: ["rgba(255, 0, 0, 0)"]
-        }]
-      },
-      // ドーナツグラフ
-      //doughnutcollection: null,
-      pagination: {
-        rowsPerPage: -1,
-        sortBy: "worktime",
-        descending: true
-      },
-      rules: {
-        required: function required(value) {
-          return !!value || "This field is required.";
-        }
+      weekList: []
+    }, _defineProperty(_ref, "searchProject", ""), _defineProperty(_ref, "searchworkSchedule", ""), _defineProperty(_ref, "searchWeeklyReport", ""), _defineProperty(_ref, "tableheaders", [{
+      text: "ID",
+      value: "user_id"
+    }, {
+      text: "社員名",
+      value: "user_name"
+    }, {
+      text: "勤務時間(※)",
+      value: "worktime"
+    }, {
+      text: "割合(%)",
+      value: "percent"
+    }]), _defineProperty(_ref, "workScheduleHeaders", [{
+      text: "ID",
+      value: "id"
+    }, {
+      text: "社員名",
+      value: "name",
+      sortable: false
+    }, {
+      text: "グラフ",
+      sortable: false
+    }, {
+      text: "勤務時間(※)",
+      value: "worktimeSum"
+    }, {
+      text: "基本勤務時間",
+      sortable: false
+    }, {
+      text: "当月残り勤務時間",
+      value: "shortageTime"
+    }, {
+      text: "超過時間(※)",
+      value: "overTime"
+    }, {
+      text: "出勤日数(※)",
+      value: "WorktingDay"
+    }, {
+      text: "欠勤日数(※)",
+      value: "AbsenceDay"
+    }, {
+      text: "超過日数(※)",
+      value: "OverDay"
+    }]), _defineProperty(_ref, "weeklyReportHeaders", [{
+      text: "ID",
+      value: "id"
+    }, {
+      text: "社員名",
+      value: "name",
+      sortable: false
+    }, {
+      text: "PJ CD",
+      value: "weekly_report.project.code"
+    }, {
+      text: "PJ名",
+      value: "weekly_report.project.name",
+      sortable: false
+    }, {
+      text: "来週の作業",
+      value: "weekly_report.nextweek_schedule",
+      sortable: false
+    }, {
+      text: "今月の休暇",
+      value: "weekly_report.site_information",
+      sortable: false
+    }, {
+      text: "現場情報",
+      value: "weekly_report.thismonth_dayoff",
+      sortable: false
+    }, {
+      text: "所感",
+      value: "naweekly_report.opinion",
+      sortable: false
+    }, {
+      text: "提出状況",
+      value: "weekly_report.is_subumited"
+    }]), _defineProperty(_ref, "users", []), _defineProperty(_ref, "holidays", []), _defineProperty(_ref, "projects", []), _defineProperty(_ref, "workschedules", []), _defineProperty(_ref, "weeklyreports", []), _defineProperty(_ref, "worktimes", [0]), _defineProperty(_ref, "projectWorktimesHeader", []), _defineProperty(_ref, "projectWorktimesDetail", []), _defineProperty(_ref, "allUserWorktimes", []), _defineProperty(_ref, "datacollection", {
+      labels: [0],
+      datasets: [{
+        backgroundColor: "rgba(255,100,100,0.1)",
+        data: [0],
+        label: "default"
+      }]
+    }), _defineProperty(_ref, "doughnutcollection", {
+      labels: ["labels"],
+      datasets: [{
+        data: [0],
+        backgroundColor: ["rgba(255, 0, 0, 0)"]
+      }]
+    }), _defineProperty(_ref, "pagination", {
+      rowsPerPage: -1,
+      sortBy: "worktime",
+      descending: true
+    }), _defineProperty(_ref, "rules", {
+      required: function required(value) {
+        return !!value || "This field is required.";
       }
-    };
+    }), _ref;
   },
   computed: {
     formTitle: function formTitle() {
@@ -6073,30 +6090,57 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     createWorktimeGraph: function createWorktimeGraph() {
       var _this = this;
 
-      var lineData = this.allUserWorktimes.find(function (x) {
+      // 実勤務時間データ作成
+      var worktimes = this.allUserWorktimes.find(function (x) {
         return x.user_id === _this.targetUserId;
       }).worktimes;
-      var lineData2 = lineData.map(function (value1, index1, array1) {
-        return lineData.filter(function (value2, index2, array2) {
+      var datasetWorktimes = worktimes.map(function (value1, index1, array1) {
+        return worktimes.filter(function (value2, index2, array2) {
           return index2 <= index1;
         }).reduce(function (total3, data3, index3) {
           return index3 === 0 ? 0 : total3 + data3;
         });
+      }); // 勤務時間下限・上限データ作成
+
+      var lengthDay = this.allUserWorktimes[0].worktimes.length;
+      var min = this.workschedules[0].workingtimeMin;
+      var max = this.workschedules[0].workingtimeMax;
+      var datasetWorktimeMin = new Array(lengthDay).fill(0).map(function (value, index, array) {
+        return (min * ((index + 1) / lengthDay)).toFixed(1);
       });
+      var datasetWorktimeMax = new Array(lengthDay).fill(0).map(function (value, index, array) {
+        return (max * ((index + 1) / lengthDay)).toFixed(1);
+      });
+      var datasets = []; // 実勤務時間
+
+      datasets.push({
+        label: this.users.find(function (x) {
+          return x.id === _this.targetUserId;
+        }).name,
+        // 社員名
+        backgroundColor: "rgba(255,100,100,0.1)",
+        data: datasetWorktimes // 勤務時間加算したもの
+
+      }); // 勤務時間下限
+
+      datasets.push({
+        label: "勤務時間下限",
+        backgroundColor: "rgba(0,0,255,0.1)",
+        data: datasetWorktimeMin
+      }); // 勤務時間上限
+
+      datasets.push({
+        label: "勤務時間上限",
+        backgroundColor: "rgba(0,255,0,0.1)",
+        data: datasetWorktimeMax
+      }); // Lineグラフ用データ代入
+
       this.datacollection = {
-        labels: lineData.map(function (value, index, array) {
+        labels: worktimes.map(function (value, index, array) {
           return index + 1;
         }),
         // 横軸
-        datasets: [{
-          backgroundColor: "rgba(255,100,100,0.1)",
-          data: lineData2,
-          // 勤務時間加算したもの
-          label: this.users.find(function (x) {
-            return x.id === _this.targetUserId;
-          }).name // name
-
-        }]
+        datasets: datasets
       };
     },
 
@@ -6160,7 +6204,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     /** 休日チェック */
     isHoliday: function isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+      return moment(date).day() % 6 === 0 || this.holidays.find(function (p) {
+        return p.date === date;
+      }) ? true : false;
     },
 
     /** プロジェクト参加者（特定のプロジェクトIDを引っ張る） */
@@ -6388,9 +6434,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 6:
                 // ユーザデータ
                 this.users = response.data;
-                console.log("this.users", this.users);
 
-              case 8:
+              case 7:
               case "end":
                 return _context2.stop();
             }
@@ -6410,7 +6455,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _fetchHolidays = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
-        var response, holidays;
+        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -6431,13 +6476,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 // 休日データ
-                holidays = [];
-                response.data.forEach(function (val_1, idx_1, arr_1) {
-                  holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+                this.holidays = response.data.map(function (item) {
+                  return {
+                    date: item.date,
+                    name: item.name
+                  };
                 });
-                this.holidays = holidays;
 
-              case 9:
+              case 7:
               case "end":
                 return _context3.stop();
             }
@@ -7044,6 +7090,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -7065,6 +7126,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       targetWeek: 0,
       basicWorkDay: 0,
       oldestWorkdate: null,
+      loadingProject: false,
+      searchProject: null,
       weekList: [],
       tableheaders: [],
       user: [],
@@ -7187,7 +7250,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     /** 休日チェック */
     isHoliday: function isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+      return moment(date).day() % 6 === 0 || this.holidays.find(function (p) {
+        return p.date === date;
+      }) ? true : false;
     },
 
     /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
@@ -7304,7 +7369,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _fetchHolidays = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
-        var response, holidays;
+        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -7325,13 +7390,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 // 休日データ
-                holidays = [];
-                response.data.forEach(function (val_1, idx_1, arr_1) {
-                  holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+                this.holidays = response.data.map(function (item) {
+                  return {
+                    date: item.date,
+                    name: item.name
+                  };
                 });
-                this.holidays = holidays;
 
-              case 9:
+              case 7:
               case "end":
                 return _context3.stop();
             }
@@ -7986,6 +8052,22 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -8007,6 +8089,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       basicWorkDay: 0,
       workingtimeMin: 0,
       workingtimeMax: 0,
+      loadingProject: false,
+      searchProject: null,
       tableheaders: [],
       user: [],
       isSubmitted: false,
@@ -8099,7 +8183,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     /** 休日チェック */
     isHoliday: function isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+      return moment(date).day() % 6 === 0 || this.holidays.find(function (p) {
+        return p.date === date;
+      }) ? true : false;
     },
 
     /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
@@ -8266,7 +8352,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _fetchHolidays = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
-        var response, holidays;
+        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -8287,13 +8373,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 // 休日データ
-                holidays = [];
-                response.data.forEach(function (val_1, idx_1, arr_1) {
-                  holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+                this.holidays = response.data.map(function (item) {
+                  return {
+                    date: item.date,
+                    name: item.name
+                  };
                 });
-                this.holidays = holidays;
 
-              case 9:
+              case 7:
               case "end":
                 return _context3.stop();
             }
@@ -31354,7 +31441,7 @@ exports.push([module.i, "\n.small {\n  margin: 100px auto;\n}\n.half {\n  width:
 
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
 // Module
-exports.push([module.i, "\n.holiday[data-v-7c11fd52] {\n  background: lightgray;\n}\n.is_submitted[data-v-7c11fd52] {\n  color: red;\n  font-weight: bold;\n}\n", ""]);
+exports.push([module.i, "\n.holiday[data-v-7c11fd52] {\n  background: lightgray;\n}\n.is_submitted[data-v-7c11fd52] {\n  color: red;\n  font-weight: bold;\n}\n.half[data-v-7c11fd52] {\n  width: 70%;\n  display: inline-block;\n}\n", ""]);
 
 
 
@@ -64740,7 +64827,7 @@ var render = function() {
     { staticClass: "navbar" },
     [
       _c("RouterLink", { staticClass: "navbar__brand", attrs: { to: "/" } }, [
-        _vm._v("Vuesplash")
+        _vm._v("E3sysPortal")
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "navbar__menu" }, [
@@ -66544,21 +66631,35 @@ var render = function() {
                                     _c(
                                       "v-card-title",
                                       [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            "append-icon": "search",
-                                            label: "Search",
-                                            "single-line": "",
-                                            "hide-details": ""
+                                        _c(
+                                          "v-toolbar",
+                                          {
+                                            attrs: { dark: "", color: "teal" }
                                           },
-                                          model: {
-                                            value: _vm.searchWeeklyReport,
-                                            callback: function($$v) {
-                                              _vm.searchWeeklyReport = $$v
-                                            },
-                                            expression: "searchWeeklyReport"
-                                          }
-                                        })
+                                          [
+                                            _c("v-toolbar-title", [
+                                              _vm._v("検索")
+                                            ]),
+                                            _vm._v(" "),
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                "append-icon": "search",
+                                                label:
+                                                  "社員名 or プロジェクト etc..",
+                                                "single-line": "",
+                                                "hide-details": ""
+                                              },
+                                              model: {
+                                                value: _vm.searchWeeklyReport,
+                                                callback: function($$v) {
+                                                  _vm.searchWeeklyReport = $$v
+                                                },
+                                                expression: "searchWeeklyReport"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     ),
@@ -66829,21 +66930,34 @@ var render = function() {
                                     _c(
                                       "v-card-title",
                                       [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            "append-icon": "search",
-                                            label: "Search",
-                                            "single-line": "",
-                                            "hide-details": ""
+                                        _c(
+                                          "v-toolbar",
+                                          {
+                                            attrs: { dark: "", color: "teal" }
                                           },
-                                          model: {
-                                            value: _vm.searchworkSchedule,
-                                            callback: function($$v) {
-                                              _vm.searchworkSchedule = $$v
-                                            },
-                                            expression: "searchworkSchedule"
-                                          }
-                                        })
+                                          [
+                                            _c("v-toolbar-title", [
+                                              _vm._v("検索")
+                                            ]),
+                                            _vm._v(" "),
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                "append-icon": "search",
+                                                label: "社員名 etc..",
+                                                "single-line": "",
+                                                "hide-details": ""
+                                              },
+                                              model: {
+                                                value: _vm.searchworkSchedule,
+                                                callback: function($$v) {
+                                                  _vm.searchworkSchedule = $$v
+                                                },
+                                                expression: "searchworkSchedule"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     ),
@@ -67410,29 +67524,55 @@ var render = function() {
                               [
                                 _c(
                                   "v-flex",
-                                  { attrs: { xs6: "" } },
+                                  { attrs: { xs10: "" } },
                                   [
-                                    _c("v-select", {
-                                      attrs: {
-                                        items: _vm.projects,
-                                        "item-value": "id",
-                                        "item-text": "name",
-                                        label: "プロジェクト",
-                                        box: ""
-                                      },
-                                      on: {
-                                        change: function($event) {
-                                          return _vm.createProjectWorklistDoughnut()
-                                        }
-                                      },
-                                      model: {
-                                        value: _vm.targetProjectId,
-                                        callback: function($$v) {
-                                          _vm.targetProjectId = $$v
-                                        },
-                                        expression: "targetProjectId"
-                                      }
-                                    })
+                                    _c(
+                                      "v-toolbar",
+                                      { attrs: { dark: "", color: "teal" } },
+                                      [
+                                        _c("v-toolbar-title", [_vm._v("検索")]),
+                                        _vm._v(" "),
+                                        _c("v-autocomplete", {
+                                          staticClass: "mx-3",
+                                          attrs: {
+                                            loading: _vm.loadingProject,
+                                            items: _vm.projects,
+                                            "item-value": "id",
+                                            "item-text": "name",
+                                            "search-input": _vm.searchProject,
+                                            "cache-items": "",
+                                            flat: "",
+                                            "hide-no-data": "",
+                                            "hide-details": "",
+                                            label: "プロジェクトコード/名",
+                                            "solo-inverted": ""
+                                          },
+                                          on: {
+                                            "update:searchInput": function(
+                                              $event
+                                            ) {
+                                              _vm.searchProject = $event
+                                            },
+                                            "update:search-input": function(
+                                              $event
+                                            ) {
+                                              _vm.searchProject = $event
+                                            },
+                                            change: function($event) {
+                                              return _vm.createProjectWorklistDoughnut()
+                                            }
+                                          },
+                                          model: {
+                                            value: _vm.targetProjectId,
+                                            callback: function($$v) {
+                                              _vm.targetProjectId = $$v
+                                            },
+                                            expression: "targetProjectId"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
                                   ],
                                   1
                                 ),
@@ -67481,29 +67621,57 @@ var render = function() {
                               [
                                 _c(
                                   "v-flex",
-                                  { attrs: { xs6: "" } },
+                                  { attrs: { xs10: "" } },
                                   [
-                                    _c("v-select", {
-                                      attrs: {
-                                        items: _vm.users,
-                                        "item-value": "id",
-                                        "item-text": "name",
-                                        label: "ユーザ",
-                                        box: ""
-                                      },
-                                      on: {
-                                        change: function($event) {
-                                          return _vm.createWorktimeGraph()
-                                        }
-                                      },
-                                      model: {
-                                        value: _vm.targetUserId,
-                                        callback: function($$v) {
-                                          _vm.targetUserId = $$v
-                                        },
-                                        expression: "targetUserId"
-                                      }
-                                    })
+                                    _c(
+                                      "v-toolbar",
+                                      { attrs: { dark: "", color: "teal" } },
+                                      [
+                                        _c("v-toolbar-title", [
+                                          _vm._v("ユーザ選択/検索")
+                                        ]),
+                                        _vm._v(" "),
+                                        _c("v-autocomplete", {
+                                          staticClass: "mx-3",
+                                          attrs: {
+                                            loading: _vm.loadingUser,
+                                            items: _vm.users,
+                                            "item-value": "id",
+                                            "item-text": "name",
+                                            "search-input": _vm.searchUser,
+                                            "cache-items": "",
+                                            flat: "",
+                                            "hide-no-data": "",
+                                            "hide-details": "",
+                                            label: "ユーザ名",
+                                            "solo-inverted": ""
+                                          },
+                                          on: {
+                                            "update:searchInput": function(
+                                              $event
+                                            ) {
+                                              _vm.searchUser = $event
+                                            },
+                                            "update:search-input": function(
+                                              $event
+                                            ) {
+                                              _vm.searchUser = $event
+                                            },
+                                            change: function($event) {
+                                              return _vm.createWorktimeGraph()
+                                            }
+                                          },
+                                          model: {
+                                            value: _vm.targetUserId,
+                                            callback: function($$v) {
+                                              _vm.targetUserId = $$v
+                                            },
+                                            expression: "targetUserId"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
                                   ],
                                   1
                                 ),
@@ -67694,6 +67862,38 @@ var render = function() {
                                 "item-text": "name",
                                 label: "プロジェクト",
                                 box: ""
+                              },
+                              model: {
+                                value: _vm.weeklyreport.project_id,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.weeklyreport, "project_id", $$v)
+                                },
+                                expression: "weeklyreport.project_id"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("v-autocomplete", {
+                              staticClass: "mx-3",
+                              attrs: {
+                                loading: _vm.loadingProject,
+                                items: _vm.projects,
+                                "item-value": "id",
+                                "item-text": "name",
+                                "search-input": _vm.searchProject,
+                                "cache-items": "",
+                                flat: "",
+                                "hide-no-data": "",
+                                "hide-details": "",
+                                label: "プロジェクトコード/名",
+                                "solo-inverted": ""
+                              },
+                              on: {
+                                "update:searchInput": function($event) {
+                                  _vm.searchProject = $event
+                                },
+                                "update:search-input": function($event) {
+                                  _vm.searchProject = $event
+                                }
                               },
                               model: {
                                 value: _vm.weeklyreport.project_id,
@@ -68486,6 +68686,45 @@ var render = function() {
                                     box: ""
                                   },
                                   on: {
+                                    change: function($event) {
+                                      return _vm.changeSelected(index)
+                                    }
+                                  },
+                                  model: {
+                                    value: _vm.selected[index].project_id,
+                                    callback: function($$v) {
+                                      _vm.$set(
+                                        _vm.selected[index],
+                                        "project_id",
+                                        $$v
+                                      )
+                                    },
+                                    expression: "selected[index].project_id"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("v-autocomplete", {
+                                  staticClass: "mx-3",
+                                  attrs: {
+                                    loading: _vm.loadingProject,
+                                    items: _vm.projects,
+                                    "item-value": "id",
+                                    "item-text": "name",
+                                    "search-input": _vm.searchProject,
+                                    "cache-items": "",
+                                    flat: "",
+                                    "hide-no-data": "",
+                                    "hide-details": "",
+                                    label: "プロジェクトコード/名",
+                                    "solo-inverted": ""
+                                  },
+                                  on: {
+                                    "update:searchInput": function($event) {
+                                      _vm.searchProject = $event
+                                    },
+                                    "update:search-input": function($event) {
+                                      _vm.searchProject = $event
+                                    },
                                     change: function($event) {
                                       return _vm.changeSelected(index)
                                     }

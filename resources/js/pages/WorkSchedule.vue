@@ -61,6 +61,22 @@
                     label="プロジェクト"
                     box
                   ></v-select>
+                  <v-autocomplete
+                    v-model="selected[index].project_id"
+                    :loading="loadingProject"
+                    :items="projects"
+                    item-value="id"
+                    item-text="name"
+                    :search-input.sync="searchProject"
+                    @change="changeSelected(index)"
+                    cache-items
+                    class="mx-3"
+                    flat
+                    hide-no-data
+                    hide-details
+                    label="プロジェクトコード/名"
+                    solo-inverted
+                  ></v-autocomplete>
                 </div>
               </v-flex>
 
@@ -213,6 +229,8 @@ export default {
       basicWorkDay: 0,
       workingtimeMin: 0,
       workingtimeMax: 0,
+      loadingProject: false,
+      searchProject: null,
       tableheaders: [],
       user: [],
       isSubmitted: false,
@@ -309,7 +327,10 @@ export default {
 
     /** 休日チェック */
     isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+      return moment(date).day() % 6 === 0 ||
+        this.holidays.find(p => p.date === date)
+        ? true
+        : false;
     },
 
     /** 1日の勤務時間と1日のプロジェクト時間が一致しているか確認 */
@@ -423,12 +444,12 @@ export default {
       }
 
       // 休日データ
-      let holidays = [];
-      response.data.forEach((val_1, idx_1, arr_1) => {
-        holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+      this.holidays = response.data.map(item => {
+        return {
+          date: item.date,
+          name: item.name
+        };
       });
-
-      this.holidays = holidays;
     },
 
     /** プロジェクトデータ取得 */

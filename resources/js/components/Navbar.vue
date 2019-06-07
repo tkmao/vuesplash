@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar">
-    <RouterLink class="navbar__brand" to="/">Vuesplash</RouterLink>
+    <RouterLink class="navbar__brand" to="/">E3sysPortal</RouterLink>
     <div class="navbar__menu">
       <div v-if="isLogin" class="navbar__item">
         <RouterLink class="nav-link" to="/workschedule">勤務表</RouterLink>

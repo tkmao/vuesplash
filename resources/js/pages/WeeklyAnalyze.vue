@@ -6,6 +6,10 @@
   color: red;
   font-weight: bold;
 }
+.half {
+  width: 70%;
+  display: inline-block;
+}
 </style>
 
 <template>
@@ -46,13 +50,16 @@
                     </v-card-text>
 
                     <v-card-title>
-                      <v-text-field
-                        v-model="searchWeeklyReport"
-                        append-icon="search"
-                        label="Search"
-                        single-line
-                        hide-details
-                      ></v-text-field>
+                      <v-toolbar dark color="teal">
+                        <v-toolbar-title>検索</v-toolbar-title>
+                        <v-text-field
+                          v-model="searchWeeklyReport"
+                          append-icon="search"
+                          label="社員名 or プロジェクト etc.."
+                          single-line
+                          hide-details
+                        ></v-text-field>
+                      </v-toolbar>
                     </v-card-title>
                     <v-card-text>
                       <v-data-table
@@ -100,13 +107,16 @@
                     <v-card-text>※ 当月累計</v-card-text>
 
                     <v-card-title>
-                      <v-text-field
-                        v-model="searchworkSchedule"
-                        append-icon="search"
-                        label="Search"
-                        single-line
-                        hide-details
-                      ></v-text-field>
+                      <v-toolbar dark color="teal">
+                        <v-toolbar-title>検索</v-toolbar-title>
+                        <v-text-field
+                          v-model="searchworkSchedule"
+                          append-icon="search"
+                          label="社員名 etc.."
+                          single-line
+                          hide-details
+                        ></v-text-field>
+                      </v-toolbar>
                     </v-card-title>
                     <v-card-text>
                       <v-data-table
@@ -204,16 +214,26 @@
                   </div>
                 </v-tab-item>
                 <v-tab-item>
-                  <v-flex xs6>
-                    <v-select
-                      v-model="targetProjectId"
-                      :items="projects"
-                      @change="createProjectWorklistDoughnut()"
-                      item-value="id"
-                      item-text="name"
-                      label="プロジェクト"
-                      box
-                    ></v-select>
+                  <v-flex xs10>
+                    <v-toolbar dark color="teal">
+                      <v-toolbar-title>検索</v-toolbar-title>
+                      <v-autocomplete
+                        v-model="targetProjectId"
+                        :loading="loadingProject"
+                        :items="projects"
+                        item-value="id"
+                        item-text="name"
+                        :search-input.sync="searchProject"
+                        @change="createProjectWorklistDoughnut()"
+                        cache-items
+                        class="mx-3"
+                        flat
+                        hide-no-data
+                        hide-details
+                        label="プロジェクトコード/名"
+                        solo-inverted
+                      ></v-autocomplete>
+                    </v-toolbar>
                   </v-flex>
                   <div class="half">
                     <div v-if="canCreateDoughnut()">
@@ -225,16 +245,26 @@
                   </div>
                 </v-tab-item>
                 <v-tab-item>
-                  <v-flex xs6>
-                    <v-select
-                      v-model="targetUserId"
-                      :items="users"
-                      @change="createWorktimeGraph()"
-                      item-value="id"
-                      item-text="name"
-                      label="ユーザ"
-                      box
-                    ></v-select>
+                  <v-flex xs10>
+                    <v-toolbar dark color="teal">
+                      <v-toolbar-title>ユーザ選択/検索</v-toolbar-title>
+                      <v-autocomplete
+                        v-model="targetUserId"
+                        :loading="loadingUser"
+                        :items="users"
+                        item-value="id"
+                        item-text="name"
+                        :search-input.sync="searchUser"
+                        @change="createWorktimeGraph()"
+                        cache-items
+                        class="mx-3"
+                        flat
+                        hide-no-data
+                        hide-details
+                        label="ユーザ名"
+                        solo-inverted
+                      ></v-autocomplete>
+                    </v-toolbar>
                   </v-flex>
                   <div class="half">
                     <line-chart :chart-data="datacollection"></line-chart>
@@ -279,6 +309,10 @@ export default {
       ],
       panel: [false, false],
       active: null,
+      searchProject: null,
+      loadingProject: false,
+      searchUser: null,
+      loadingUser: false,
       isAscProjectCode: false,
       isAscWorktime: false,
       targetDate: 0,
@@ -389,12 +423,13 @@ export default {
 
     /** 線グラフ作成(勤務時間用) */
     createWorktimeGraph() {
-      const lineData = this.allUserWorktimes.find(
+      // 実勤務時間データ作成
+      const worktimes = this.allUserWorktimes.find(
         x => x.user_id === this.targetUserId
       ).worktimes;
 
-      const lineData2 = lineData.map(function(value1, index1, array1) {
-        return lineData
+      const datasetWorktimes = worktimes.map(function(value1, index1, array1) {
+        return worktimes
           .filter(function(value2, index2, array2) {
             return index2 <= index1;
           })
@@ -403,17 +438,48 @@ export default {
           });
       });
 
+      // 勤務時間下限・上限データ作成
+      const lengthDay = this.allUserWorktimes[0].worktimes.length;
+      const min = this.workschedules[0].workingtimeMin;
+      const max = this.workschedules[0].workingtimeMax;
+      const datasetWorktimeMin = new Array(lengthDay)
+        .fill(0)
+        .map(function(value, index, array) {
+          return (min * ((index + 1) / lengthDay)).toFixed(1);
+        });
+      const datasetWorktimeMax = new Array(lengthDay)
+        .fill(0)
+        .map(function(value, index, array) {
+          return (max * ((index + 1) / lengthDay)).toFixed(1);
+        });
+
+      let datasets = [];
+      // 実勤務時間
+      datasets.push({
+        label: this.users.find(x => x.id === this.targetUserId).name, // 社員名
+        backgroundColor: "rgba(255,100,100,0.1)",
+        data: datasetWorktimes // 勤務時間加算したもの
+      });
+      // 勤務時間下限
+      datasets.push({
+        label: "勤務時間下限",
+        backgroundColor: "rgba(0,0,255,0.1)",
+        data: datasetWorktimeMin
+      });
+
+      // 勤務時間上限
+      datasets.push({
+        label: "勤務時間上限",
+        backgroundColor: "rgba(0,255,0,0.1)",
+        data: datasetWorktimeMax
+      });
+
+      // Lineグラフ用データ代入
       this.datacollection = {
-        labels: lineData.map(function(value, index, array) {
+        labels: worktimes.map(function(value, index, array) {
           return index + 1;
         }), // 横軸
-        datasets: [
-          {
-            backgroundColor: "rgba(255,100,100,0.1)",
-            data: lineData2, // 勤務時間加算したもの
-            label: this.users.find(x => x.id === this.targetUserId).name // name
-          }
-        ]
+        datasets: datasets
       };
     },
 
@@ -486,7 +552,10 @@ export default {
 
     /** 休日チェック */
     isHoliday(date) {
-      return moment(date).day() % 6 === 0 || this.holidays[date] ? true : false;
+      return moment(date).day() % 6 === 0 ||
+        this.holidays.find(p => p.date === date)
+        ? true
+        : false;
     },
 
     /** プロジェクト参加者（特定のプロジェクトIDを引っ張る） */
@@ -631,7 +700,6 @@ export default {
             // 1日加算
             startDate.add(1, "days");
           }
-
           responseData[idx_1].work_schedule = work_schedule;
         }
       });
@@ -683,7 +751,6 @@ export default {
 
       // ユーザデータ
       this.users = response.data;
-      console.log("this.users", this.users);
     },
 
     /** 休日データ取得 */
@@ -696,12 +763,12 @@ export default {
       }
 
       // 休日データ
-      let holidays = [];
-      response.data.forEach((val_1, idx_1, arr_1) => {
-        holidays[arr_1[idx_1].date] = arr_1[idx_1].name;
+      this.holidays = response.data.map(item => {
+        return {
+          date: item.date,
+          name: item.name
+        };
       });
-
-      this.holidays = holidays;
     },
 
     /** プロジェクトデータ取得 */
