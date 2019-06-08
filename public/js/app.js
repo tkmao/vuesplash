@@ -5934,6 +5934,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -6064,6 +6072,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         data: [0],
         backgroundColor: ["rgba(255, 0, 0, 0)"]
       }]
+    }), _defineProperty(_ref, "doughnutcollection2", {
+      labels: ["labels"],
+      datasets: [{
+        data: [0],
+        backgroundColor: ["rgba(255, 0, 0, 0)"]
+      }]
     }), _defineProperty(_ref, "pagination", {
       rowsPerPage: -1,
       sortBy: "worktime",
@@ -6141,6 +6155,32 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }),
         // 横軸
         datasets: datasets
+      };
+    },
+
+    /** ドーナツグラフ作成(プロジェクト時間用) */
+    createAllProjectWorklistDoughnut: function createAllProjectWorklistDoughnut() {
+      var projectWorktimesHeader = this.projectWorktimesHeader;
+      var doughnutData = projectWorktimesHeader.sort(function (a, b) {
+        return a.worktime < b.worktime ? 1 : -1;
+      });
+      var dColors = [];
+
+      for (var i = 0; i < doughnutData.length; i++) {
+        var code = i * 5;
+        dColors.push("rgba(255," + code + "," + code + ",0.4)");
+      }
+
+      this.doughnutcollection2 = {
+        labels: doughnutData.map(function (y) {
+          return y.project_code;
+        }),
+        datasets: [{
+          data: doughnutData.map(function (y) {
+            return y.worktime;
+          }),
+          backgroundColor: dColors
+        }]
       };
     },
 
@@ -6637,13 +6677,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
                 this.culBasicWorktimeAMonth(); // 勤務時間計算
 
-                this.culWorktimes(); // ドーナツグラフ作成
+                this.culWorktimes(); // ドーナツグラフ作成(ALL)
 
-                this.createProjectWorklistDoughnut(1); // 線グラフ
+                this.createAllProjectWorklistDoughnut(); // ドーナツグラフ作成
+
+                this.createProjectWorklistDoughnut(); // 線グラフ
 
                 this.createWorktimeGraph();
 
-              case 13:
+              case 14:
               case "end":
                 return _context6.stop();
             }
@@ -31441,7 +31483,7 @@ exports.push([module.i, "\n.small {\n  margin: 100px auto;\n}\n.half {\n  width:
 
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
 // Module
-exports.push([module.i, "\n.holiday[data-v-7c11fd52] {\n  background: lightgray;\n}\n.is_submitted[data-v-7c11fd52] {\n  color: red;\n  font-weight: bold;\n}\n.half[data-v-7c11fd52] {\n  width: 70%;\n  display: inline-block;\n}\n", ""]);
+exports.push([module.i, "\n.holiday[data-v-7c11fd52] {\n  background: lightgray;\n}\n.is_submitted[data-v-7c11fd52] {\n  color: red;\n  font-weight: bold;\n}\n.half[data-v-7c11fd52] {\n  width: 48%;\n  display: inline-block;\n}\n", ""]);
 
 
 
@@ -67576,6 +67618,42 @@ var render = function() {
                                   ],
                                   1
                                 ),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "half" }, [
+                                  _vm.canCreateDoughnut()
+                                    ? _c(
+                                        "div",
+                                        [
+                                          _c("doughnut-chart", {
+                                            attrs: {
+                                              "chart-data":
+                                                _vm.doughnutcollection2
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    : _c(
+                                        "div",
+                                        [
+                                          _c(
+                                            "v-alert",
+                                            {
+                                              attrs: {
+                                                value: true,
+                                                type: "warning"
+                                              }
+                                            },
+                                            [
+                                              _vm._v(
+                                                "表示できるデータがありません。条件を変えて表示してください"
+                                              )
+                                            ]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                ]),
                                 _vm._v(" "),
                                 _c("div", { staticClass: "half" }, [
                                   _vm.canCreateDoughnut()

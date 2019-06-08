@@ -7,7 +7,7 @@
   font-weight: bold;
 }
 .half {
-  width: 70%;
+  width: 48%;
   display: inline-block;
 }
 </style>
@@ -237,6 +237,14 @@
                   </v-flex>
                   <div class="half">
                     <div v-if="canCreateDoughnut()">
+                      <doughnut-chart :chart-data="doughnutcollection2"></doughnut-chart>
+                    </div>
+                    <div v-else>
+                      <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
+                    </div>
+                  </div>
+                  <div class="half">
+                    <div v-if="canCreateDoughnut()">
                       <doughnut-chart :chart-data="doughnutcollection"></doughnut-chart>
                     </div>
                     <div v-else>
@@ -402,7 +410,15 @@ export default {
           }
         ]
       }, // ドーナツグラフ
-      //doughnutcollection: null,
+      doughnutcollection2: {
+        labels: ["labels"],
+        datasets: [
+          {
+            data: [0],
+            backgroundColor: ["rgba(255, 0, 0, 0)"]
+          }
+        ]
+      }, // ドーナツグラフ
       pagination: { rowsPerPage: -1, sortBy: "worktime", descending: true },
       rules: {
         required: value => !!value || "This field is required."
@@ -480,6 +496,30 @@ export default {
           return index + 1;
         }), // 横軸
         datasets: datasets
+      };
+    },
+
+    /** ドーナツグラフ作成(プロジェクト時間用) */
+    createAllProjectWorklistDoughnut() {
+      const projectWorktimesHeader = this.projectWorktimesHeader;
+      const doughnutData = projectWorktimesHeader.sort(function(a, b) {
+        return a.worktime < b.worktime ? 1 : -1;
+      });
+
+      let dColors = [];
+      for (let i = 0; i < doughnutData.length; i++) {
+        let code = i * 5;
+        dColors.push("rgba(255," + code + "," + code + ",0.4)");
+      }
+
+      this.doughnutcollection2 = {
+        labels: doughnutData.map(y => y.project_code),
+        datasets: [
+          {
+            data: doughnutData.map(y => y.worktime),
+            backgroundColor: dColors
+          }
+        ]
       };
     },
 
@@ -834,8 +874,10 @@ export default {
       this.culBasicWorktimeAMonth();
       // 勤務時間計算
       this.culWorktimes();
+      // ドーナツグラフ作成(ALL)
+      this.createAllProjectWorklistDoughnut();
       // ドーナツグラフ作成
-      this.createProjectWorklistDoughnut(1);
+      this.createProjectWorklistDoughnut();
       // 線グラフ
       this.createWorktimeGraph();
     },
