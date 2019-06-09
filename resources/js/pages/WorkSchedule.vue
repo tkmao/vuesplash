@@ -52,15 +52,6 @@
                   :key="projectWorktime.key"
                 >
                   <p>プロジェクト{{ index + 1 }}</p>
-                  <v-select
-                    v-model="selected[index].project_id"
-                    @change="changeSelected(index)"
-                    :items="projects"
-                    item-value="id"
-                    item-text="name"
-                    label="プロジェクト"
-                    box
-                  ></v-select>
                   <v-autocomplete
                     v-model="selected[index].project_id"
                     :loading="loadingProject"

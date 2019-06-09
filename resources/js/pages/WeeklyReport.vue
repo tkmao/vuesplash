@@ -43,14 +43,6 @@
               <br>
               総勤務時間：{{ this.worktimeSum }} 時間
               <v-flex xs6>
-                <v-select
-                  v-model="weeklyreport.project_id"
-                  :items="projects"
-                  item-value="id"
-                  item-text="name"
-                  label="プロジェクト"
-                  box
-                ></v-select>
                 <v-autocomplete
                   v-model="weeklyreport.project_id"
                   :loading="loadingProject"

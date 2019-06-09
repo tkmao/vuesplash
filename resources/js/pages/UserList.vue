@@ -1,18 +1,7 @@
 <template>
   <div class="user-list">
     <v-app id="inspire">
-      <!--<div class="grid">-->
       <div>
-        <!--
-      <User
-        class="grid__item"
-        v-for="user in users"
-        :key="user.id"
-        :item="user"
-        @like="onLikeClick"
-      />
-        -->
-
         <v-toolbar flat color="white">
           <v-toolbar-title>ユーザリスト</v-toolbar-title>
           <v-divider class="mx-2" inset vertical></v-divider>
@@ -30,10 +19,16 @@
 
               <v-card-text>
                 <v-container grid-list-md>
+                    <p v-if="errors.length">
+    <b>Please correct the following error(s):</b>
+    <ul>
+      <li v-for="error in errors" :key="error">{{ error }}</li>
+    </ul>
+  </p>
                   <v-layout wrap>
                     <v-flex xs8 sm8 md8>
                       <v-text-field
-                        v-model="editedItem.name"
+                        v-model="userItem.name"
                         label="名前*"
                         :rules="[rules.required]"
                         clearable
@@ -42,7 +37,7 @@
                     </v-flex>
                     <v-flex xs8 sm8 md8>
                       <v-text-field
-                        v-model="editedItem.email"
+                        v-model="userItem.email"
                         label="email*"
                         :rules="[rules.required, rules.email]"
                         clearable
@@ -51,8 +46,8 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-select
-                        v-model="editedItem.usertype_id"
-                        item-text="label"
+                        v-model="userItem.usertype_id"
+                        item-text="text"
                         item-value="value"
                         :items="usertypes"
                         label="ユーザタイプID*"
@@ -61,8 +56,8 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-select
-                        v-model="editedItem.workingtime_type"
-                        item-text="label"
+                        v-model="userItem.workingtime_type"
+                        item-text="text"
                         item-value="value"
                         :items="workingtimetypes"
                         label="勤務形態*"
@@ -71,7 +66,7 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-text-field
-                        v-model="editedItem.worktime_day"
+                        v-model="userItem.worktime_day"
                         type="Number"
                         min="0"
                         label="一日の勤務時間"
@@ -79,7 +74,7 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-text-field
-                        v-model="editedItem.maxworktime_month"
+                        v-model="userItem.maxworktime_month"
                         :rules="[rules.naturalNumber]"
                         type="Number"
                         min="0"
@@ -88,7 +83,7 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-text-field
-                        v-model="editedItem.workingtime_min"
+                        v-model="userItem.workingtime_min"
                         type="Number"
                         min="0"
                         label="勤務時間下限"
@@ -96,18 +91,18 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-text-field
-                        v-model="editedItem.workingtime_max"
+                        v-model="userItem.workingtime_max"
                         type="Number"
                         min="0"
                         label="勤務時間上限"
                       ></v-text-field>
                     </v-flex>
                     <v-flex xs5 sm5 md5>
-                      <v-text-field v-model="editedItem.hiredate" type="date" label="入社日"></v-text-field>
+                      <v-text-field v-model="userItem.hiredate" type="date" label="入社日"></v-text-field>
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-text-field
-                        v-model="editedItem.paid_holiday"
+                        v-model="userItem.paid_holiday"
                         type="Number"
                         min="0"
                         label="有給日数"
@@ -115,8 +110,8 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-select
-                        v-model="editedItem.is_admin"
-                        item-text="label"
+                        v-model="userItem.is_admin"
+                        item-text="text"
                         item-value="value"
                         :items="isadmin"
                         label="管理者フラグ*"
@@ -125,8 +120,8 @@
                     </v-flex>
                     <v-flex xs5 sm5 md5>
                       <v-select
-                        v-model="editedItem.is_deleted"
-                        item-text="label"
+                        v-model="userItem.is_deleted"
+                        item-text="text"
                         item-value="value"
                         :items="isdelete"
                         label="削除フラグ*"
@@ -180,25 +175,7 @@
             </td>
           </template>
         </v-data-table>
-
-        <!--
-      <div class="example-modal-window">
-        <p>ボタンを押すとモーダルウィンドウが開きます</p>
-        <button @click="openModal">開く</button>
-
-        <User @close="closeModal" v-if="modal">
-          <p>Vue.js Modal Window!</p>
-          <div>
-            <input v-model="message">
-          </div>
-          <template slot="footer">
-            <button @click="doSend">送信</button>
-          </template>
-        </User>
       </div>
-        -->
-      </div>
-      <!--<Pagination :current-page="currentPage" :last-page="lastPage"/>-->
     </v-app>
   </div>
 </template>
@@ -225,38 +202,37 @@ export default {
   },
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "ユーザ新規作成" : "ユーザ編集";
+      return this.isUserExist ? "ユーザ編集" : "ユーザ新規作成";
     }
   },
   data() {
     return {
       dialog: false,
-      photos: [],
       usertypes: [
-        { label: "マネージャー", value: 1 },
-        { label: "正社員", value: 2 },
-        { label: "契約社員", value: 3 },
-        { label: "アルバイト", value: 4 },
-        { label: "インターン", value: 5 }
+        { text: "マネージャー", value: 1 },
+        { text: "正社員", value: 2 },
+        { text: "契約社員", value: 3 },
+        { text: "アルバイト", value: 4 },
+        { text: "インターン", value: 5 }
       ],
       workingtimetypes: [
-        { label: "勤務日数により変動", value: 1 },
-        { label: "固定勤務時間", value: 2 }
+        { text: "勤務日数により変動", value: 1 },
+        { text: "固定勤務時間", value: 2 }
       ],
       isadmin: [
-        { label: "一般ユーザ", value: false },
-        { label: "管理者", value: true }
+        { text: "一般ユーザ", value: false },
+        { text: "管理者", value: true }
       ],
       isdelete: [
-        { label: "active", value: false },
-        { label: "not active", value: true }
+        { text: "active", value: false },
+        { text: "not active", value: true }
       ],
       rules: {
         required: value => !!value || "This field is required.",
         naturalNumber: value => value > 0 || "Number only.",
         email: value => {
           const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(value) || "Not an email address.";
+          return pattern.test(value) || "Not an email address."; // .test() はJSの正規表現のパターンマッチングで使用。https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
         }
       },
       headers: [
@@ -281,34 +257,21 @@ export default {
         { text: "削除", value: 0, sortable: false }
       ],
       pagination: { rowsPerPage: -1 },
+      errors: [],
       users: [],
-      editedIndex: -1,
-      editedItem: {
-        id: "",
-        name: "",
-        email: "",
-        usertype_id: null,
-        workingtime_type: null,
-        worktime_day: null,
-        maxworktime_month: null,
-        workingtime_min: null,
-        workingtime_max: null,
-        hiredate: null,
-        paid_holiday: null,
-        is_admin: false,
-        is_deleted: false
-      },
-      defaultItem: {
-        id: "",
-        name: "",
-        email: "test@e3sys.co.jp",
+      isUserExist: false,
+      userItem: null,
+      userItemDefault: {
+        id: null,
+        name: null,
+        email: "@e3sys.co.jp",
         usertype_id: 2,
         workingtime_type: 1,
         worktime_day: 8,
         maxworktime_month: 20,
         workingtime_min: 160,
         workingtime_max: 180,
-        hiredate: "2019-05-01",
+        hiredate: "2019-06-01",
         paid_holiday: 10,
         is_admin: false,
         is_deleted: false
@@ -323,81 +286,29 @@ export default {
     this.initialize();
   },
   methods: {
-    async fetchPhotos() {
-      const response = await axios.get(`/api/photos/?page=${this.page}`);
+    /** 初期化 */
+    initialize() {
+      this.userItem = Object.assign({}, this.userItemDefault);
+    },
+
+    /** ユーザ一覧取得 */
+    async fetchUsers() {
+      const response = await axios.get(`/api/user/getall`);
 
       if (response.status !== OK) {
         this.$store.commit("error/setCode", response.status);
         return false;
       }
 
-      //this.currentPage = response.data.current_page;
-      //this.lastPage = response.data.last_page;
       this.users = response.data;
     },
-    onLikeClick({ id, liked }) {
-      console.log("onLikeClick");
-      if (!this.$store.getters["auth/check"]) {
-        alert("いいね機能を使うにはログインしてください。");
-        return false;
-      }
 
-      if (liked) {
-        this.unlike(id);
-      } else {
-        this.like(id);
-      }
-    },
-    async like(id) {
-      console.log("like");
-      const response = await axios.put(`/api/photos/${id}/like`);
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-
-      this.photos = this.photos.map(photo => {
-        if (photo.id === response.data.photo_id) {
-          photo.likes_count += 1;
-          photo.liked_by_user = true;
-        }
-        return photo;
-      });
-    },
-    async unlike(id) {
-      console.log("unlike");
-      const response = await axios.delete(`/api/photos/${id}/like`);
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-
-      this.photos = this.photos.map(photo => {
-        if (photo.id === response.data.photo_id) {
-          photo.likes_count -= 1;
-          photo.liked_by_user = false;
-        }
-        return photo;
-      });
-    },
-    async storeuser(editedItem) {
-      console.log("storeuser");
-      const response = await axios.post(`/api/user/${editedItem.id}/store`, {
-        id: editedItem.id,
-        name: editedItem.name,
-        email: editedItem.email,
-        usertype_id: editedItem.usertype_id,
-        workingtime_type: editedItem.workingtime_type,
-        worktime_day: editedItem.worktime_day,
-        maxworktime_month: editedItem.maxworktime_month,
-        workingtime_min: editedItem.workingtime_min,
-        workingtime_max: editedItem.workingtime_max,
-        hiredate: editedItem.hiredate,
-        paid_holiday: editedItem.paid_holiday,
-        is_admin: editedItem.is_admin,
-        is_deleted: editedItem.is_deleted
+    /** ユーザデータ登録 */
+    async store() {
+      console.log("userItem", this.userItem);
+      console.log("rules", this.rules);
+      const response = await axios.post(`/api/user/store`, {
+        user: this.userItem
       });
 
       if (response.status !== OK) {
@@ -405,71 +316,88 @@ export default {
         return false;
       }
     },
-    openModal() {
-      console.log("openModal");
-      this.modal = true;
-    },
-    closeModal() {
-      console.log("closeModal");
-      this.modal = false;
-    },
-    doSend() {
-      console.log("doSend");
-      if (this.message.length > 0) {
-        alert(this.message);
-        this.message = "";
-        this.closeModal();
-      } else {
-        alert("メッセージを入力してください");
+
+    /** ユーザデータ編集 */
+    async edit() {
+      console.log("userItem", this.userItem);
+      const response = await axios.post(`/api/user/edit`, {
+        user: this.userItem
+      });
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
       }
     },
-    initialize() {
-      console.log("initialize");
-      this.editedItem = Object.assign({}, this.defaultItem);
+
+    /** ユーザデータ削除 */
+    async delete() {
+      console.log("userItem", this.userItem);
+      const response = await axios.post(`/api/user/delete`, {
+        userId: this.userItem.id
+      });
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
     },
 
+    /** 編集画面オープン */
     editItem(item) {
-      console.log("editItem");
-      this.editedIndex = this.users.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.isUserExist = this.users.indexOf(item) > -1 ? true : false;
+      this.userItem = Object.assign({}, item);
       this.dialog = true;
     },
 
+    /** ユーザ削除アラート開く */
     deleteItem(item) {
-      console.log("deleteItem");
-      const index = this.users.indexOf(item);
       confirm("Are you sure you want to delete this item?") &&
-        this.users.splice(index, 1);
+        this.delete() &&
+        this.fetchUsers();
     },
 
+    /** モーダルクローズ */
     close() {
-      console.log("close");
+      // モーダルクローズ
       this.dialog = false;
+      // モーダルをクローズするタイミングで、デフォルト値に変更される値を確認できないようにするために、少し送らせて値を変更
       setTimeout(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
+        this.userItem = Object.assign({}, this.userItemDefault);
+        this.isUserExist = false;
       }, 300);
     },
 
+    /** データ登録・編集 */
     save() {
       console.log("save");
-      if (this.editedIndex > -1) {
-        Object.assign(this.users[this.editedIndex], this.editedItem);
-        this.storeuser(this.editedItem);
+      if (this.checkValidation()) {
+        // データ登録・編集
+        this.isUserExist ? this.edit() : this.store();
+        // モーダルクローズ
+        this.close();
+        // ユーザ一覧取得
+        this.fetchUsers();
       } else {
-        this.users.push(this.editedItem);
+        console.log('false');
       }
-      this.close();
+    },
+
+    /** バリデーション */
+    checkValidation() {
+      console.log("checkValidation", this.userItem);
+      return false;
     }
   },
   watch: {
     $route: {
       async handler() {
         console.log("handler");
-        await this.fetchPhotos();
+        await this.fetchUsers();
       },
       immediate: true
     },
+
     dialog(val) {
       console.log("dialog", val);
       val || this.close();

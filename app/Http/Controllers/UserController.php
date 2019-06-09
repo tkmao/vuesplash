@@ -33,17 +33,6 @@ class UserController extends Controller
     }
 
     /**
-     * ユーザ登録
-     * @param string $id
-     * @return User
-     */
-    public function store(Request $request)
-    {
-        dd($request->all());
-        //$result = $this->userServiceInterface->store($request);
-    }
-
-    /**
      * ユーザ情報取得
      * @param string $id
      * @return User
@@ -65,5 +54,41 @@ class UserController extends Controller
         $users = $this->userServiceInterface->all();
 
         return $users ?? abort(404);
+    }
+
+        /**
+     * ユーザ登録
+     * @param Request $request
+     * @return User
+     */
+    public function store(Request $request)
+    {
+        dd('store', $request->all());
+        $requestArray = $request->all();
+        $result = $this->userServiceInterface->store($requestArray);
+    }
+
+        /**
+     * ユーザ編集
+     * @param Request $request
+     * @return User
+     */
+    public function edit(Request $request)
+    {
+        dd('edit', $request->all());
+        $requestArray = $request->all();
+        $result = $this->userServiceInterface->edit($requestArray);
+    }
+
+        /**
+     * ユーザ削除
+     * @param Request $request
+     * @return User
+     */
+    public function delete(Request $request)
+    {
+        dd('delete', $request->all());
+        $requestArray = $request->all();
+        $result = $this->userServiceInterface->delete($requestArray['userId']);
     }
 }

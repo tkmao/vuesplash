@@ -34,7 +34,7 @@ Route::put('/photos/{id}/like', 'PhotoController@like')->name('photo.like');
 Route::delete('/photos/{id}/like', 'PhotoController@unlike');
 
 // ユーザ登録
-Route::post('/user/{id}/store', 'PhotoController@storeUser')->name('user.store');
+Route::post('/user/{id}/store', 'PhotoController@storeUser')->name('user.storeuser');
 
 // 勤務表取得
 Route::post('/workschedule/get', 'WorkScheduleController@index')->name('workschedule.index');
@@ -68,3 +68,9 @@ Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall'
 Route::post('/user/get', 'UserController@get')->name('user.get');
 // ユーザ一覧取得
 Route::get('/user/getall', 'UserController@getAll')->name('user.getall');
+// ユーザ登録
+Route::post('/user/store', 'UserController@store')->name('user.store');
+// ユーザ編集
+Route::post('/user/edit', 'UserController@edit')->name('user.edit');
+// ユーザ削除
+Route::post('/user/delete', 'UserController@delete')->name('user.delete');

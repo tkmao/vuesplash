@@ -5134,29 +5134,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 
@@ -5177,48 +5154,47 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     formTitle: function formTitle() {
-      return this.editedIndex === -1 ? "ユーザ新規作成" : "ユーザ編集";
+      return this.isUserExist ? "ユーザ編集" : "ユーザ新規作成";
     }
   },
   data: function data() {
     return {
       dialog: false,
-      photos: [],
       usertypes: [{
-        label: "マネージャー",
+        text: "マネージャー",
         value: 1
       }, {
-        label: "正社員",
+        text: "正社員",
         value: 2
       }, {
-        label: "契約社員",
+        text: "契約社員",
         value: 3
       }, {
-        label: "アルバイト",
+        text: "アルバイト",
         value: 4
       }, {
-        label: "インターン",
+        text: "インターン",
         value: 5
       }],
       workingtimetypes: [{
-        label: "勤務日数により変動",
+        text: "勤務日数により変動",
         value: 1
       }, {
-        label: "固定勤務時間",
+        text: "固定勤務時間",
         value: 2
       }],
       isadmin: [{
-        label: "一般ユーザ",
+        text: "一般ユーザ",
         value: false
       }, {
-        label: "管理者",
+        text: "管理者",
         value: true
       }],
       isdelete: [{
-        label: "active",
+        text: "active",
         value: false
       }, {
-        label: "not active",
+        text: "not active",
         value: true
       }],
       rules: {
@@ -5230,7 +5206,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         },
         email: function email(value) {
           var pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(value) || "Not an email address.";
+          return pattern.test(value) || "Not an email address."; // .test() はJSの正規表現のパターンマッチングで使用。https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
         }
       },
       headers: [{
@@ -5285,34 +5261,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       pagination: {
         rowsPerPage: -1
       },
+      errors: [],
       users: [],
-      editedIndex: -1,
-      editedItem: {
-        id: "",
-        name: "",
-        email: "",
-        usertype_id: null,
-        workingtime_type: null,
-        worktime_day: null,
-        maxworktime_month: null,
-        workingtime_min: null,
-        workingtime_max: null,
-        hiredate: null,
-        paid_holiday: null,
-        is_admin: false,
-        is_deleted: false
-      },
-      defaultItem: {
-        id: "",
-        name: "",
-        email: "test@e3sys.co.jp",
+      isUserExist: false,
+      userItem: null,
+      userItemDefault: {
+        id: null,
+        name: null,
+        email: "@e3sys.co.jp",
         usertype_id: 2,
         workingtime_type: 1,
         worktime_day: 8,
         maxworktime_month: 20,
         workingtime_min: 160,
         workingtime_max: 180,
-        hiredate: "2019-05-01",
+        hiredate: "2019-06-01",
         paid_holiday: 10,
         is_admin: false,
         is_deleted: false
@@ -5327,8 +5290,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     this.initialize();
   },
   methods: {
-    fetchPhotos: function () {
-      var _fetchPhotos = _asyncToGenerator(
+    /** 初期化 */
+    initialize: function initialize() {
+      this.userItem = Object.assign({}, this.userItemDefault);
+    },
+
+    /** ユーザ一覧取得 */
+    fetchUsers: function () {
+      var _fetchUsers = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
         var response;
@@ -5337,7 +5306,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context.prev = _context.next) {
               case 0:
                 _context.next = 2;
-                return axios.get("/api/photos/?page=".concat(this.page));
+                return axios.get("/api/user/getall");
 
               case 2:
                 response = _context.sent;
@@ -5351,8 +5320,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context.abrupt("return", false);
 
               case 6:
-                //this.currentPage = response.data.current_page;
-                //this.lastPage = response.data.last_page;
                 this.users = response.data;
 
               case 7:
@@ -5363,61 +5330,40 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee, this);
       }));
 
-      function fetchPhotos() {
-        return _fetchPhotos.apply(this, arguments);
+      function fetchUsers() {
+        return _fetchUsers.apply(this, arguments);
       }
 
-      return fetchPhotos;
+      return fetchUsers;
     }(),
-    onLikeClick: function onLikeClick(_ref) {
-      var id = _ref.id,
-          liked = _ref.liked;
-      console.log("onLikeClick");
 
-      if (!this.$store.getters["auth/check"]) {
-        alert("いいね機能を使うにはログインしてください。");
-        return false;
-      }
-
-      if (liked) {
-        this.unlike(id);
-      } else {
-        this.like(id);
-      }
-    },
-    like: function () {
-      var _like = _asyncToGenerator(
+    /** ユーザデータ登録 */
+    store: function () {
+      var _store = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(id) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                console.log("like");
-                _context2.next = 3;
-                return axios.put("/api/photos/".concat(id, "/like"));
+                console.log("userItem", this.userItem);
+                console.log("rules", this.rules);
+                _context2.next = 4;
+                return axios.post("/api/user/store", {
+                  user: this.userItem
+                });
 
-              case 3:
+              case 4:
                 response = _context2.sent;
 
                 if (!(response.status !== _util__WEBPACK_IMPORTED_MODULE_1__["OK"])) {
-                  _context2.next = 7;
+                  _context2.next = 8;
                   break;
                 }
 
                 this.$store.commit("error/setCode", response.status);
                 return _context2.abrupt("return", false);
-
-              case 7:
-                this.photos = this.photos.map(function (photo) {
-                  if (photo.id === response.data.photo_id) {
-                    photo.likes_count += 1;
-                    photo.liked_by_user = true;
-                  }
-
-                  return photo;
-                });
 
               case 8:
               case "end":
@@ -5427,24 +5373,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee2, this);
       }));
 
-      function like(_x) {
-        return _like.apply(this, arguments);
+      function store() {
+        return _store.apply(this, arguments);
       }
 
-      return like;
+      return store;
     }(),
-    unlike: function () {
-      var _unlike = _asyncToGenerator(
+
+    /** ユーザデータ編集 */
+    edit: function () {
+      var _edit = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(id) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                console.log("unlike");
+                console.log("userItem", this.userItem);
                 _context3.next = 3;
-                return axios["delete"]("/api/photos/".concat(id, "/like"));
+                return axios.post("/api/user/edit", {
+                  user: this.userItem
+                });
 
               case 3:
                 response = _context3.sent;
@@ -5458,16 +5408,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return _context3.abrupt("return", false);
 
               case 7:
-                this.photos = this.photos.map(function (photo) {
-                  if (photo.id === response.data.photo_id) {
-                    photo.likes_count -= 1;
-                    photo.liked_by_user = false;
-                  }
-
-                  return photo;
-                });
-
-              case 8:
               case "end":
                 return _context3.stop();
             }
@@ -5475,37 +5415,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee3, this);
       }));
 
-      function unlike(_x2) {
-        return _unlike.apply(this, arguments);
+      function edit() {
+        return _edit.apply(this, arguments);
       }
 
-      return unlike;
+      return edit;
     }(),
-    storeuser: function () {
-      var _storeuser = _asyncToGenerator(
+
+    /** ユーザデータ削除 */
+    "delete": function () {
+      var _delete2 = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(editedItem) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                console.log("storeuser");
+                console.log("userItem", this.userItem);
                 _context4.next = 3;
-                return axios.post("/api/user/".concat(editedItem.id, "/store"), {
-                  id: editedItem.id,
-                  name: editedItem.name,
-                  email: editedItem.email,
-                  usertype_id: editedItem.usertype_id,
-                  workingtime_type: editedItem.workingtime_type,
-                  worktime_day: editedItem.worktime_day,
-                  maxworktime_month: editedItem.maxworktime_month,
-                  workingtime_min: editedItem.workingtime_min,
-                  workingtime_max: editedItem.workingtime_max,
-                  hiredate: editedItem.hiredate,
-                  paid_holiday: editedItem.paid_holiday,
-                  is_admin: editedItem.is_admin,
-                  is_deleted: editedItem.is_deleted
+                return axios.post("/api/user/delete", {
+                  userId: this.userItem.id
                 });
 
               case 3:
@@ -5527,67 +5457,58 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee4, this);
       }));
 
-      function storeuser(_x3) {
-        return _storeuser.apply(this, arguments);
+      function _delete() {
+        return _delete2.apply(this, arguments);
       }
 
-      return storeuser;
+      return _delete;
     }(),
-    openModal: function openModal() {
-      console.log("openModal");
-      this.modal = true;
-    },
-    closeModal: function closeModal() {
-      console.log("closeModal");
-      this.modal = false;
-    },
-    doSend: function doSend() {
-      console.log("doSend");
 
-      if (this.message.length > 0) {
-        alert(this.message);
-        this.message = "";
-        this.closeModal();
-      } else {
-        alert("メッセージを入力してください");
-      }
-    },
-    initialize: function initialize() {
-      console.log("initialize");
-      this.editedItem = Object.assign({}, this.defaultItem);
-    },
+    /** 編集画面オープン */
     editItem: function editItem(item) {
-      console.log("editItem");
-      this.editedIndex = this.users.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.isUserExist = this.users.indexOf(item) > -1 ? true : false;
+      this.userItem = Object.assign({}, item);
       this.dialog = true;
     },
+
+    /** ユーザ削除アラート開く */
     deleteItem: function deleteItem(item) {
-      console.log("deleteItem");
-      var index = this.users.indexOf(item);
-      confirm("Are you sure you want to delete this item?") && this.users.splice(index, 1);
+      confirm("Are you sure you want to delete this item?") && this["delete"]() && this.fetchUsers();
     },
+
+    /** モーダルクローズ */
     close: function close() {
       var _this = this;
 
-      console.log("close");
-      this.dialog = false;
+      // モーダルクローズ
+      this.dialog = false; // モーダルをクローズするタイミングで、デフォルト値に変更される値を確認できないようにするために、少し送らせて値を変更
+
       setTimeout(function () {
-        _this.editedItem = Object.assign({}, _this.defaultItem);
-        _this.editedIndex = -1;
+        _this.userItem = Object.assign({}, _this.userItemDefault);
+        _this.isUserExist = false;
       }, 300);
     },
+
+    /** データ登録・編集 */
     save: function save() {
       console.log("save");
 
-      if (this.editedIndex > -1) {
-        Object.assign(this.users[this.editedIndex], this.editedItem);
-        this.storeuser(this.editedItem);
-      } else {
-        this.users.push(this.editedItem);
-      }
+      if (this.checkValidation()) {
+        // データ登録・編集
+        this.isUserExist ? this.edit() : this.store(); // モーダルクローズ
 
-      this.close();
+        this.close(); // ユーザ一覧取得
+
+        this.fetchUsers();
+      } else {
+        console.log('false');
+      }
+    },
+
+    /** バリデーション */
+    checkValidation: function checkValidation() {
+      console.log("checkValidation", this.userItem);
+      return false;
     }
   },
   watch: {
@@ -5602,7 +5523,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 case 0:
                   console.log("handler");
                   _context5.next = 3;
-                  return this.fetchPhotos();
+                  return this.fetchUsers();
 
                 case 3:
                 case "end":
@@ -7139,14 +7060,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 
@@ -7902,15 +7815,6 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -66025,6 +65929,26 @@ var render = function() {
                               "v-container",
                               { attrs: { "grid-list-md": "" } },
                               [
+                                _vm.errors.length
+                                  ? _c("p", [
+                                      _c("b", [
+                                        _vm._v(
+                                          "Please correct the following error(s):"
+                                        )
+                                      ]),
+                                      _vm._v(" "),
+                                      _c(
+                                        "ul",
+                                        _vm._l(_vm.errors, function(error) {
+                                          return _c("li", { key: error }, [
+                                            _vm._v(_vm._s(error))
+                                          ])
+                                        }),
+                                        0
+                                      )
+                                    ])
+                                  : _vm._e(),
+                                _vm._v(" "),
                                 _c(
                                   "v-layout",
                                   { attrs: { wrap: "" } },
@@ -66041,15 +65965,15 @@ var render = function() {
                                             required: ""
                                           },
                                           model: {
-                                            value: _vm.editedItem.name,
+                                            value: _vm.userItem.name,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "name",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.name"
+                                            expression: "userItem.name"
                                           }
                                         })
                                       ],
@@ -66071,15 +65995,15 @@ var render = function() {
                                             required: ""
                                           },
                                           model: {
-                                            value: _vm.editedItem.email,
+                                            value: _vm.userItem.email,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "email",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.email"
+                                            expression: "userItem.email"
                                           }
                                         })
                                       ],
@@ -66092,22 +66016,22 @@ var render = function() {
                                       [
                                         _c("v-select", {
                                           attrs: {
-                                            "item-text": "label",
+                                            "item-text": "text",
                                             "item-value": "value",
                                             items: _vm.usertypes,
                                             label: "ユーザタイプID*",
                                             required: ""
                                           },
                                           model: {
-                                            value: _vm.editedItem.usertype_id,
+                                            value: _vm.userItem.usertype_id,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "usertype_id",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.usertype_id"
+                                            expression: "userItem.usertype_id"
                                           }
                                         })
                                       ],
@@ -66120,7 +66044,7 @@ var render = function() {
                                       [
                                         _c("v-select", {
                                           attrs: {
-                                            "item-text": "label",
+                                            "item-text": "text",
                                             "item-value": "value",
                                             items: _vm.workingtimetypes,
                                             label: "勤務形態*",
@@ -66128,16 +66052,16 @@ var render = function() {
                                           },
                                           model: {
                                             value:
-                                              _vm.editedItem.workingtime_type,
+                                              _vm.userItem.workingtime_type,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "workingtime_type",
                                                 $$v
                                               )
                                             },
                                             expression:
-                                              "editedItem.workingtime_type"
+                                              "userItem.workingtime_type"
                                           }
                                         })
                                       ],
@@ -66155,16 +66079,15 @@ var render = function() {
                                             label: "一日の勤務時間"
                                           },
                                           model: {
-                                            value: _vm.editedItem.worktime_day,
+                                            value: _vm.userItem.worktime_day,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "worktime_day",
                                                 $$v
                                               )
                                             },
-                                            expression:
-                                              "editedItem.worktime_day"
+                                            expression: "userItem.worktime_day"
                                           }
                                         })
                                       ],
@@ -66184,16 +66107,16 @@ var render = function() {
                                           },
                                           model: {
                                             value:
-                                              _vm.editedItem.maxworktime_month,
+                                              _vm.userItem.maxworktime_month,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "maxworktime_month",
                                                 $$v
                                               )
                                             },
                                             expression:
-                                              "editedItem.maxworktime_month"
+                                              "userItem.maxworktime_month"
                                           }
                                         })
                                       ],
@@ -66211,17 +66134,16 @@ var render = function() {
                                             label: "勤務時間下限"
                                           },
                                           model: {
-                                            value:
-                                              _vm.editedItem.workingtime_min,
+                                            value: _vm.userItem.workingtime_min,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "workingtime_min",
                                                 $$v
                                               )
                                             },
                                             expression:
-                                              "editedItem.workingtime_min"
+                                              "userItem.workingtime_min"
                                           }
                                         })
                                       ],
@@ -66239,17 +66161,16 @@ var render = function() {
                                             label: "勤務時間上限"
                                           },
                                           model: {
-                                            value:
-                                              _vm.editedItem.workingtime_max,
+                                            value: _vm.userItem.workingtime_max,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "workingtime_max",
                                                 $$v
                                               )
                                             },
                                             expression:
-                                              "editedItem.workingtime_max"
+                                              "userItem.workingtime_max"
                                           }
                                         })
                                       ],
@@ -66266,15 +66187,15 @@ var render = function() {
                                             label: "入社日"
                                           },
                                           model: {
-                                            value: _vm.editedItem.hiredate,
+                                            value: _vm.userItem.hiredate,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "hiredate",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.hiredate"
+                                            expression: "userItem.hiredate"
                                           }
                                         })
                                       ],
@@ -66292,16 +66213,15 @@ var render = function() {
                                             label: "有給日数"
                                           },
                                           model: {
-                                            value: _vm.editedItem.paid_holiday,
+                                            value: _vm.userItem.paid_holiday,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "paid_holiday",
                                                 $$v
                                               )
                                             },
-                                            expression:
-                                              "editedItem.paid_holiday"
+                                            expression: "userItem.paid_holiday"
                                           }
                                         })
                                       ],
@@ -66314,22 +66234,22 @@ var render = function() {
                                       [
                                         _c("v-select", {
                                           attrs: {
-                                            "item-text": "label",
+                                            "item-text": "text",
                                             "item-value": "value",
                                             items: _vm.isadmin,
                                             label: "管理者フラグ*",
                                             required: ""
                                           },
                                           model: {
-                                            value: _vm.editedItem.is_admin,
+                                            value: _vm.userItem.is_admin,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "is_admin",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.is_admin"
+                                            expression: "userItem.is_admin"
                                           }
                                         })
                                       ],
@@ -66342,22 +66262,22 @@ var render = function() {
                                       [
                                         _c("v-select", {
                                           attrs: {
-                                            "item-text": "label",
+                                            "item-text": "text",
                                             "item-value": "value",
                                             items: _vm.isdelete,
                                             label: "削除フラグ*",
                                             required: ""
                                           },
                                           model: {
-                                            value: _vm.editedItem.is_deleted,
+                                            value: _vm.userItem.is_deleted,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
+                                                _vm.userItem,
                                                 "is_deleted",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.is_deleted"
+                                            expression: "userItem.is_deleted"
                                           }
                                         })
                                       ],
@@ -67933,23 +67853,6 @@ var render = function() {
                           "v-flex",
                           { attrs: { xs6: "" } },
                           [
-                            _c("v-select", {
-                              attrs: {
-                                items: _vm.projects,
-                                "item-value": "id",
-                                "item-text": "name",
-                                label: "プロジェクト",
-                                box: ""
-                              },
-                              model: {
-                                value: _vm.weeklyreport.project_id,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.weeklyreport, "project_id", $$v)
-                                },
-                                expression: "weeklyreport.project_id"
-                              }
-                            }),
-                            _vm._v(" "),
                             _c("v-autocomplete", {
                               staticClass: "mx-3",
                               attrs: {
@@ -68754,32 +68657,6 @@ var render = function() {
                                 _c("p", [
                                   _vm._v("プロジェクト" + _vm._s(index + 1))
                                 ]),
-                                _vm._v(" "),
-                                _c("v-select", {
-                                  attrs: {
-                                    items: _vm.projects,
-                                    "item-value": "id",
-                                    "item-text": "name",
-                                    label: "プロジェクト",
-                                    box: ""
-                                  },
-                                  on: {
-                                    change: function($event) {
-                                      return _vm.changeSelected(index)
-                                    }
-                                  },
-                                  model: {
-                                    value: _vm.selected[index].project_id,
-                                    callback: function($$v) {
-                                      _vm.$set(
-                                        _vm.selected[index],
-                                        "project_id",
-                                        $$v
-                                      )
-                                    },
-                                    expression: "selected[index].project_id"
-                                  }
-                                }),
                                 _vm._v(" "),
                                 _c("v-autocomplete", {
                                   staticClass: "mx-3",
