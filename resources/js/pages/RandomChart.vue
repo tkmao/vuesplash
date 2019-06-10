@@ -25,8 +25,30 @@ export default {
   },
   data() {
     return {
-      datacollection: null,
-      doughnutcollection: null,
+      datacollection: {
+        labels: [0, 100],
+        datasets: [
+          {
+            label: "data-1",
+            backgroundColor: "rgba(255,100,100,0.1)",
+            data: [3, 50]
+          },
+          {
+            label: "data-2",
+            backgroundColor: "rgba(255,255,100,0.1)",
+            data: [60, 20]
+          }
+        ]
+      },
+      doughnutcollection: {
+        labels: ["data-1", "data-2"],
+        datasets: [
+          {
+            data: [10, 45],
+            backgroundColor: ["rgba(255,10,20,0.4)", "rgba(255,255,20,0.4)"]
+          }
+        ]
+      },
       lines: 3
     };
   },
@@ -75,26 +97,6 @@ export default {
           }
         ]
       };
-
-      console.log("this.datacollection", this.datacollection);
-      console.log("labels", [min, max]);
-      console.log("datasets", datasets);
-      console.log(
-        "this.datacollection.datasets[0]",
-        this.datacollection.datasets[0]
-      );
-      console.log(
-        "this.datacollection.datasets[0].backgroundColor",
-        this.datacollection.datasets[0].backgroundColor
-      );
-      console.log(
-        "this.datacollection.datasets[0].data",
-        this.datacollection.datasets[0].data
-      );
-      console.log(
-        "this.datacollection.datasets[0].label",
-        this.datacollection.datasets[0].label
-      );
     },
     randomize() {
       this.lines = Math.floor(Math.random() * 10) + 1;

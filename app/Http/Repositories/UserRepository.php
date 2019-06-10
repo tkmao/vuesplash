@@ -80,19 +80,19 @@ class UserRepository implements UserRepositoryInterface
     {
         try {
             $user = new User;
-            $user->name = $requestArray['userName'];
-            $user->email = $requestArray['userEmail'];
-            $user->password = bcrypt($requestArray['userPassword']);
-            $user->usertype_id = $requestArray['userTypeId'];
-            $user->workingtime_type = $requestArray['workingtimeType'];
-            $user->worktime_day = (isset($requestArray['worktimeDay']) ? $requestArray['worktimeDay'] : null);
-            $user->maxworktime_month = (isset($requestArray['maxWorktimeMonth']) ? $requestArray['maxWorktimeMonth'] : null);
-            $user->workingtime_min = (isset($requestArray['workingtimeMin']) ? $requestArray['workingtimeMin'] : null);
-            $user->workingtime_max = (isset($requestArray['workingtimeMax']) ? $requestArray['workingtimeMax'] : null);
-            $user->paid_holiday = $requestArray['paidHoliday'];
+            $user->name = $requestArray['name'];
+            $user->email = $requestArray['email'];
+            $user->password = bcrypt($requestArray['password']);
+            $user->usertype_id = $requestArray['usertype_id'];
+            $user->workingtime_type = $requestArray['workingtime_type'];
+            $user->worktime_day = $requestArray['worktime_day'];
+            $user->maxworktime_month = $requestArray['maxworktime_month'];
+            $user->workingtime_min = $requestArray['workingtime_min'];
+            $user->workingtime_max = $requestArray['workingtime_max'];
+            $user->paid_holiday = $requestArray['paid_holiday'];
             $user->hiredate = $requestArray['hiredate'];
-            $user->is_admin = $requestArray['userIsAdmin'];
-            $user->is_deleted = false;
+            $user->is_admin = $requestArray['is_admin'];
+            $user->is_deleted = $requestArray['is_deleted'];
             $user->save();
         } catch (\Exception $e) {
             throw $e;
@@ -108,19 +108,19 @@ class UserRepository implements UserRepositoryInterface
     public function edit(array $requestArray): void
     {
         try {
-            $where = [ 'id' => $requestArray['userId'] ];
-            $update_values  = [ 'name' => $requestArray['userName'],
-                                'email' => $requestArray['userEmail'],
-                                'usertype_id' => $requestArray['userTypeId'],
-                                'workingtime_type' => $requestArray['workingtimeType'],
-                                'worktime_day' => (isset($requestArray['worktimeDay']) ? $requestArray['worktimeDay'] : null),
-                                'maxworktime_month' => (isset($requestArray['maxWorktimeMonth']) ? $requestArray['maxWorktimeMonth'] : null),
-                                'workingtime_min' => (isset($requestArray['workingtimeMin']) ? $requestArray['workingtimeMin'] : null),
-                                'workingtime_max' => (isset($requestArray['workingtimeMax']) ? $requestArray['workingtimeMax'] : null),
-                                'paid_holiday' => $requestArray['paidHoliday'],
+            $where = [ 'id' => $requestArray['id'] ];
+            $update_values  = [ 'name' => $requestArray['name'],
+                                'email' => $requestArray['email'],
+                                'usertype_id' => $requestArray['usertype_id'],
+                                'workingtime_type' => $requestArray['workingtime_type'],
+                                'worktime_day' => $requestArray['worktime_day'],
+                                'maxworktime_month' => $requestArray['maxworktime_month'],
+                                'workingtime_min' => $requestArray['workingtime_min'],
+                                'workingtime_max' => $requestArray['workingtime_max'],
+                                'paid_holiday' => $requestArray['paid_holiday'],
                                 'hiredate' => $requestArray['hiredate'],
-                                'is_admin' => $requestArray['userIsAdmin'],
-                                'is_deleted' => false,
+                                'is_admin' => $requestArray['is_admin'],
+                                'is_deleted' => $requestArray['is_deleted'],
                             ];
 
             $this->user->where($where)->update($update_values);

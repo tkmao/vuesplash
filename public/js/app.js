@@ -4856,8 +4856,25 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      datacollection: null,
-      doughnutcollection: null,
+      datacollection: {
+        labels: [0, 100],
+        datasets: [{
+          label: "data-1",
+          backgroundColor: "rgba(255,100,100,0.1)",
+          data: [3, 50]
+        }, {
+          label: "data-2",
+          backgroundColor: "rgba(255,255,100,0.1)",
+          data: [60, 20]
+        }]
+      },
+      doughnutcollection: {
+        labels: ["data-1", "data-2"],
+        datasets: [{
+          data: [10, 45],
+          backgroundColor: ["rgba(255,10,20,0.4)", "rgba(255,255,20,0.4)"]
+        }]
+      },
       lines: 3
     };
   },
@@ -4909,13 +4926,6 @@ __webpack_require__.r(__webpack_exports__);
           backgroundColor: dColors
         }]
       };
-      console.log("this.datacollection", this.datacollection);
-      console.log("labels", [min, max]);
-      console.log("datasets", datasets);
-      console.log("this.datacollection.datasets[0]", this.datacollection.datasets[0]);
-      console.log("this.datacollection.datasets[0].backgroundColor", this.datacollection.datasets[0].backgroundColor);
-      console.log("this.datacollection.datasets[0].data", this.datacollection.datasets[0].data);
-      console.log("this.datacollection.datasets[0].label", this.datacollection.datasets[0].label);
     },
     randomize: function randomize() {
       this.lines = Math.floor(Math.random() * 10) + 1;
@@ -5134,6 +5144,46 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -5158,6 +5208,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     }
   },
   data: function data() {
+    var _this = this;
+
     return {
       dialog: false,
       usertypes: [{
@@ -5191,23 +5243,38 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         value: true
       }],
       isdelete: [{
-        text: "active",
+        text: "有効",
         value: false
       }, {
-        text: "not active",
+        text: "無効",
         value: true
       }],
       rules: {
         required: function required(value) {
           return !!value || "This field is required.";
         },
+        //
+        requiredBoolean: function requiredBoolean(value) {
+          return typeof value !== "undefined" || "This field is required.";
+        },
+        //
         naturalNumber: function naturalNumber(value) {
-          return value > 0 || "Number only.";
+          return value > 0 && Number.isInteger(parseFloat(value)) || "Natural Number only.";
         },
         email: function email(value) {
           var pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
           return pattern.test(value) || "Not an email address."; // .test() はJSの正規表現のパターンマッチングで使用。https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
-        }
+        },
+        passwordRules: [function (value) {
+          return !!value || "Password is required";
+        }, function (value) {
+          return value && value.length >= 6 || "Password must be more than 6 characters";
+        }],
+        passwordConfirmRules: [function (value) {
+          return !!value || "Password Confirm is required";
+        }, function (value) {
+          return value === _this.userItem.password || "Password confirm is equal to password";
+        }]
       },
       headers: [{
         text: "ID",
@@ -5232,11 +5299,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         text: "月の上限勤務時間",
         value: "maxworktime_month"
       }, {
-        text: "勤務時間下限",
-        value: "workingtime_min"
-      }, {
-        text: "勤務時間上限",
-        value: "workingtime_max"
+        text: "勤務時間下限上限",
+        sortable: false
       }, {
         text: "入社日",
         value: "hiredate"
@@ -5244,10 +5308,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         text: "有給日数",
         value: "paid_holiday"
       }, {
-        text: "管理者フラグ",
+        text: "管理者権限",
         value: "is_admin"
       }, {
-        text: "削除フラグ",
+        text: "ユーザ状態",
         value: "is_deleted"
       }, {
         text: "編集",
@@ -5261,7 +5325,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       pagination: {
         rowsPerPage: -1
       },
-      errors: [],
+      valid: false,
       users: [],
       isUserExist: false,
       userItem: null,
@@ -5269,6 +5333,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         id: null,
         name: null,
         email: "@e3sys.co.jp",
+        password: null,
+        password_confirmation: null,
         usertype_id: 2,
         workingtime_type: 1,
         worktime_day: 8,
@@ -5292,6 +5358,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   methods: {
     /** 初期化 */
     initialize: function initialize() {
+      this.userItemDefault.hiredate = moment().format("YYYY-MM-DD");
       this.userItem = Object.assign({}, this.userItemDefault);
     },
 
@@ -5472,43 +5539,126 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
 
     /** ユーザ削除アラート開く */
-    deleteItem: function deleteItem(item) {
-      confirm("Are you sure you want to delete this item?") && this["delete"]() && this.fetchUsers();
+    deleteItem: function () {
+      var _deleteItem = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5(item) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                if (!(this.users.indexOf(item) > -1)) {
+                  _context5.next = 11;
+                  break;
+                }
+
+                this.userItem = Object.assign({}, item);
+                _context5.t0 = confirm("Are you sure you want to delete this item?");
+
+                if (!_context5.t0) {
+                  _context5.next = 7;
+                  break;
+                }
+
+                _context5.next = 6;
+                return this["delete"]();
+
+              case 6:
+                _context5.t0 = _context5.sent;
+
+              case 7:
+                _context5.t1 = _context5.t0;
+
+                if (!_context5.t1) {
+                  _context5.next = 11;
+                  break;
+                }
+
+                _context5.next = 11;
+                return this.fetchUsers();
+
+              case 11:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function deleteItem(_x) {
+        return _deleteItem.apply(this, arguments);
+      }
+
+      return deleteItem;
+    }(),
+
+    /** データ登録・編集 */
+    save: function () {
+      var _save = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                if (!this.$refs.form.validate()) {
+                  _context6.next = 10;
+                  break;
+                }
+
+                if (!this.isUserExist) {
+                  _context6.next = 6;
+                  break;
+                }
+
+                _context6.next = 4;
+                return this.edit();
+
+              case 4:
+                _context6.next = 8;
+                break;
+
+              case 6:
+                _context6.next = 8;
+                return this.store();
+
+              case 8:
+                // モーダルクローズ
+                this.close(); // ユーザ一覧取得
+
+                this.fetchUsers();
+
+              case 10:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function save() {
+        return _save.apply(this, arguments);
+      }
+
+      return save;
+    }(),
+
+    /** 入力データクリア */
+    clear: function clear() {
+      this.$refs.form.reset();
     },
 
     /** モーダルクローズ */
     close: function close() {
-      var _this = this;
+      var _this2 = this;
 
       // モーダルクローズ
       this.dialog = false; // モーダルをクローズするタイミングで、デフォルト値に変更される値を確認できないようにするために、少し送らせて値を変更
 
       setTimeout(function () {
-        _this.userItem = Object.assign({}, _this.userItemDefault);
-        _this.isUserExist = false;
+        _this2.userItem = Object.assign({}, _this2.userItemDefault);
+        _this2.isUserExist = false;
       }, 300);
-    },
-
-    /** データ登録・編集 */
-    save: function save() {
-      console.log("save");
-
-      if (this.checkValidation()) {
-        // データ登録・編集
-        this.isUserExist ? this.edit() : this.store(); // モーダルクローズ
-
-        this.close(); // ユーザ一覧取得
-
-        this.fetchUsers();
-      } else {
-        console.log('false');
-      }
-    },
-
-    /** バリデーション */
-    checkValidation: function checkValidation() {
-      console.log("checkValidation", this.userItem);
-      return false;
     }
   },
   watch: {
@@ -5516,21 +5666,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       handler: function () {
         var _handler = _asyncToGenerator(
         /*#__PURE__*/
-        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
             while (1) {
-              switch (_context5.prev = _context5.next) {
+              switch (_context7.prev = _context7.next) {
                 case 0:
-                  console.log("handler");
-                  _context5.next = 3;
+                  _context7.next = 2;
                   return this.fetchUsers();
 
-                case 3:
+                case 2:
                 case "end":
-                  return _context5.stop();
+                  return _context7.stop();
               }
             }
-          }, _callee5, this);
+          }, _callee7, this);
         }));
 
         function handler() {
@@ -5542,7 +5691,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       immediate: true
     },
     dialog: function dialog(val) {
-      console.log("dialog", val);
       val || this.close();
     }
   }
@@ -65929,357 +66077,509 @@ var render = function() {
                               "v-container",
                               { attrs: { "grid-list-md": "" } },
                               [
-                                _vm.errors.length
-                                  ? _c("p", [
-                                      _c("b", [
-                                        _vm._v(
-                                          "Please correct the following error(s):"
-                                        )
-                                      ]),
-                                      _vm._v(" "),
-                                      _c(
-                                        "ul",
-                                        _vm._l(_vm.errors, function(error) {
-                                          return _c("li", { key: error }, [
-                                            _vm._v(_vm._s(error))
-                                          ])
-                                        }),
-                                        0
-                                      )
-                                    ])
-                                  : _vm._e(),
-                                _vm._v(" "),
                                 _c(
-                                  "v-layout",
-                                  { attrs: { wrap: "" } },
+                                  "v-form",
+                                  {
+                                    ref: "form",
+                                    model: {
+                                      value: _vm.valid,
+                                      callback: function($$v) {
+                                        _vm.valid = $$v
+                                      },
+                                      expression: "valid"
+                                    }
+                                  },
                                   [
                                     _c(
-                                      "v-flex",
-                                      { attrs: { xs8: "", sm8: "", md8: "" } },
+                                      "v-layout",
+                                      { attrs: { wrap: "" } },
                                       [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            label: "名前*",
-                                            rules: [_vm.rules.required],
-                                            clearable: "",
-                                            required: ""
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs8: "", sm8: "", md8: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.name,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "name",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.name"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs8: "", sm8: "", md8: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            label: "email*",
-                                            rules: [
-                                              _vm.rules.required,
-                                              _vm.rules.email
-                                            ],
-                                            clearable: "",
-                                            required: ""
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                "prepend-icon": "account_box",
+                                                label: "名前*",
+                                                rules: [_vm.rules.required],
+                                                clearable: "",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.userItem.name,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "name",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "userItem.name"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs8: "", sm8: "", md8: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.email,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "email",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.email"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-select", {
-                                          attrs: {
-                                            "item-text": "text",
-                                            "item-value": "value",
-                                            items: _vm.usertypes,
-                                            label: "ユーザタイプID*",
-                                            required: ""
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                "prepend-icon": "mail",
+                                                label: "email*",
+                                                rules: [
+                                                  _vm.rules.required,
+                                                  _vm.rules.email
+                                                ],
+                                                clearable: "",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.userItem.email,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "email",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "userItem.email"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.usertype_id,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "usertype_id",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.usertype_id"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-select", {
-                                          attrs: {
-                                            "item-text": "text",
-                                            "item-value": "value",
-                                            items: _vm.workingtimetypes,
-                                            label: "勤務形態*",
-                                            required: ""
+                                          [
+                                            !_vm.isUserExist
+                                              ? _c(
+                                                  "div",
+                                                  [
+                                                    _c("v-text-field", {
+                                                      attrs: {
+                                                        "prepend-icon": "lock",
+                                                        label: "Password",
+                                                        type: "password",
+                                                        rules:
+                                                          _vm.rules
+                                                            .passwordRules,
+                                                        required: ""
+                                                      },
+                                                      model: {
+                                                        value:
+                                                          _vm.userItem.password,
+                                                        callback: function(
+                                                          $$v
+                                                        ) {
+                                                          _vm.$set(
+                                                            _vm.userItem,
+                                                            "password",
+                                                            $$v
+                                                          )
+                                                        },
+                                                        expression:
+                                                          "userItem.password"
+                                                      }
+                                                    })
+                                                  ],
+                                                  1
+                                                )
+                                              : _vm._e()
+                                          ]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value:
-                                              _vm.userItem.workingtime_type,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "workingtime_type",
-                                                $$v
-                                              )
-                                            },
-                                            expression:
-                                              "userItem.workingtime_type"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            type: "Number",
-                                            min: "0",
-                                            label: "一日の勤務時間"
+                                          [
+                                            !_vm.isUserExist
+                                              ? _c(
+                                                  "div",
+                                                  [
+                                                    _c("v-text-field", {
+                                                      attrs: {
+                                                        "prepend-icon": "lock",
+                                                        label:
+                                                          "Password Confirmation",
+                                                        type: "password",
+                                                        rules:
+                                                          _vm.rules
+                                                            .passwordConfirmRules,
+                                                        required: ""
+                                                      },
+                                                      model: {
+                                                        value:
+                                                          _vm.userItem
+                                                            .password_confirmation,
+                                                        callback: function(
+                                                          $$v
+                                                        ) {
+                                                          _vm.$set(
+                                                            _vm.userItem,
+                                                            "password_confirmation",
+                                                            $$v
+                                                          )
+                                                        },
+                                                        expression:
+                                                          "userItem.password_confirmation"
+                                                      }
+                                                    })
+                                                  ],
+                                                  1
+                                                )
+                                              : _vm._e()
+                                          ]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.worktime_day,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "worktime_day",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.worktime_day"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            rules: [_vm.rules.naturalNumber],
-                                            type: "Number",
-                                            min: "0",
-                                            label: "月の上限勤務時間"
+                                          [
+                                            _c("v-select", {
+                                              attrs: {
+                                                rules: [_vm.rules.required],
+                                                "item-text": "text",
+                                                "item-value": "value",
+                                                items: _vm.usertypes,
+                                                label: "ユーザタイプID*",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.userItem.usertype_id,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "usertype_id",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.usertype_id"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value:
-                                              _vm.userItem.maxworktime_month,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "maxworktime_month",
-                                                $$v
-                                              )
-                                            },
-                                            expression:
-                                              "userItem.maxworktime_month"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            type: "Number",
-                                            min: "0",
-                                            label: "勤務時間下限"
+                                          [
+                                            _c("v-select", {
+                                              attrs: {
+                                                rules: [_vm.rules.required],
+                                                "item-text": "text",
+                                                "item-value": "value",
+                                                items: _vm.workingtimetypes,
+                                                label: "勤務形態*",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.userItem.workingtime_type,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "workingtime_type",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.workingtime_type"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.workingtime_min,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "workingtime_min",
-                                                $$v
-                                              )
-                                            },
-                                            expression:
-                                              "userItem.workingtime_min"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            type: "Number",
-                                            min: "0",
-                                            label: "勤務時間上限"
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.required,
+                                                  _vm.rules.naturalNumber
+                                                ],
+                                                type: "Number",
+                                                step: "1",
+                                                min: "0",
+                                                label: "一日の勤務時間*"
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.userItem.worktime_day,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "worktime_day",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.worktime_day"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.workingtime_max,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "workingtime_max",
-                                                $$v
-                                              )
-                                            },
-                                            expression:
-                                              "userItem.workingtime_max"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            type: "date",
-                                            label: "入社日"
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.required,
+                                                  _vm.rules.naturalNumber
+                                                ],
+                                                type: "Number",
+                                                min: "0",
+                                                step: "1",
+                                                label: "月の上限勤務時間*"
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.userItem
+                                                    .maxworktime_month,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "maxworktime_month",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.maxworktime_month"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.hiredate,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "hiredate",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.hiredate"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            type: "Number",
-                                            min: "0",
-                                            label: "有給日数"
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.required,
+                                                  _vm.rules.naturalNumber
+                                                ],
+                                                type: "Number",
+                                                min: "0",
+                                                step: "1",
+                                                label: "勤務時間下限*"
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.userItem.workingtime_min,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "workingtime_min",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.workingtime_min"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.paid_holiday,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "paid_holiday",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.paid_holiday"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-select", {
-                                          attrs: {
-                                            "item-text": "text",
-                                            "item-value": "value",
-                                            items: _vm.isadmin,
-                                            label: "管理者フラグ*",
-                                            required: ""
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.required,
+                                                  _vm.rules.naturalNumber
+                                                ],
+                                                type: "Number",
+                                                min: "0",
+                                                step: "1",
+                                                label: "勤務時間上限*"
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.userItem.workingtime_max,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "workingtime_max",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.workingtime_max"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.is_admin,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "is_admin",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.is_admin"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs5: "", sm5: "", md5: "" } },
-                                      [
-                                        _c("v-select", {
-                                          attrs: {
-                                            "item-text": "text",
-                                            "item-value": "value",
-                                            items: _vm.isdelete,
-                                            label: "削除フラグ*",
-                                            required: ""
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                rules: [_vm.rules.required],
+                                                type: "date",
+                                                label: "入社日*"
+                                              },
+                                              model: {
+                                                value: _vm.userItem.hiredate,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "hiredate",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "userItem.hiredate"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
                                           },
-                                          model: {
-                                            value: _vm.userItem.is_deleted,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.userItem,
-                                                "is_deleted",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "userItem.is_deleted"
-                                          }
-                                        })
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.required,
+                                                  _vm.rules.naturalNumber
+                                                ],
+                                                type: "Number",
+                                                min: "0",
+                                                step: "1",
+                                                label: "有給日数*"
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.userItem.paid_holiday,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "paid_holiday",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.paid_holiday"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
+                                          },
+                                          [
+                                            _c("v-select", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.requiredBoolean
+                                                ],
+                                                "item-text": "text",
+                                                "item-value": "value",
+                                                items: _vm.isadmin,
+                                                label: "管理者権限*",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.userItem.is_admin,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "is_admin",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "userItem.is_admin"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: { xs5: "", sm5: "", md5: "" }
+                                          },
+                                          [
+                                            _c("v-select", {
+                                              attrs: {
+                                                rules: [
+                                                  _vm.rules.requiredBoolean
+                                                ],
+                                                "item-text": "text",
+                                                "item-value": "value",
+                                                items: _vm.isdelete,
+                                                label: "ユーザ状態*",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.userItem.is_deleted,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.userItem,
+                                                    "is_deleted",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "userItem.is_deleted"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     )
@@ -66304,9 +66604,14 @@ var render = function() {
                               _vm._v("Cancel")
                             ]),
                             _vm._v(" "),
+                            _c("v-btn", { on: { click: _vm.clear } }, [
+                              _vm._v("Clear")
+                            ]),
+                            _vm._v(" "),
                             _c(
                               "v-btn",
                               {
+                                class: { red: !_vm.valid, green: _vm.valid },
                                 attrs: { color: "success" },
                                 on: { click: _vm.save }
                               },
@@ -66348,40 +66653,43 @@ var render = function() {
                       _vm._v(" "),
                       _c("td", [_vm._v(_vm._s(props.item.name))]),
                       _vm._v(" "),
-                      _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.email))
+                      _c("td", [_vm._v(_vm._s(props.item.email))]),
+                      _vm._v(" "),
+                      _c("td", [
+                        _vm._v(
+                          _vm._s(
+                            _vm.usertypes.find(function(x) {
+                              return x.value === props.item.usertype_id
+                            }).text
+                          )
+                        )
                       ]),
                       _vm._v(" "),
-                      props.item.usertype_id == 1
-                        ? _c("td", [_vm._v("マネージャー")])
-                        : props.item.usertype_id == 2
-                        ? _c("td", [_vm._v("正社員")])
-                        : props.item.usertype_id == 3
-                        ? _c("td", [_vm._v("契約社員")])
-                        : props.item.usertype_id == 4
-                        ? _c("td", [_vm._v("アルバイト")])
-                        : props.item.usertype_id == 5
-                        ? _c("td", [_vm._v("インターン")])
-                        : _vm._e(),
-                      _vm._v(" "),
-                      _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.workingtime_type))
-                      ]),
-                      _vm._v(" "),
-                      _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.worktime_day))
-                      ]),
-                      _vm._v(" "),
-                      _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.maxworktime_month))
+                      _c("td", [
+                        _vm._v(
+                          _vm._s(
+                            _vm.workingtimetypes.find(function(x) {
+                              return x.value === props.item.workingtime_type
+                            }).text
+                          )
+                        )
                       ]),
                       _vm._v(" "),
                       _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.workingtime_min))
+                        _vm._v(_vm._s(props.item.worktime_day) + " h")
                       ]),
                       _vm._v(" "),
                       _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.workingtime_max))
+                        _vm._v(_vm._s(props.item.maxworktime_month) + " h")
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-xs-right" }, [
+                        _vm._v(
+                          _vm._s(props.item.workingtime_min) +
+                            " h 〜 " +
+                            _vm._s(props.item.workingtime_max) +
+                            " h"
+                        )
                       ]),
                       _vm._v(" "),
                       _c("td", { staticClass: "text-xs-right" }, [
@@ -66389,15 +66697,27 @@ var render = function() {
                       ]),
                       _vm._v(" "),
                       _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.paid_holiday))
+                        _vm._v(_vm._s(props.item.paid_holiday) + " 日")
                       ]),
                       _vm._v(" "),
-                      _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.is_admin))
+                      _c("td", [
+                        _vm._v(
+                          _vm._s(
+                            _vm.isadmin.find(function(x) {
+                              return x.value === props.item.is_admin
+                            }).text
+                          )
+                        )
                       ]),
                       _vm._v(" "),
-                      _c("td", { staticClass: "text-xs-right" }, [
-                        _vm._v(_vm._s(props.item.is_deleted))
+                      _c("td", [
+                        _vm._v(
+                          _vm._s(
+                            _vm.isdelete.find(function(x) {
+                              return x.value === props.item.is_deleted
+                            }).text
+                          )
+                        )
                       ]),
                       _vm._v(" "),
                       _c(

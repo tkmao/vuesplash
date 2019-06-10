@@ -63,9 +63,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        dd('store', $request->all());
         $requestArray = $request->all();
-        $result = $this->userServiceInterface->store($requestArray);
+        $result = $this->userServiceInterface->store($requestArray['user']);
     }
 
         /**
@@ -75,9 +74,8 @@ class UserController extends Controller
      */
     public function edit(Request $request)
     {
-        dd('edit', $request->all());
         $requestArray = $request->all();
-        $result = $this->userServiceInterface->edit($requestArray);
+        $result = $this->userServiceInterface->edit($requestArray['user']);
     }
 
         /**
@@ -87,7 +85,6 @@ class UserController extends Controller
      */
     public function delete(Request $request)
     {
-        dd('delete', $request->all());
         $requestArray = $request->all();
         $result = $this->userServiceInterface->delete($requestArray['userId']);
     }
