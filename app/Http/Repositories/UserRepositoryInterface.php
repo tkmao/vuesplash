@@ -8,7 +8,7 @@ interface UserRepositoryInterface
 
     public function all(): \Illuminate\Database\Eloquent\Collection;
 
-    public function store(array $requestArray): void;
+    public function store(array $requestArray): int;
 
     public function edit(array $requestArray): void;
 

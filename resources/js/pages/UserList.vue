@@ -72,6 +72,104 @@
                                     </div>
                                   </v-flex>
                                   <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-select
+                                        v-model="userItem.user_contract[0].usertype_id"
+                                        :rules="[rules.required]"
+                                        item-text="text"
+                                        item-value="value"
+                                        :items="usertypes"
+                                        label="ユーザタイプID*"
+                                        required
+                                      ></v-select>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-select
+                                        v-model="userItem.user_contract[0].workingtime_type"
+                                        :rules="[rules.required]"
+                                        item-text="text"
+                                        item-value="value"
+                                        :items="workingtimetypes"
+                                        label="勤務形態*"
+                                        required
+                                      ></v-select>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-text-field
+                                        v-model="userItem.user_contract[0].worktime_day"
+                                        :rules="[rules.required, rules.naturalNumber]"
+                                        type="Number"
+                                        step="1"
+                                        min="0"
+                                        label="一日の勤務時間*"
+                                      ></v-text-field>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-text-field
+                                        v-model="userItem.user_contract[0].maxworktime_month"
+                                        :rules="[rules.required, rules.naturalNumber]"
+                                        type="Number"
+                                        min="0"
+                                        step="1"
+                                        label="月の上限勤務時間*"
+                                      ></v-text-field>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-text-field
+                                        v-model="userItem.user_contract[0].workingtime_min"
+                                        :rules="[rules.required, rules.naturalNumber]"
+                                        type="Number"
+                                        min="0"
+                                        step="1"
+                                        label="勤務時間下限*"
+                                      ></v-text-field>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-text-field
+                                        v-model="userItem.user_contract[0].workingtime_max"
+                                        :rules="[rules.required, rules.naturalNumber]"
+                                        type="Number"
+                                        min="0"
+                                        step="1"
+                                        label="勤務時間上限*"
+                                      ></v-text-field>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-text-field
+                                        v-model="userItem.user_contract[0].startdate"
+                                        :rules="[rules.required]"
+                                        type="date"
+                                        min="0"
+                                        step="1"
+                                        label="契約有効開始日*"
+                                      ></v-text-field>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
+                                    <div v-if="!isUserExist">
+                                      <v-text-field
+                                        v-model="userItem.user_contract[0].enddate"
+                                        :rules="[rules.required, rules.contract]"
+                                        type="date"
+                                        min="0"
+                                        step="1"
+                                        label="契約有効終了日*"
+                                      ></v-text-field>
+                                    </div>
+                                  </v-flex>
+                                  <v-flex xs5 sm5 md5>
                                     <v-text-field
                                       v-model="userItem.hiredate"
                                       :rules="[rules.required]"

@@ -74,26 +74,22 @@ class UserRepository implements UserRepositoryInterface
      * ユーザデータ登録
      *
      * @param array $requestArray
-     * @return void
+     * @return int
      */
-    public function store(array $requestArray): void
+    public function store(array $requestArray): int
     {
         try {
             $user = new User;
             $user->name = $requestArray['name'];
             $user->email = $requestArray['email'];
             $user->password = bcrypt($requestArray['password']);
-            $user->usertype_id = $requestArray['usertype_id'];
-            $user->workingtime_type = $requestArray['workingtime_type'];
-            $user->worktime_day = $requestArray['worktime_day'];
-            $user->maxworktime_month = $requestArray['maxworktime_month'];
-            $user->workingtime_min = $requestArray['workingtime_min'];
-            $user->workingtime_max = $requestArray['workingtime_max'];
             $user->paid_holiday = $requestArray['paid_holiday'];
             $user->hiredate = $requestArray['hiredate'];
             $user->is_admin = $requestArray['is_admin'];
             $user->is_deleted = $requestArray['is_deleted'];
             $user->save();
+
+            return $user->id;
         } catch (\Exception $e) {
             throw $e;
         }
@@ -111,12 +107,6 @@ class UserRepository implements UserRepositoryInterface
             $where = [ 'id' => $requestArray['id'] ];
             $update_values  = [ 'name' => $requestArray['name'],
                                 'email' => $requestArray['email'],
-                                'usertype_id' => $requestArray['usertype_id'],
-                                'workingtime_type' => $requestArray['workingtime_type'],
-                                'worktime_day' => $requestArray['worktime_day'],
-                                'maxworktime_month' => $requestArray['maxworktime_month'],
-                                'workingtime_min' => $requestArray['workingtime_min'],
-                                'workingtime_max' => $requestArray['workingtime_max'],
                                 'paid_holiday' => $requestArray['paid_holiday'],
                                 'hiredate' => $requestArray['hiredate'],
                                 'is_admin' => $requestArray['is_admin'],

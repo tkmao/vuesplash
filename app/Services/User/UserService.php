@@ -2,22 +2,28 @@
 
 namespace App\Services\User;
 
+use App\Repositories\UserContractRepositoryInterface;
 use App\Repositories\UserRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 
 class UserService implements UserServiceInterface
 {
     /**
+     * @var UserContractRepositoryInterface
      * @var UserRepositoryInterface
      */
+    protected $userContractRepositoryInterface;
     protected $userRepositoryInterface;
 
     /**
+     * @param App\Repositories\UserContractRepositoryInterface  $userContractRepositoryInterface  The user contract repository
      * @param App\Repositories\UserRepositoryInterface  $userRepositoryInterface  The user repository
      */
     public function __construct(
+        UserContractRepositoryInterface $userContractRepositoryInterface,
         UserRepositoryInterface $userRepositoryInterface
     ) {
+        $this->userContractRepositoryInterface = $userContractRepositoryInterface;
         $this->userRepositoryInterface = $userRepositoryInterface;
     }
 
@@ -59,7 +65,8 @@ class UserService implements UserServiceInterface
     public function store(array $requestArray): void
     {
         try {
-            $this->userRepositoryInterface->store($requestArray);
+            $requestArray['user_contract'][0]['user_id'] = $this->userRepositoryInterface->store($requestArray);
+            $this->userContractRepositoryInterface->store($requestArray['user_contract'][0]);
         } catch (\Exception $e) {
             throw $e;
         }
