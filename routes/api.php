@@ -74,3 +74,10 @@ Route::post('/user/store', 'UserController@store')->name('user.store');
 Route::post('/user/edit', 'UserController@edit')->name('user.edit');
 // ユーザ削除
 Route::post('/user/delete', 'UserController@delete')->name('user.delete');
+
+// ユーザ契約登録
+Route::post('/usercontract/store', 'UserContractController@store')->name('usercontract.store');
+// ユーザ契約編集
+Route::post('/usercontract/edit', 'UserContractController@edit')->name('usercontract.edit');
+// ユーザ契約削除
+Route::post('/usercontract/delete', 'UserContractController@delete')->name('usercontract.delete');

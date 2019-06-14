@@ -133,9 +133,11 @@
                           <td width="10%">{{ props.item.name }}</td>
                           <td width="5%">グラフ</td>
                           <td class="text-xs-right" width="5%">{{ props.item.worktimeSum }} h</td>
-                          <td
-                            width="5%"
-                          >{{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h</td>
+                          <td width="5%">
+                            {{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h
+                            <br>
+                            （{{ workingtimetypes.find(x => x.value === props.item.workingtimeType).text }}）
+                          </td>
                           <td class="text-xs-right" width="5%">{{ props.item.shortageTime }} h</td>
                           <td class="text-xs-right" width="5%">{{ props.item.overTime }} h</td>
                           <td class="text-xs-right" width="5%">{{ props.item.WorktingDay }} 日</td>
@@ -236,16 +238,16 @@
                     </v-toolbar>
                   </v-flex>
                   <div class="half">
-                    <div v-if="canCreateDoughnut()">
-                      <doughnut-chart :chart-data="doughnutcollection2"></doughnut-chart>
+                    <div v-if="canCreateDoughnutAllProject()">
+                      <doughnut-chart :chart-data="allProjectDoughnutcollection"></doughnut-chart>
                     </div>
                     <div v-else>
                       <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
                     </div>
                   </div>
                   <div class="half">
-                    <div v-if="canCreateDoughnut()">
-                      <doughnut-chart :chart-data="doughnutcollection"></doughnut-chart>
+                    <div v-if="canCreateDoughnutProject()">
+                      <doughnut-chart :chart-data="projectDoughnutcollection"></doughnut-chart>
                     </div>
                     <div v-else>
                       <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
@@ -255,7 +257,7 @@
                 <v-tab-item>
                   <v-flex xs10>
                     <v-toolbar dark color="teal">
-                      <v-toolbar-title>ユーザ選択/検索</v-toolbar-title>
+                      <v-toolbar-title>社員選択/検索</v-toolbar-title>
                       <v-autocomplete
                         v-model="targetUserId"
                         :loading="loadingUser"
@@ -334,6 +336,10 @@ export default {
       searchProject: "",
       searchworkSchedule: "",
       searchWeeklyReport: "",
+      workingtimetypes: [
+        { text: "勤務日数により変動", value: 1 },
+        { text: "固定勤務時間", value: 2 }
+      ],
       tableheaders: [
         { text: "ID", value: "user_id" },
         { text: "社員名", value: "user_name" },
@@ -401,7 +407,8 @@ export default {
           }
         ]
       },
-      doughnutcollection: {
+      // ドーナツグラフ（全プロジェクト）
+      allProjectDoughnutcollection: {
         labels: ["labels"],
         datasets: [
           {
@@ -409,8 +416,9 @@ export default {
             backgroundColor: ["rgba(255, 0, 0, 0)"]
           }
         ]
-      }, // ドーナツグラフ
-      doughnutcollection2: {
+      },
+      // ドーナツグラフ（各プロジェクト）
+      projectDoughnutcollection: {
         labels: ["labels"],
         datasets: [
           {
@@ -418,7 +426,7 @@ export default {
             backgroundColor: ["rgba(255, 0, 0, 0)"]
           }
         ]
-      }, // ドーナツグラフ
+      },
       pagination: { rowsPerPage: -1, sortBy: "worktime", descending: true },
       rules: {
         required: value => !!value || "This field is required."
@@ -456,13 +464,17 @@ export default {
 
       // 勤務時間下限・上限データ作成
       const lengthDay = this.allUserWorktimes[0].worktimes.length;
-      const min = this.workschedules[0].workingtimeMin;
-      const max = this.workschedules[0].workingtimeMax;
+      const min = this.workschedules.find(x => x.id === this.targetUserId)
+        .workingtimeMin;
+      const max = this.workschedules.find(x => x.id === this.targetUserId)
+        .workingtimeMax;
+
       const datasetWorktimeMin = new Array(lengthDay)
         .fill(0)
         .map(function(value, index, array) {
           return (min * ((index + 1) / lengthDay)).toFixed(1);
         });
+
       const datasetWorktimeMax = new Array(lengthDay)
         .fill(0)
         .map(function(value, index, array) {
@@ -512,7 +524,7 @@ export default {
         dColors.push("rgba(255," + code + "," + code + ",0.4)");
       }
 
-      this.doughnutcollection2 = {
+      this.allProjectDoughnutcollection = {
         labels: doughnutData.map(y => y.project_code),
         datasets: [
           {
@@ -538,7 +550,7 @@ export default {
         dColors.push("rgba(255," + code + "," + code + ",0.4)");
       }
 
-      this.doughnutcollection = {
+      this.projectDoughnutcollection = {
         labels: doughnutData.map(y => y.user_name),
         datasets: [
           {
@@ -549,10 +561,21 @@ export default {
       };
     },
 
-    /** ドーナツグラフを表示できるか確認 */
-    canCreateDoughnut(date) {
-      return this.doughnutcollection.datasets[0].data.length !== 0
-        ? this.doughnutcollection.datasets[0].data.reduce((a, b) =>
+    /** ドーナツグラフを表示できるか確認（全プロジェクト） */
+    canCreateDoughnutAllProject(date) {
+      return this.allProjectDoughnutcollection.datasets[0].data.length !== 0
+        ? this.allProjectDoughnutcollection.datasets[0].data.reduce((a, b) =>
+            a > b ? a : b
+          ) === 0
+          ? false
+          : true
+        : false;
+    },
+
+    /** ドーナツグラフを表示できるか確認（各プロジェクト） */
+    canCreateDoughnutProject(date) {
+      return this.projectDoughnutcollection.datasets[0].data.length !== 0
+        ? this.projectDoughnutcollection.datasets[0].data.reduce((a, b) =>
             a > b ? a : b
           ) === 0
           ? false
@@ -919,29 +942,47 @@ export default {
 
     /** 基本勤務時間作成 */
     culBasicWorktimeAMonth() {
+      const targetDate = this.targetDate.format("YYYY-MM-DD");
+
       /** 今月の勤務時間数 */
       this.workschedules.forEach((val_1, idx_1, arr_1) => {
-        if (val_1.workingtime_type === 1) {
+        const user = val_1.user_contract.find(function(element) {
+          return (
+            element.startdate <= targetDate && targetDate <= element.enddate
+          );
+        });
+
+        if (user.workingtime_type === 1) {
+          this.$set(
+            this.workschedules[idx_1],
+            "workingtimeType",
+            user.workingtime_type
+          );
           this.$set(
             this.workschedules[idx_1],
             "workingtimeMin",
-            this.basicWorkDay * val_1.worktime_day
+            this.basicWorkDay * user.worktime_day
           );
           this.$set(
             this.workschedules[idx_1],
             "workingtimeMax",
-            val_1.workingtimeMin + val_1.maxworktime_month
+            val_1.workingtimeMin + user.maxworktime_month
           );
-        } else if (val_1.workingtime_type === 2) {
+        } else if (user.workingtime_type === 2) {
+          this.$set(
+            this.workschedules[idx_1],
+            "workingtimeType",
+            user.workingtime_type
+          );
           this.$set(
             this.workschedules[idx_1],
             "workingtimeMin",
-            val_1.workingtime_min
+            user.workingtime_min
           );
           this.$set(
             this.workschedules[idx_1],
             "workingtimeMax",
-            val_1.workingtime_max
+            user.workingtime_max
           );
         }
       });

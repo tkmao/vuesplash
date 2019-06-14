@@ -19,16 +19,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'usertype_id',
-        'workingtime_type',
-        'worktime_day',
-        'maxworktime_month',
-        'workingtime_min',
-        'workingtime_max',
         'hiredate',
         'paid_holiday',
         'is_admin',
-        'is_deleted',
+        'is_deleted'
     ];
 
     /** JSONに含める属性 */
@@ -36,19 +30,13 @@ class User extends Authenticatable
         'id',
         'name',
         'email',
-        'usertype_id',
-        'workingtime_type',
-        'worktime_day',
-        'maxworktime_month',
-        'workingtime_min',
-        'workingtime_max',
         'hiredate',
         'paid_holiday',
         'is_admin',
         'is_deleted',
         'workSchedule',
         'weeklyReport',
-        'userType'
+        'userContract'
     ];
 
     protected $casts = [
@@ -77,8 +65,8 @@ class User extends Authenticatable
         return $this->hasOne('App\Repositories\Models\WeeklyReport', 'user_id');
     }
 
-    public function userType()
+    public function userContract()
     {
-        return $this->belongsTo('App\Repositories\Models\UserType', 'usertype_id', 'id');
+        return $this->hasMany('App\Repositories\Models\UserContract', 'user_id');
     }
 }

@@ -26,7 +26,7 @@ class UserRepository implements UserRepositoryInterface
     public function find($id): \App\Repositories\Models\User
     {
         try {
-            $user = $this->user->find($id);
+            $user = $this->user->with(['userContract.userType'])->find($id);
             if (!$user) {
                 $user = new User();
             }
@@ -45,7 +45,7 @@ class UserRepository implements UserRepositoryInterface
     public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $user = $this->user->with(['userType'])->where('is_deleted', false)->get();
+            $user = $this->user->with(['userContract.userType'])->where('is_deleted', false)->get();
 
             return $user;
         } catch (\Exception $e) {
@@ -212,7 +212,7 @@ class UserRepository implements UserRepositoryInterface
     {
         try {
             $user = $this->user
-                            ->with(['workSchedule' => function ($query) use ($dateFrom, $dateTo) {
+                            ->with(['userContract.userType', 'workSchedule' => function ($query) use ($dateFrom, $dateTo) {
                                 $query->with(['projectWork.project'])
                                       ->whereBetween('workdate', [$dateFrom, $dateTo])
                                       ->orderBy('workdate', 'asc');

@@ -58,7 +58,7 @@
                     :items="projects"
                     item-value="id"
                     item-text="name"
-                    :search-input.sync="searchProject"
+                    :search-input.sync="searchProject[index]"
                     @change="changeSelected(index)"
                     cache-items
                     class="mx-3"
@@ -283,12 +283,17 @@ export default {
 
     /** 今月の勤務時間数 */
     culBasicWorktimeAMonth() {
-      if (this.user.workingtime_type === 1) {
-        this.workingtimeMin = this.basicWorkDay * this.user.worktime_day;
-        this.workingtimeMax = this.workingtimeMin + this.user.maxworktime_month;
-      } else if (this.user.workingtime_type === 2) {
-        this.workingtimeMin = this.user.workingtime_min;
-        this.workingtimeMax = this.user.workingtime_max;
+      const targetDate = this.targetDate.format("YYYY-MM-DD");
+      const user = this.user.user_contract.find(function(element) {
+        return element.startdate <= targetDate && targetDate <= element.enddate;
+      });
+
+      if (user.workingtime_type === 1) {
+        this.workingtimeMin = this.basicWorkDay * user.worktime_day;
+        this.workingtimeMax = this.workingtimeMin + user.maxworktime_month;
+      } else if (user.workingtime_type === 2) {
+        this.workingtimeMin = user.workingtime_min;
+        this.workingtimeMax = user.workingtime_max;
       }
     },
 
@@ -486,6 +491,8 @@ export default {
       this.selected = this.workschedules[0].project_work.map(item => {
         return { project_id: item["project_id"] };
       });
+      // プロジェクト選択用の配列作成
+      this.searchProject = Array(this.selected.length);
       // テーブルヘッダー作成
       this.tableheaders = this.createTableHeaders(
         this.workschedules[0].project_work.length
