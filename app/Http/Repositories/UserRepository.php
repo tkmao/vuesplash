@@ -45,7 +45,7 @@ class UserRepository implements UserRepositoryInterface
     public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $user = $this->user->with(['userContract.userType'])->where('is_deleted', false)->get();
+            $user = $this->user->with(['userContract.userType'])->get();
 
             return $user;
         } catch (\Exception $e) {
@@ -167,12 +167,14 @@ class UserRepository implements UserRepositoryInterface
     /**
      * 全ユーザ週報情報取得
      *
+     * @param string $targetDate
      * @param int $weekNumber
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getWeeklyReportByWeekNumber(int $weekNumber): \Illuminate\Database\Eloquent\Collection
+    public function getWeeklyReportByWeekNumber(string $targetDate, int $weekNumber): \Illuminate\Database\Eloquent\Collection
     {
         try {
+            /*
             $user = $this->user
                             ->with(['weeklyReport' => function ($query) use ($weekNumber) {
                                 $query->with(['project'])
@@ -180,6 +182,20 @@ class UserRepository implements UserRepositoryInterface
                                       ->get();
                             }])
                             ->where('is_deleted', false)->orderBy('id', 'asc')->get();
+            */
+            
+            $user = $this->user
+                            ->with(['userContract' => function ($query) use ($targetDate) {
+                                $query->with(['userType'])
+                                      ->where('startdate', '<=', $targetDate)
+                                      ->where('enddate', '>=', $targetDate)
+                                      ->get();
+                            }, 'weeklyReport' => function ($query) use ($weekNumber) {
+                                $query->with(['project'])
+                                      ->where('week_number', '=', $weekNumber)
+                                      ->get();
+                            }])
+                            ->orderBy('id', 'asc')->get();
 
             if (!$user) {
                 $user = new User();

@@ -65,10 +65,11 @@ class WeeklyReportController extends Controller
     public function getAllUser(Request $request)
     {
         $requestArray = $request->all();
+        $targetDate = $requestArray['targetDate'];
         $weekNumber = $requestArray['weekNumber'];
 
         // 週報情報取得
-        $weeklyReports = $this->weeklyReportServiceInterface->getAllUser($weekNumber);
+        $weeklyReports = $this->weeklyReportServiceInterface->getAllUser($targetDate, $weekNumber);
 
         return $weeklyReports ?? abort(404);
     }

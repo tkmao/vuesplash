@@ -133,11 +133,16 @@
                           <td width="10%">{{ props.item.name }}</td>
                           <td width="5%">グラフ</td>
                           <td class="text-xs-right" width="5%">{{ props.item.worktimeSum }} h</td>
-                          <td width="5%">
-                            {{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h
-                            <br>
-                            （{{ workingtimetypes.find(x => x.value === props.item.workingtimeType).text }}）
-                          </td>
+                          <div v-if="isContracted(props.item.workingtimeType)">
+                            <td width="5%">
+                              {{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h
+                              <br>
+                              （{{ workingtimetypes.find(x => x.value === props.item.workingtimeType).text }}）
+                            </td>
+                          </div>
+                          <div v-else>
+                            <td>現在未契約</td>
+                          </div>
                           <td class="text-xs-right" width="5%">{{ props.item.shortageTime }} h</td>
                           <td class="text-xs-right" width="5%">{{ props.item.overTime }} h</td>
                           <td class="text-xs-right" width="5%">{{ props.item.WorktingDay }} 日</td>
@@ -561,6 +566,11 @@ export default {
       };
     },
 
+    /** 契約情報は存在するか */
+    isContracted(workingtimeType) {
+      return workingtimeType ? true : false;
+    },
+
     /** ドーナツグラフを表示できるか確認（全プロジェクト） */
     canCreateDoughnutAllProject(date) {
       return this.allProjectDoughnutcollection.datasets[0].data.length !== 0
@@ -908,6 +918,7 @@ export default {
     /** 全ユーザ週報データ取得 */
     async fetchWeeklyReport() {
       const response = await axios.post(`/api/weeklyreport/getalluser`, {
+        targetDate: this.targetDate.format("YYYY-MM-DD"),
         weekNumber: this.targetWeek
       });
 
@@ -952,7 +963,11 @@ export default {
           );
         });
 
-        if (user.workingtime_type === 1) {
+        if (!user) {
+          this.$set(this.workschedules[idx_1], "workingtimeType", null);
+          this.$set(this.workschedules[idx_1], "workingtimeMin", null);
+          this.$set(this.workschedules[idx_1], "workingtimeMax", null);
+        } else if (user.workingtime_type === 1) {
           this.$set(
             this.workschedules[idx_1],
             "workingtimeType",

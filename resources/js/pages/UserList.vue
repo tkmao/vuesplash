@@ -238,7 +238,7 @@
                           <td class="text-xs-right">{{ props.item.id }}</td>
                           <td>{{ props.item.name }}</td>
                           <td>{{ props.item.email }}</td>
-                          <td>{{ usertype(props.item.id) }}</td>
+                          <td>{{ userType(props.item.id) }}</td>
                           <td>{{ workingtimeType(props.item.id) }}</td>
                           <td class="text-xs-right">{{ props.item.hiredate }}</td>
                           <td class="text-xs-right">{{ props.item.paid_holiday }} 日</td>
@@ -638,17 +638,28 @@ export default {
         });
     },
 
-    /** ユーザタイプ */
-    usertype(userId) {
-      return this.userContract(this.userItemDefault.hiredate, userId).user_type
-        .name;
+    /** ユーザタイプ（ユーザ一覧画面で使用） */
+    userType(userId) {
+      const userContract = this.userContract(
+        this.userItemDefault.hiredate,
+        userId
+      );
+
+      return userContract ? userContract.user_type.name : "現在未契約";
     },
 
     /** 勤務形態・勤務時間 */
     workingtimeType(userId) {
-      return this.workingtimeTypeSummary(
-        this.userContract(this.userItemDefault.hiredate, userId)
+      const userContract = this.userContract(
+        this.userItemDefault.hiredate,
+        userId
       );
+
+      return userContract
+        ? this.workingtimeTypeSummary(
+            this.userContract(this.userItemDefault.hiredate, userId)
+          )
+        : "現在未契約";
     },
 
     /** 勤務形態・勤務時間 */
@@ -692,6 +703,7 @@ export default {
       }
 
       this.users = response.data;
+      console.log("this.users", this.users);
       this.changeUser();
     },
 
