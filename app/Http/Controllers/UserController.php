@@ -56,7 +56,7 @@ class UserController extends Controller
         return $users ?? abort(404);
     }
 
-        /**
+    /**
      * ユーザ登録
      * @param Request $request
      * @return User
@@ -67,7 +67,7 @@ class UserController extends Controller
         $result = $this->userServiceInterface->store($requestArray['user']);
     }
 
-        /**
+    /**
      * ユーザ編集
      * @param Request $request
      * @return User
@@ -78,7 +78,7 @@ class UserController extends Controller
         $result = $this->userServiceInterface->edit($requestArray['user']);
     }
 
-        /**
+    /**
      * ユーザ削除
      * @param Request $request
      * @return User
