@@ -360,7 +360,7 @@
                                 <v-flex xs5 sm5 md5>
                                   <v-text-field
                                     v-model="userContractItem.startdate"
-                                    :rules="[rules.required]"
+                                    :rules="[rules.required, rules.contracttest]"
                                     type="date"
                                     min="0"
                                     step="1"
@@ -370,7 +370,7 @@
                                 <v-flex xs5 sm5 md5>
                                   <v-text-field
                                     v-model="userContractItem.enddate"
-                                    :rules="[rules.required, rules.contract]"
+                                    :rules="[rules.required, rules.contract, rules.contracttest]"
                                     type="date"
                                     min="0"
                                     step="1"
@@ -500,6 +500,24 @@ export default {
         contract: value =>
           value > this.userContractItem.startdate ||
           "契約終了日は契約開始日よりも未来にして下さい",
+        contracttest: value => {
+          const valid = this.users[0]
+            ? this.userContract(value, this.userContractItem.user_id)
+              ? false
+              : true
+            : false;
+
+          /*
+          if (this.users[0]) {
+            const userContract = this.userContract(
+              value,
+              this.userContractItem.user_id
+            );
+            valid = userContract ? false : true;
+          }
+          */
+          return valid || "契約有効日が他の契約日時と重なっています";
+        },
         passwordRules: [
           value => !!value || "Password is required",
           value =>
@@ -537,36 +555,34 @@ export default {
       pagination: { rowsPerPage: -1 },
       valid: false,
       users: [],
-      user: [
-        {
-          id: null,
-          name: "",
-          email: "",
-          paid_holiday: 0,
-          hiredate: "2015-09-01",
-          is_admin: false,
-          is_deleted: false,
-          user_contract: [
-            {
-              id: 4,
-              user_id: 2,
-              usertype_id: 5,
-              workingtime_type: 1,
-              worktime_day: 8,
-              maxworktime_month: 20,
-              workingtime_min: 162,
-              workingtime_max: 190,
-              startdate: "2015-09-01",
-              enddate: "2019-02-28",
-              user_type: {
-                id: 5,
-                name: "インターン",
-                is_deleted: 0
-              }
+      user: {
+        id: null,
+        name: "",
+        email: "",
+        paid_holiday: 0,
+        hiredate: "2015-09-01",
+        is_admin: false,
+        is_deleted: false,
+        user_contract: [
+          {
+            id: 4,
+            user_id: 2,
+            usertype_id: 5,
+            workingtime_type: 1,
+            worktime_day: 8,
+            maxworktime_month: 20,
+            workingtime_min: 162,
+            workingtime_max: 190,
+            startdate: "2015-09-01",
+            enddate: "2019-02-28",
+            user_type: {
+              id: 5,
+              name: "インターン",
+              is_deleted: 0
             }
-          ]
-        }
-      ],
+          }
+        ]
+      },
       loadingUser: false,
       isUserExist: false,
       userItem: null,
@@ -694,7 +710,6 @@ export default {
 
     /** ユーザ一覧取得 */
     async fetchUsers() {
-      console.log("fetchUsers");
       const response = await axios.get(`/api/user/getall`);
 
       if (response.status !== OK) {
@@ -703,13 +718,11 @@ export default {
       }
 
       this.users = response.data;
-      console.log("this.users", this.users);
       this.changeUser();
     },
 
     /** ユーザデータ登録 */
     async store() {
-      console.log("userItem", this.userItem);
       const response = await axios.post(`/api/user/store`, {
         user: this.userItem
       });
@@ -722,7 +735,6 @@ export default {
 
     /** ユーザ契約データ登録 */
     async storeContract() {
-      console.log("storeContract userContractItem", this.userContractItem);
       const response = await axios.post(`/api/usercontract/store`, {
         userContract: this.userContractItem
       });
@@ -735,7 +747,6 @@ export default {
 
     /** ユーザデータ編集 */
     async edit() {
-      console.log("userItem", this.userItem);
       const response = await axios.post(`/api/user/edit`, {
         user: this.userItem
       });
@@ -760,7 +771,6 @@ export default {
 
     /** ユーザデータ削除 */
     async delete() {
-      console.log("userItem", this.userItem);
       const response = await axios.post(`/api/user/delete`, {
         userId: this.userItem.id
       });
@@ -785,7 +795,6 @@ export default {
 
     /** 編集画面オープン */
     editItem(item) {
-      console.log("editItem", item);
       this.isUserExist = this.users.indexOf(item) > -1 ? true : false;
       this.userItem = Object.assign({}, item);
       this.dialog = true;
