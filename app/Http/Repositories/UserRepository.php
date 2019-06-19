@@ -167,29 +167,25 @@ class UserRepository implements UserRepositoryInterface
     /**
      * 全ユーザ週報情報取得
      *
-     * @param string $targetDate
+     * @param \Carbon\Carbon $dateFrom
+     * @param \Carbon\Carbon $dateTo
      * @param int $weekNumber
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getWeeklyReportByWeekNumber(string $targetDate, int $weekNumber): \Illuminate\Database\Eloquent\Collection
+    public function getWeeklyReportByWeekNumber(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo, int $weekNumber): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            /*
             $user = $this->user
-                            ->with(['weeklyReport' => function ($query) use ($weekNumber) {
-                                $query->with(['project'])
-                                      ->where('week_number', '=', $weekNumber)
-                                      ->get();
-                            }])
-                            ->where('is_deleted', false)->orderBy('id', 'asc')->get();
-            */
-            
-            $user = $this->user
-                            ->with(['userContract' => function ($query) use ($targetDate) {
+                            ->with(['userContract' => function ($query) use ($dateFrom, $dateTo) {
                                 $query->with(['userType'])
-                                      ->where('startdate', '<=', $targetDate)
-                                      ->where('enddate', '>=', $targetDate)
-                                      ->get();
+                                      ->where(function ($query) use ($dateFrom) {
+                                          $query->where('startdate', '<=', $dateFrom)
+                                                ->where('enddate', '>=', $dateFrom);
+                                      })
+                                      ->orWhere(function ($query) use ($dateTo) {
+                                          $query->where('startdate', '<=', $dateTo)
+                                                ->where('enddate', '>=', $dateTo);
+                                      });
                             }, 'weeklyReport' => function ($query) use ($weekNumber) {
                                 $query->with(['project'])
                                       ->where('week_number', '=', $weekNumber)
@@ -218,12 +214,22 @@ class UserRepository implements UserRepositoryInterface
     {
         try {
             $user = $this->user
-                            ->with(['userContract.userType', 'workSchedule' => function ($query) use ($dateFrom, $dateTo) {
+                            ->with(['userContract' => function ($query) use ($dateFrom, $dateTo) {
+                                $query->with(['userType'])
+                                      ->where(function ($query) use ($dateFrom) {
+                                          $query->where('startdate', '<=', $dateFrom)
+                                                ->where('enddate', '>=', $dateFrom);
+                                      })
+                                      ->orWhere(function ($query) use ($dateTo) {
+                                          $query->where('startdate', '<=', $dateTo)
+                                                ->where('enddate', '>=', $dateTo);
+                                      });
+                            },  'workSchedule' => function ($query) use ($dateFrom, $dateTo) {
                                 $query->with(['projectWork.project'])
                                       ->whereBetween('workdate', [$dateFrom, $dateTo])
                                       ->orderBy('workdate', 'asc');
                             }])
-                            ->where('is_deleted', false)->orderBy('id', 'asc')->get();
+                            ->orderBy('id', 'asc')->get();
 
             if (!$user) {
                 $user = new User();

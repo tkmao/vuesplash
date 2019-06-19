@@ -64,14 +64,15 @@ class WeeklyReportService implements WeeklyReportServiceInterface
     /**
      * 全ユーザ週報情報取得
      *
-     * @param string $targetDate
+     * @param \Carbon\Carbon $dateFrom
+     * @param \Carbon\Carbon $dateTo
      * @param int $weekNumber
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAllUser(string $targetDate, int $weekNumber): \Illuminate\Database\Eloquent\Collection
+    public function getAllUser(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo, int $weekNumber): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->userRepositoryInterface->getWeeklyReportByWeekNumber($targetDate, $weekNumber);
+            return $this->userRepositoryInterface->getWeeklyReportByWeekNumber($dateFrom, $dateTo, $weekNumber);
         } catch (\Exception $e) {
             throw $e;
         }

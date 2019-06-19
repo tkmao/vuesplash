@@ -6,7 +6,7 @@ interface WeeklyReportServiceInterface
 {
     public function get(int $userId, int $weekNumber): \App\Repositories\Models\WeeklyReport;
 
-    public function getAllUser(string $targetDate, int $weekNumber): \Illuminate\Database\Eloquent\Collection;
+    public function getAllUser(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo, int $weekNumber): \Illuminate\Database\Eloquent\Collection;
 
     public function store(array $requestArray): void;
 

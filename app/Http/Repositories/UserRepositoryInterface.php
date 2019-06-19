@@ -16,7 +16,7 @@ interface UserRepositoryInterface
 
     public function getWorkScheduleByWeekNumber(int $weekNumber): \Illuminate\Database\Eloquent\Collection;
 
-    public function getWeeklyReportByWeekNumber(string $targetDate, int $weekNumber): \Illuminate\Database\Eloquent\Collection;
+    public function getWeeklyReportByWeekNumber(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo, int $weekNumber): \Illuminate\Database\Eloquent\Collection;
 
     public function getWorkSchedule(\Carbon\Carbon $dateFrom, \Carbon\Carbon $dateTo): \Illuminate\Database\Eloquent\Collection;
 }

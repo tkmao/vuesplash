@@ -360,7 +360,7 @@
                                 <v-flex xs5 sm5 md5>
                                   <v-text-field
                                     v-model="userContractItem.startdate"
-                                    :rules="[rules.required, rules.contracttest]"
+                                    :rules="[rules.required, rules.noDuplicateContract]"
                                     type="date"
                                     min="0"
                                     step="1"
@@ -370,7 +370,7 @@
                                 <v-flex xs5 sm5 md5>
                                   <v-text-field
                                     v-model="userContractItem.enddate"
-                                    :rules="[rules.required, rules.contract, rules.contracttest]"
+                                    :rules="[rules.required, rules.contract, rules.noDuplicateContract]"
                                     type="date"
                                     min="0"
                                     step="1"
@@ -487,9 +487,9 @@ export default {
       ],
       isdelete: [{ text: "有効", value: false }, { text: "無効", value: true }],
       rules: {
-        required: value => !!value || "This field is required.", //
+        required: value => !!value || "This field is required.",
         requiredBoolean: value =>
-          typeof value !== "undefined" || "This field is required.", //
+          typeof value !== "undefined" || "This field is required.",
         naturalNumber: value =>
           (value > 0 && Number.isInteger(parseFloat(value))) ||
           "Natural Number only.",
@@ -500,24 +500,17 @@ export default {
         contract: value =>
           value > this.userContractItem.startdate ||
           "契約終了日は契約開始日よりも未来にして下さい",
-        contracttest: value => {
-          const valid = this.users[0]
-            ? this.userContract(value, this.userContractItem.user_id)
-              ? false
-              : true
-            : false;
 
-          /*
-          if (this.users[0]) {
-            const userContract = this.userContract(
-              value,
-              this.userContractItem.user_id
-            );
-            valid = userContract ? false : true;
-          }
-          */
-          return valid || "契約有効日が他の契約日時と重なっています";
-        },
+        /** 契約情報の重複チェック */
+        noDuplicateContract: value =>
+          (this.users[0]
+            ? this.userContract(value, this.userContractItem.user_id)
+              ? this.userContract(value, this.userContractItem.user_id).id !==
+                this.userContractItem.id
+                ? false
+                : true
+              : true
+            : true) || "契約有効日が他の契約日時と重なっています",
         passwordRules: [
           value => !!value || "Password is required",
           value =>

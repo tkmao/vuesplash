@@ -68,8 +68,13 @@ class WeeklyReportController extends Controller
         $targetDate = $requestArray['targetDate'];
         $weekNumber = $requestArray['weekNumber'];
 
+        $date = (isset($targetDate)) ? new \Carbon\Carbon($targetDate) : \Carbon\Carbon::now();
+
+        $dateFrom = $date->copy()->startOfWeek();
+        $dateTo = $date->copy()->endOfWeek();
+
         // 週報情報取得
-        $weeklyReports = $this->weeklyReportServiceInterface->getAllUser($targetDate, $weekNumber);
+        $weeklyReports = $this->weeklyReportServiceInterface->getAllUser($dateFrom, $dateTo, $weekNumber);
 
         return $weeklyReports ?? abort(404);
     }

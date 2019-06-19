@@ -64,7 +64,7 @@
                     <v-card-text>
                       <v-data-table
                         :headers="weeklyReportHeaders"
-                        :items="weeklyreports"
+                        :items="weeklyReportsValidUser()"
                         hide-actions
                         :pagination.sync="pagination"
                         class="elevation-1"
@@ -121,7 +121,7 @@
                     <v-card-text>
                       <v-data-table
                         :headers="workScheduleHeaders"
-                        :items="workschedules"
+                        :items="workschedulesValidUser()"
                         hide-actions
                         :pagination.sync="pagination"
                         class="elevation-1"
@@ -446,8 +446,55 @@ export default {
   methods: {
     /** 初期処理 */
     initialize() {
-      this.targetDate = moment();
-      this.targetWeek = this.targetDate.format("ggggWW");
+      this.targetDate = moment().startOf("isoweek");
+      const targetWeek = this.targetDate.clone();
+      this.targetWeek = targetWeek.format("ggggWW");
+    },
+
+    /** 週報リスト */
+    weeklyReportsValidUser() {
+      let targetDate = this.targetDate.clone();
+      const weekStartDate = targetDate.format("YYYY-MM-DD");
+      const weekEndDate = targetDate.endOf("isoweek").format("YYYY-MM-DD");
+
+      return this.weeklyreports.filter(function(value1, index1, array1) {
+        return (
+          value1.user_contract.find(function(element) {
+            return (
+              (element.startdate <= weekStartDate &&
+                weekStartDate <= element.enddate) ||
+              (element.startdate <= weekEndDate &&
+                weekEndDate <= element.enddate)
+            );
+          }) !== undefined
+        );
+      });
+    },
+
+    /** 勤務表リスト */
+    workschedulesValidUser() {
+      let targetDate = this.targetDate.clone();
+      const monthStartDate = targetDate
+        .endOf("isoweek")
+        .startOf("month")
+        .format("YYYY-MM-DD");
+      const monthEndDate = targetDate
+        .endOf("isoweek")
+        .endOf("month")
+        .format("YYYY-MM-DD");
+
+      return this.workschedules.filter(function(value1, index1, array1) {
+        return (
+          value1.user_contract.find(function(element) {
+            return (
+              (element.startdate <= monthStartDate &&
+                monthStartDate <= element.enddate) ||
+              (element.startdate <= monthEndDate &&
+                monthEndDate <= element.enddate)
+            );
+          }) !== undefined
+        );
+      });
     },
 
     /** 線グラフ作成(勤務時間用) */
@@ -602,7 +649,9 @@ export default {
     weekNumberToDate(weekNumber) {
       const year = weekNumber.substr(0, 4);
       const weak = weekNumber.substr(4, 2);
-      return moment(year).add(weak - 1, "weeks");
+      return moment(year)
+        .add(weak - 1, "weeks")
+        .startOf("isoweek");
     },
 
     /** 週報変換 */
@@ -728,14 +777,10 @@ export default {
       responseData.forEach((val_1, idx_1, arr_1) => {
         let work_schedule = [];
         if (val_1.work_schedule.length === 0) {
-          const startDate = this.targetDate
-            .endOf("isoweek")
-            .startOf("month")
-            .clone();
-          const endDate = this.targetDate
-            .endOf("isoweek")
-            .endOf("month")
-            .clone();
+          let startDate = this.targetDate.clone();
+          let endDate = this.targetDate.clone();
+          startDate.endOf("isoweek").startOf("month");
+          endDate.endOf("isoweek").endOf("month");
 
           // 当月分のデータが存在しない場合、デフォルト値で作成
           while (startDate.unix() <= endDate.unix()) {
@@ -882,8 +927,9 @@ export default {
 
     /** 全ユーザ勤務表データ取得 */
     async fetchWorkSchedules() {
+      const targetDate = this.targetDate.clone();
       const response = await axios.post(`/api/workschedule/getalluser`, {
-        yearmonth: this.targetDate.endOf("isoweek").format("YYYYMM")
+        yearmonth: targetDate.endOf("isoweek").format("YYYYMM")
       });
 
       if (response.status !== OK) {
@@ -917,8 +963,9 @@ export default {
 
     /** 全ユーザ週報データ取得 */
     async fetchWeeklyReport() {
+      const targetDate = this.targetDate.clone();
       const response = await axios.post(`/api/weeklyreport/getalluser`, {
-        targetDate: this.targetDate.format("YYYY-MM-DD"),
+        targetDate: targetDate.format("YYYY-MM-DD"),
         weekNumber: this.targetWeek
       });
 
@@ -933,14 +980,10 @@ export default {
     /** 基本勤務日数計算 */
     culBasicWorkDay() {
       this.basicWorkDay = 0;
-      const startDate = this.targetDate
-        .endOf("isoweek")
-        .startOf("month")
-        .clone();
-      const endDate = this.targetDate
-        .endOf("isoweek")
-        .endOf("month")
-        .clone();
+      const startDate = this.targetDate.clone();
+      const endDate = this.targetDate.clone();
+      startDate.endOf("isoweek").startOf("month");
+      endDate.endOf("isoweek").endOf("month");
 
       // 1日ずつインクリメントして配列へpush
       while (startDate.unix() <= endDate.unix()) {
@@ -953,13 +996,17 @@ export default {
 
     /** 基本勤務時間作成 */
     culBasicWorktimeAMonth() {
-      const targetDate = this.targetDate.format("YYYY-MM-DD");
+      const targetDate = this.targetDate.clone();
+      const weekStartDate = targetDate.format("YYYY-MM-DD");
+      const weekEndDate = targetDate.endOf("isoweek").format("YYYY-MM-DD");
 
       /** 今月の勤務時間数 */
       this.workschedules.forEach((val_1, idx_1, arr_1) => {
         const user = val_1.user_contract.find(function(element) {
           return (
-            element.startdate <= targetDate && targetDate <= element.enddate
+            (element.startdate <= weekStartDate &&
+              weekStartDate <= element.enddate) ||
+            (element.startdate <= weekEndDate && weekEndDate <= element.enddate)
           );
         });
 
@@ -1195,7 +1242,8 @@ export default {
     /** 対象週select */
     changeTargetWeek: function() {
       this.targetDate = this.weekNumberToDate(this.targetWeek);
-      this.targetWeek = this.targetDate.format("ggggWW");
+      const targetWeek = this.targetDate.clone();
+      this.targetWeek = targetWeek.format("ggggWW");
       this.fetchWorkSchedules();
       this.fetchWeeklyReport();
     }
