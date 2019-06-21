@@ -8,7 +8,7 @@
         <RouterLink class="nav-link" to="/weeklyanalyze">週報管理</RouterLink>
         <RouterLink class="nav-link" to="/random">グラフ</RouterLink>
         <RouterLink class="nav-link" to="/user">社員一覧</RouterLink>
-        <RouterLink class="nav-link" to="/project">プロジェクト一覧</RouterLink>
+        <RouterLink class="nav-link" to="/company">企業一覧</RouterLink>
         <button class="button" @click="showForm = ! showForm">
           <i class="icon ion-md-add"></i>
           Submit a photo

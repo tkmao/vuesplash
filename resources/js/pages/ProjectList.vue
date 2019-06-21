@@ -1,199 +1,183 @@
 <template>
-  <div class="project-list">
+  <div class="user-list">
     <v-app id="inspire">
-      <!--<div class="grid">-->
-      <div>
-        <!--
-      <User
-        class="grid__item"
-        v-for="user in users"
-        :key="user.id"
-        :item="user"
-        @like="onLikeClick"
-      />
-        -->
-
-        <v-toolbar flat color="white">
-          <v-toolbar-title>プロジェクトリスト</v-toolbar-title>
-          <v-divider class="mx-2" inset vertical></v-divider>
-          <!-- v-spacer  -->
-          <v-spacer></v-spacer>
-
-          <v-dialog v-model="dialog" max-width="700px">
-            <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-12" v-on="on">新規作成</v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
-
-              <v-card-text>
-                <v-container grid-list-md>
-                  <v-layout wrap>
-                    <v-flex xs8 sm8 md8>
-                      <v-text-field
-                        v-model="editedItem.name"
-                        label="名前*"
-                        :rules="[rules.required]"
-                        clearable
-                        required
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs8 sm8 md8>
-                      <v-text-field
-                        v-model="editedItem.email"
-                        label="email*"
-                        :rules="[rules.required, rules.email]"
-                        clearable
-                        required
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-select
-                        v-model="editedItem.usertype_id"
-                        item-text="label"
-                        item-value="value"
-                        :items="usertypes"
-                        label="ユーザタイプID*"
-                        required
-                      ></v-select>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-select
-                        v-model="editedItem.workingtime_type"
-                        item-text="label"
-                        item-value="value"
-                        :items="workingtimetypes"
-                        label="勤務形態*"
-                        required
-                      ></v-select>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-text-field
-                        v-model="editedItem.worktime_day"
-                        type="Number"
-                        min="0"
-                        label="一日の勤務時間"
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-text-field
-                        v-model="editedItem.maxworktime_month"
-                        :rules="[rules.naturalNumber]"
-                        type="Number"
-                        min="0"
-                        label="月の上限勤務時間"
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-text-field
-                        v-model="editedItem.workingtime_min"
-                        type="Number"
-                        min="0"
-                        label="勤務時間下限"
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-text-field
-                        v-model="editedItem.workingtime_max"
-                        type="Number"
-                        min="0"
-                        label="勤務時間上限"
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-text-field v-model="editedItem.hiredate" type="date" label="入社日"></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-text-field
-                        v-model="editedItem.paid_holiday"
-                        type="Number"
-                        min="0"
-                        label="有給日数"
-                      ></v-text-field>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-select
-                        v-model="editedItem.is_admin"
-                        item-text="label"
-                        item-value="value"
-                        :items="isadmin"
-                        label="管理者フラグ*"
-                        required
-                      ></v-select>
-                    </v-flex>
-                    <v-flex xs5 sm5 md5>
-                      <v-select
-                        v-model="editedItem.is_deleted"
-                        item-text="label"
-                        item-value="value"
-                        :items="isdelete"
-                        label="削除フラグ*"
-                        required
-                      ></v-select>
-                    </v-flex>
-                  </v-layout>
-                </v-container>
-                <small>*indicates required field</small>
-              </v-card-text>
-              <v-card-actions>
+      <v-container grid-list-md text-xs-left fluid>
+        <v-layout row wrap>
+          <v-flex xs12>
+            <div>
+              <v-toolbar flat color="white">
+                <v-toolbar-title>プロジェクト管理</v-toolbar-title>
+                <v-divider class="mx-2" inset vertical></v-divider>
+                <!-- v-spacer  -->
                 <v-spacer></v-spacer>
-                <v-btn @click="close">Cancel</v-btn>
-                <v-btn color="success" @click="save">Save</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
+                <v-card-title>
+                  プロジェクト選択 :
+                  <v-autocomplete
+                    v-model="userContractItem.user_id"
+                    :loading="loadingUser"
+                    :items="users"
+                    item-value="id"
+                    item-text="name"
+                    :search-input.sync="searchUser"
+                    @change="changeUser()"
+                    cache-items
+                    class="mx-3"
+                    flat
+                    hide-no-data
+                    hide-details
+                    label="プロジェクト名"
+                    solo-inverted
+                  ></v-autocomplete>
+                </v-card-title>
+                <v-dialog v-model="dialog" max-width="700px">
+                  <template v-slot:activator="{ on }">
+                    <v-btn color="primary" dark class="mb-12" v-on="on">新規プロジェクト作成</v-btn>
+                  </template>
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">{{ formTitle }}</span>
+                    </v-card-title>
 
-        <v-data-table :headers="headers" :items="users" class="elevation-1">
-          <template v-slot:items="props">
-            <td class="text-xs-right">{{ props.item.id }}</td>
-            <td>{{ props.item.name }}</td>
-            <td class="text-xs-right">{{ props.item.email }}</td>
-            <td v-if="props.item.usertype_id == 1">マネージャー</td>
-            <td v-else-if="props.item.usertype_id == 2">正社員</td>
-            <td v-else-if="props.item.usertype_id == 3">契約社員</td>
-            <td v-else-if="props.item.usertype_id == 4">アルバイト</td>
-            <td v-else-if="props.item.usertype_id == 5">インターン</td>
-            <td class="text-xs-right">{{ props.item.workingtime_type }}</td>
-            <td class="text-xs-right">{{ props.item.worktime_day }}</td>
-            <td class="text-xs-right">{{ props.item.maxworktime_month }}</td>
-            <td class="text-xs-right">{{ props.item.workingtime_min }}</td>
-            <td class="text-xs-right">{{ props.item.workingtime_max }}</td>
-            <td class="text-xs-right">{{ props.item.hiredate }}</td>
-            <td class="text-xs-right">{{ props.item.paid_holiday }}</td>
-            <td class="text-xs-right">{{ props.item.is_admin }}</td>
-            <td class="text-xs-right">{{ props.item.is_deleted }}</td>
-            <td class="justify-center">
-              <!-- 編集ボタン -->
-              <v-icon small @click="editItem(props.item)">edit</v-icon>
-            </td>
-            <td class="justify-center">
-              <!-- 削除ボタン -->
-              <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-            </td>
-          </template>
-        </v-data-table>
-
-        <!--
-      <div class="example-modal-window">
-        <p>ボタンを押すとモーダルウィンドウが開きます</p>
-        <button @click="openModal">開く</button>
-
-        <User @close="closeModal" v-if="modal">
-          <p>Vue.js Modal Window!</p>
-          <div>
-            <input v-model="message">
-          </div>
-          <template slot="footer">
-            <button @click="doSend">送信</button>
-          </template>
-        </User>
-      </div>
-        -->
-      </div>
-      <!--<Pagination :current-page="currentPage" :last-page="lastPage"/>-->
+                    <v-card-text>
+                      <v-container grid-list-md>
+                        <v-form v-model="valid" ref="form">
+                          <v-layout wrap>
+                            <v-flex xs5 sm5 md5>
+                              <v-select
+                                v-model="userContractItem.usertype_id"
+                                :rules="[rules.required]"
+                                item-text="text"
+                                item-value="value"
+                                :items="usertypes"
+                                label="プロジェクトコード*"
+                                required
+                              ></v-select>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-select
+                                v-model="userContractItem.workingtime_type"
+                                :rules="[rules.required]"
+                                item-text="text"
+                                item-value="value"
+                                :items="workingtimetypes"
+                                label="プロジェクト名*"
+                                required
+                              ></v-select>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-text-field
+                                v-model="userContractItem.worktime_day"
+                                :rules="[rules.required, rules.naturalNumber]"
+                                type="Number"
+                                step="1"
+                                min="0"
+                                label="区分*"
+                              ></v-text-field>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-text-field
+                                v-model="userContractItem.maxworktime_month"
+                                :rules="[rules.required, rules.naturalNumber]"
+                                type="Number"
+                                min="0"
+                                step="1"
+                                label="取引先企業*"
+                              ></v-text-field>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-text-field
+                                v-model="userContractItem.workingtime_min"
+                                :rules="[rules.required, rules.naturalNumber]"
+                                type="Number"
+                                min="0"
+                                step="1"
+                                label="勤務時間下限*"
+                              ></v-text-field>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-text-field
+                                v-model="userContractItem.workingtime_max"
+                                :rules="[rules.required, rules.naturalNumber]"
+                                type="Number"
+                                min="0"
+                                step="1"
+                                label="勤務時間上限*"
+                              ></v-text-field>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-text-field
+                                v-model="userContractItem.startdate"
+                                :rules="[rules.required, rules.noDuplicateContract]"
+                                type="date"
+                                min="0"
+                                step="1"
+                                label="契約有効開始日*"
+                              ></v-text-field>
+                            </v-flex>
+                            <v-flex xs5 sm5 md5>
+                              <v-text-field
+                                v-model="userContractItem.enddate"
+                                :rules="[rules.required, rules.contract, rules.noDuplicateContract]"
+                                type="date"
+                                min="0"
+                                step="1"
+                                label="契約有効終了日*"
+                              ></v-text-field>
+                            </v-flex>
+                          </v-layout>
+                        </v-form>
+                      </v-container>
+                      <small>*indicates required field</small>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn @click="closeContract">Cancel</v-btn>
+                      <v-btn @click="clear">Clear</v-btn>
+                      <v-btn
+                        :class="{ red: !valid, green: valid }"
+                        color="success"
+                        @click="saveContract"
+                      >Save</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-toolbar>
+              <v-card-text>
+                社員名 : {{ this.user.name }}
+                <br>
+                メールアドレス : {{ this.user.email }}
+                <br>
+                入社日 : {{ this.user.hiredate }}
+                <br>
+                有給日数 : {{ this.user.paid_holiday }} 日
+              </v-card-text>
+              <v-card-text>
+                <v-data-table
+                  :headers="userHeaders"
+                  :items="user.user_contract"
+                  :pagination.sync="pagination"
+                  class="elevation-1"
+                >
+                  <template v-slot:items="props">
+                    <td class="text-xs-right">{{ props.item.startdate }}</td>
+                    <td class="text-xs-right">{{ props.item.enddate }}</td>
+                    <td class="text-xs-right">{{ props.item.user_type.name }}</td>
+                    <td>{{ workingtimeTypeSummary(props.item) }}</td>
+                    <td class="justify-center">
+                      <!-- 編集ボタン -->
+                      <v-icon small @click="editContractItem(props.item)">edit</v-icon>
+                    </td>
+                    <td class="justify-center">
+                      <!-- 削除ボタン -->
+                      <v-icon small @click="deleteContractItem(props.item)">delete</v-icon>
+                    </td>
+                  </template>
+                </v-data-table>
+              </v-card-text>
+            </div>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-app>
   </div>
 </template>
@@ -218,94 +202,112 @@ export default {
       default: 1
     }
   },
-  computed: {
-    formTitle() {
-      return this.editedIndex === -1 ? "ユーザ新規作成" : "ユーザ編集";
-    }
-  },
   data() {
     return {
+      tabs: ["社員一覧", "社員契約管理"],
+      active: null,
       dialog: false,
-      photos: [],
+      dialogContract: false,
+      searchUser: "",
       usertypes: [
-        { label: "マネージャー", value: 1 },
-        { label: "正社員", value: 2 },
-        { label: "契約社員", value: 3 },
-        { label: "アルバイト", value: 4 },
-        { label: "インターン", value: 5 }
+        { text: "マネージャー", value: 1 },
+        { text: "正社員", value: 2 },
+        { text: "契約社員", value: 3 },
+        { text: "アルバイト", value: 4 },
+        { text: "インターン", value: 5 }
       ],
       workingtimetypes: [
-        { label: "勤務日数により変動", value: 1 },
-        { label: "固定勤務時間", value: 2 }
+        { text: "勤務日数により変動", value: 1 },
+        { text: "固定勤務時間", value: 2 }
       ],
       isadmin: [
-        { label: "一般ユーザ", value: false },
-        { label: "管理者", value: true }
+        { text: "一般", value: false },
+        { text: "管理者", value: true }
       ],
-      isdelete: [
-        { label: "active", value: false },
-        { label: "not active", value: true }
-      ],
+      isdelete: [{ text: "有効", value: false }, { text: "無効", value: true }],
       rules: {
         required: value => !!value || "This field is required.",
-        naturalNumber: value => value > 0 || "Number only.",
+        requiredBoolean: value =>
+          typeof value !== "undefined" || "This field is required.",
+        naturalNumber: value =>
+          (value > 0 && Number.isInteger(parseFloat(value))) ||
+          "Natural Number only.",
         email: value => {
           const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(value) || "Not an email address.";
-        }
-      },
-      headers: [
-        {
-          text: "ID",
-          align: "left",
-          value: "id"
+          return pattern.test(value) || "Not an email address."; // .test() はJSの正規表現のパターンマッチングで使用。https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
         },
-        { text: "名前", value: "name" },
-        { text: "email", value: "email" },
-        { text: "ユーザタイプID", value: "usertype_id" },
-        { text: "勤務形態", value: "workingtime_type" },
-        { text: "一日の勤務時間", value: "worktime_day" },
-        { text: "月の上限勤務時間", value: "maxworktime_month" },
-        { text: "勤務時間下限", value: "workingtime_min" },
-        { text: "勤務時間上限", value: "workingtime_max" },
-        { text: "入社日", value: "hiredate" },
-        { text: "有給日数", value: "paid_holiday" },
-        { text: "管理者フラグ", value: "is_admin" },
-        { text: "削除フラグ", value: "is_deleted" },
+        contract: value =>
+          value > this.userContractItem.startdate ||
+          "契約終了日は契約開始日よりも未来にして下さい",
+
+        /** 契約情報の重複チェック */
+        noDuplicateContract: value =>
+          (this.users[0]
+            ? this.userContract(value, this.userContractItem.user_id)
+              ? this.userContract(value, this.userContractItem.user_id).id !==
+                this.userContractItem.id
+                ? false
+                : true
+              : true
+            : true) || "契約有効日が他の契約日時と重なっています",
+        passwordRules: [
+          value => !!value || "Password is required",
+          value =>
+            (value && value.length >= 6) ||
+            "Password must be more than 6 characters"
+        ],
+        passwordConfirmRules: [
+          value => !!value || "Password Confirm is required",
+          value =>
+            value === this.userItem.password ||
+            "Password confirm is equal to password"
+        ]
+      },
+      projectHeaders: [
+        { text: "ID", align: "left", value: "id" },
+        { text: "コード", value: "name" },
+        { text: "プロジェクト名", value: "email" },
+        { text: "区分", value: "usertype_id" },
+        { text: "取引先企業", sortable: false },
+        { text: "ステータス", value: "hiredate" },
         { text: "編集", value: 0, sortable: false },
         { text: "削除", value: 0, sortable: false }
       ],
-      users: [],
-      editedIndex: -1,
-      editedItem: {
-        id: "",
-        name: "",
-        email: "",
-        usertype_id: null,
-        workingtime_type: null,
-        worktime_day: null,
-        maxworktime_month: null,
-        workingtime_min: null,
-        workingtime_max: null,
-        hiredate: null,
-        paid_holiday: null,
-        is_admin: false,
-        is_deleted: false
-      },
-      defaultItem: {
-        id: "",
-        name: "",
-        email: "test@e3sys.co.jp",
-        usertype_id: 2,
-        workingtime_type: 1,
-        worktime_day: 8,
-        maxworktime_month: 20,
-        workingtime_min: 160,
-        workingtime_max: 180,
-        hiredate: "2019-05-01",
+      pagination: { rowsPerPage: -1 },
+      valid: false,
+      projects: [],
+      loadingUser: false,
+      isUserExist: false,
+      userItem: null,
+      userContractItem: null,
+      userItemDefault: {
+        id: null,
+        name: null,
+        email: "@e3sys.co.jp",
+        password: null,
+        password_confirmation: null,
+        hiredate: "2019-06-01",
         paid_holiday: 10,
         is_admin: false,
-        is_deleted: false
+        is_deleted: false,
+        user_contract: [
+          {
+            user_id: 1,
+            usertype_id: 2,
+            workingtime_type: 1,
+            worktime_day: 8,
+            maxworktime_month: 20,
+            workingtime_min: 160,
+            workingtime_max: 180,
+            startdate: "2015-09-01",
+            enddate: "2030-12-31",
+            user_type: {
+              id: 2,
+              name: "正社員",
+              is_deleted: 0
+            }
+          }
+        ]
       },
       currentPage: 0,
       lastPage: 0,
@@ -316,156 +318,175 @@ export default {
   created() {
     this.initialize();
   },
+  computed: {
+    formTitle() {
+      return this.isUserExist ? "プロジェクト編集" : "プロジェクト新規作成";
+    }
+  },
   methods: {
-    async fetchPhotos() {
-      const response = await axios.get(`/api/photos/?page=${this.page}`);
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-
-      //this.currentPage = response.data.current_page;
-      //this.lastPage = response.data.last_page;
-      this.users = response.data;
-    },
-    onLikeClick({ id, liked }) {
-      console.log("onLikeClick");
-      if (!this.$store.getters["auth/check"]) {
-        alert("いいね機能を使うにはログインしてください。");
-        return false;
-      }
-
-      if (liked) {
-        this.unlike(id);
-      } else {
-        this.like(id);
-      }
-    },
-    async like(id) {
-      console.log("like");
-      const response = await axios.put(`/api/photos/${id}/like`);
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-
-      this.photos = this.photos.map(photo => {
-        if (photo.id === response.data.photo_id) {
-          photo.likes_count += 1;
-          photo.liked_by_user = true;
-        }
-        return photo;
-      });
-    },
-    async unlike(id) {
-      console.log("unlike");
-      const response = await axios.delete(`/api/photos/${id}/like`);
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-
-      this.photos = this.photos.map(photo => {
-        if (photo.id === response.data.photo_id) {
-          photo.likes_count -= 1;
-          photo.liked_by_user = false;
-        }
-        return photo;
-      });
-    },
-    async storeuser(editedItem) {
-      console.log("storeuser");
-      const response = await axios.post(`/api/user/${editedItem.id}/store`, {
-        id: editedItem.id,
-        name: editedItem.name,
-        email: editedItem.email,
-        usertype_id: editedItem.usertype_id,
-        workingtime_type: editedItem.workingtime_type,
-        worktime_day: editedItem.worktime_day,
-        maxworktime_month: editedItem.maxworktime_month,
-        workingtime_min: editedItem.workingtime_min,
-        workingtime_max: editedItem.workingtime_max,
-        hiredate: editedItem.hiredate,
-        paid_holiday: editedItem.paid_holiday,
-        is_admin: editedItem.is_admin,
-        is_deleted: editedItem.is_deleted
-      });
-
-      if (response.status !== OK) {
-        this.$store.commit("error/setCode", response.status);
-        return false;
-      }
-    },
-    openModal() {
-      console.log("openModal");
-      this.modal = true;
-    },
-    closeModal() {
-      console.log("closeModal");
-      this.modal = false;
-    },
-    doSend() {
-      console.log("doSend");
-      if (this.message.length > 0) {
-        alert(this.message);
-        this.message = "";
-        this.closeModal();
-      } else {
-        alert("メッセージを入力してください");
-      }
-    },
+    /** 初期化 */
     initialize() {
-      console.log("initialize");
-      this.editedItem = Object.assign({}, this.defaultItem);
+      this.userItemDefault.hiredate = moment().format("YYYY-MM-DD");
+      this.userItem = Object.assign({}, this.userItemDefault);
+      this.userContractItem = Object.assign(
+        {},
+        this.userItemDefault.user_contract[0]
+      );
     },
 
+    /** ユーザタイプ（ユーザ一覧画面で使用） */
+    userType(userId) {
+      const userContract = this.userContract(
+        this.userItemDefault.hiredate,
+        userId
+      );
+
+      return userContract ? userContract.user_type.name : "現在未契約";
+    },
+
+    /** 勤務形態・勤務時間 */
+    workingtimeType(userId) {
+      const userContract = this.userContract(
+        this.userItemDefault.hiredate,
+        userId
+      );
+
+      return userContract
+        ? this.workingtimeTypeSummary(
+            this.userContract(this.userItemDefault.hiredate, userId)
+          )
+        : "現在未契約";
+    },
+
+    /** 勤務形態・勤務時間 */
+    workingtimeTypeSummary(userContract) {
+      if (userContract.workingtime_type === 1) {
+        return (
+          "勤務日数により変動 :" +
+          "1日" +
+          userContract.worktime_day +
+          " h、月の上限勤務時間: + " +
+          userContract.maxworktime_month +
+          " h"
+        );
+      } else if (userContract.workingtime_type === 2) {
+        return (
+          "固定勤務時間 :" +
+          userContract.workingtime_min +
+          " h 〜 " +
+          userContract.workingtime_max +
+          " h"
+        );
+      }
+    },
+
+    /** プロジェクト一覧取得 */
+    async fetchProjects() {
+      const response = await axios.get(`/api/project/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      this.projects = response.data;
+    },
+
+    /** プロジェクトデータ登録 */
+    async store() {
+      const response = await axios.post(`/api/project/store`, {
+        user: this.userItem
+      });
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+    },
+
+    /** プロジェクトデータ編集 */
+    async edit() {
+      const response = await axios.post(`/api/project/edit`, {
+        user: this.userItem
+      });
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+    },
+
+    /** プロジェクトデータ削除 */
+    async delete() {
+      const response = await axios.post(`/api/project/delete`, {
+        userId: this.userItem.id
+      });
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+    },
+
+    /** 編集画面オープン */
     editItem(item) {
-      console.log("editItem");
-      this.editedIndex = this.users.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.isUserExist = this.users.indexOf(item) > -1 ? true : false;
+      this.userItem = Object.assign({}, item);
       this.dialog = true;
     },
 
-    deleteItem(item) {
-      console.log("deleteItem");
-      const index = this.users.indexOf(item);
-      confirm("Are you sure you want to delete this item?") &&
-        this.users.splice(index, 1);
-    },
-
-    close() {
-      console.log("close");
-      this.dialog = false;
-      setTimeout(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      }, 300);
-    },
-
-    save() {
-      console.log("save");
-      if (this.editedIndex > -1) {
-        Object.assign(this.users[this.editedIndex], this.editedItem);
-        this.storeuser(this.editedItem);
-      } else {
-        this.users.push(this.editedItem);
+    /** プロジェクト削除アラート開く */
+    async deleteItem(item) {
+      if (this.users.indexOf(item) > -1) {
+        this.userItem = Object.assign({}, item);
+        if (confirm("Are you sure you want to delete this item?")) {
+          await this.delete();
+          this.fetchUsers();
+        }
       }
-      this.close();
+    },
+
+    /** ユーザ登録・編集 */
+    async save() {
+      if (this.$refs.form.validate()) {
+        // データ登録・編集
+        this.isUserExist ? await this.edit() : await this.store();
+        // モーダルクローズ
+        this.close();
+        // ユーザ一覧取得
+        this.fetchUsers();
+      }
+    },
+
+    /** 入力データクリア */
+    clear() {
+      this.$refs.form.reset();
+    },
+
+    /** モーダルクローズ */
+    close() {
+      // モーダルクローズ
+      this.dialog = false;
+      // モーダルをクローズするタイミングで、デフォルト値に変更される値を確認できないようにするために、少し送らせて値を変更
+      setTimeout(() => {
+        this.userItem = Object.assign({}, this.userItemDefault);
+        this.userContractItem = Object.assign(
+          {},
+          this.userItemDefault.user_contract[0]
+        );
+        this.isUserExist = false;
+      }, 300);
     }
   },
   watch: {
     $route: {
       async handler() {
-        console.log("handler");
-        await this.fetchPhotos();
+        await this.fetchProjects();
       },
       immediate: true
     },
+
     dialog(val) {
-      console.log("dialog", val);
       val || this.close();
     }
   }

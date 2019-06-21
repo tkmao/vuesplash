@@ -81,3 +81,12 @@ Route::post('/usercontract/store', 'UserContractController@store')->name('userco
 Route::post('/usercontract/edit', 'UserContractController@edit')->name('usercontract.edit');
 // ユーザ契約削除
 Route::post('/usercontract/delete', 'UserContractController@delete')->name('usercontract.delete');
+
+// 企業一覧取得
+Route::get('/company/getall', 'CompanyController@getAll')->name('company.getall');
+// 企業登録
+Route::post('/company/store', 'CompanyController@store')->name('company.store');
+// 企業編集
+Route::post('/company/edit', 'CompanyController@edit')->name('company.edit');
+// 企業削除
+Route::post('/company/delete', 'CompanyController@delete')->name('company.delete');

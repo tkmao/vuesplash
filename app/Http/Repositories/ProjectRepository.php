@@ -20,19 +20,14 @@ class ProjectRepository implements ProjectRepositoryInterface
     /**
      * 全プロジェクトデータ取得
      *
-     * @param bool $withOtherTable
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(bool $withOtherTable): \Illuminate\Database\Eloquent\Collection
+    public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            if ($withOtherTable) {
-                $project = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('is_deleted', false)->get();
-            } else {
-                $project = $this->project->where('is_deleted', false)->get();
-            }
+            $projects = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('is_deleted', false)->get();
 
-            return $project;
+            return $projects;
         } catch (\Exception $e) {
             throw $e;
         }
@@ -47,9 +42,9 @@ class ProjectRepository implements ProjectRepositoryInterface
     public function getById(int $id): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $project = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('id', '=', $id)->get();
+            $projects = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('id', '=', $id)->get();
 
-            return $project;
+            return $projects;
         } catch (\Exception $e) {
             throw $e;
         }

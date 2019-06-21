@@ -52,7 +52,7 @@ class ProjectController extends Controller
      */
     public function getAll(Request $request)
     {
-        $projects = $this->projectServiceInterface->getAll();
+        $projects = $this->projectServiceInterface->all();
 
         return $projects ?? abort(404);
     }

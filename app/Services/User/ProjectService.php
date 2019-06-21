@@ -41,11 +41,10 @@ class ProjectService implements ProjectServiceInterface
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAll(): \Illuminate\Database\Eloquent\Collection
+    public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $withOtherTable = true;
-            return $this->projectRepositoryInterface->all($withOtherTable);
+            return $this->projectRepositoryInterface->all();
         } catch (\Exception $e) {
             throw $e;
         }

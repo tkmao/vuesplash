@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
 
         $bindData = [
             // Service
+            'App\Services\User\CompanyServiceInterface'                 => 'App\Services\User\CompanyService',
             'App\Services\User\HolidayServiceInterface'                 => 'App\Services\User\HolidayService',
             'App\Services\User\ProjectServiceInterface'                 => 'App\Services\User\ProjectService',
             'App\Services\User\UserContractServiceInterface'            => 'App\Services\User\UserContractService',
@@ -45,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
             'App\Services\User\WorkScheduleServiceInterface'            => 'App\Services\User\WorkScheduleService',
 
             // Repository
+            'App\Repositories\CompanyRepositoryInterface'               => 'App\Repositories\CompanyRepository',
             'App\Repositories\HolidayRepositoryInterface'               => 'App\Repositories\HolidayRepository',
             'App\Repositories\ProjectRepositoryInterface'               => 'App\Repositories\ProjectRepository',
             'App\Repositories\ProjectWorkRepositoryInterface'           => 'App\Repositories\ProjectWorkRepository',

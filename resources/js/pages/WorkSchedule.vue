@@ -217,7 +217,7 @@ export default {
   data() {
     return {
       targetDate: 0,
-      basicWorkDay: 0,
+      // basicWorkDay: 0,
       workingtimeMin: 0,
       workingtimeMax: 0,
       loadingProject: false,
@@ -241,6 +241,23 @@ export default {
   computed: {
     formTitle() {
       return 1;
+    },
+
+    /** 基本勤務日数計算 */
+    basicWorkDay() {
+      console.log("basicWorkDay", this.targetDate);
+      let basicWorkDay = 0;
+      let startDate = this.targetDate.clone();
+      let endDate = this.targetDate.clone();
+      startDate = startDate.startOf("month");
+      endDate = endDate.endOf("month");
+
+      // 1日ずつインクリメントして配列へpush
+      while (startDate.unix() <= endDate.unix()) {
+        !this.isHoliday(startDate.format("YYYY-MM-DD")) ? basicWorkDay++ : null;
+        startDate.add(1, "days");
+      }
+      return basicWorkDay;
     }
   },
   methods: {
@@ -255,19 +272,19 @@ export default {
     },
 
     /** 基本勤務日数計算 */
-    culBasicWorkDay() {
-      this.basicWorkDay = 0;
-      const startDate = this.targetDate.startOf("month").clone();
-      const endDate = this.targetDate.endOf("month").clone();
+    // culBasicWorkDay() {
+    //   this.basicWorkDay = 0;
+    //   const startDate = this.targetDate.startOf("month").clone();
+    //   const endDate = this.targetDate.endOf("month").clone();
 
-      // 1日ずつインクリメントして配列へpush
-      while (startDate.unix() <= endDate.unix()) {
-        !this.isHoliday(startDate.format("YYYY-MM-DD"))
-          ? this.basicWorkDay++
-          : null;
-        startDate.add(1, "days");
-      }
-    },
+    //   // 1日ずつインクリメントして配列へpush
+    //   while (startDate.unix() <= endDate.unix()) {
+    //     !this.isHoliday(startDate.format("YYYY-MM-DD"))
+    //       ? this.basicWorkDay++
+    //       : null;
+    //     startDate.add(1, "days");
+    //   }
+    // },
 
     /** 出勤日数計算 */
     WorktingDay() {
@@ -354,7 +371,11 @@ export default {
 
     /** 月次移動 */
     changeMonth: function(index) {
-      this.targetDate.add(index, "months");
+      //this.targetDate.add(index, "months");
+      const targetDate = this.targetDate.add(index, "months");
+      this.targetDate = 0;
+      this.targetDate = targetDate;
+      console.log("changeMonth", this.targetDate);
       this.fetchWorkScheduleMonth();
       this.fetchWorkSchedules();
     },
@@ -498,7 +519,7 @@ export default {
         this.workschedules[0].project_work.length
       );
       // 勤務情報再計算
-      this.culBasicWorkDay();
+      // this.culBasicWorkDay();
       this.culBasicWorktimeAMonth();
     },
 

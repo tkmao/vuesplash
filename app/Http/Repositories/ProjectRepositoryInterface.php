@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 interface ProjectRepositoryInterface
 {
-    public function all(bool $withOtherTable): \Illuminate\Database\Eloquent\Collection;
+    public function all(): \Illuminate\Database\Eloquent\Collection;
 
     public function getById(int $id): \Illuminate\Database\Eloquent\Collection;
 

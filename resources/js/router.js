@@ -8,6 +8,7 @@ import WeeklyReport from './pages/WeeklyReport.vue'
 import WeeklyAnalyze from './pages/WeeklyAnalyze.vue'
 import RandomChart from './pages/RandomChart.vue'
 import UserList from './pages/UserList.vue'
+import CompanyList from './pages/CompanyList.vue'
 import Login from './pages/Login.vue'
 import SystemError from './pages/errors/System.vue'
 import NotFound from './pages/errors/NotFound.vue'
@@ -60,6 +61,14 @@ const routes = [
   {
     path: '/user',
     component: UserList,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
+    path: '/company',
+    component: CompanyList,
     props: route => {
       const page = route.query.page
       return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
