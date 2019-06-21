@@ -245,7 +245,6 @@ export default {
 
     /** 基本勤務日数計算 */
     basicWorkDay() {
-      console.log("basicWorkDay", this.targetDate);
       let basicWorkDay = 0;
       let startDate = this.targetDate.clone();
       let endDate = this.targetDate.clone();

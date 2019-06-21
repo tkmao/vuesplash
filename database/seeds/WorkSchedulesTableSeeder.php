@@ -30,7 +30,7 @@ class WorkSchedulesTableSeeder extends Seeder
             ];
 
         $start = '20190201'; // 開始日時
-        $end = '20190531';   // 終了日時
+        $end = '20190630';   // 終了日時
         $today = date("Ymd"); // 今日の日付
         $userCount = DB::table('users')->count(); // 全ユーザ件数
         $minutes = array(0, 15, 30, 45);
