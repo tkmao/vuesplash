@@ -21,32 +21,6 @@ class HolidayController extends Controller
 
     /**
      * 休日一覧
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     */
-    public function index(Request $request)
-    {
-        dd('holiday index');
-        $holidays = $this->holidayServiceInterface->getAll();
-
-        return $holidays ?? abort(404);
-    }
-
-    /**
-     * 休日登録
-     * @param string $id
-     * @return Holiday
-     */
-    public function store(Request $request)
-    {
-        dd($request->all());
-        //$result = $this->holidayServiceInterface->store($request);
-        dd('storeUser', $id, $request->all(), gettype($request));
-
-        return $user ?? abort(404);
-    }
-
-    /**
-     * 休日一覧
      * @param string $id
      * @return Holiday
      */
@@ -55,5 +29,41 @@ class HolidayController extends Controller
         $holidays = $this->holidayServiceInterface->getAllHoliday();
 
         return $holidays ?? abort(404);
+    }
+
+    /**
+     * 休日登録
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function store(Request $request)
+    {
+        $requestArray = $request->all();
+        $this->holidayServiceInterface->store($requestArray['holiday']);
+    }
+
+    /**
+     * 休日修正
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function edit(Request $request)
+    {
+        $requestArray = $request->all();
+        $this->holidayServiceInterface->edit($requestArray['holiday']);
+    }
+
+    /**
+     * 休日削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request)
+    {
+        $requestArray = $request->all();
+        $this->holidayServiceInterface->delete($requestArray['holidayId']);
     }
 }

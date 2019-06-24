@@ -80,8 +80,8 @@ class HolidayRepository implements HolidayRepositoryInterface
     {
         try {
             $holiday = new Holiday;
-            $holiday->date = $requestArray['holidayDate'];
-            $holiday->name = $requestArray['holidayName'];
+            $holiday->date = $requestArray['date'];
+            $holiday->name = $requestArray['name'];
             $holiday->save();
         } catch (\Exception $e) {
             throw $e;
@@ -97,9 +97,9 @@ class HolidayRepository implements HolidayRepositoryInterface
     public function edit(array $requestArray): void
     {
         try {
-            $where = [ 'id' => $requestArray['holidayId'] ];
-            $update_values  = [ 'date' => $requestArray['holidayDate'],
-                                'name' => $requestArray['holidayName'],
+            $where = [ 'id' => $requestArray['id'] ];
+            $update_values  = [ 'date' => $requestArray['date'],
+                                'name' => $requestArray['name'],
                             ];
 
             $this->holiday->where($where)->update($update_values);

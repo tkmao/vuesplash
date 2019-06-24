@@ -61,9 +61,6 @@ Route::post('/workschedule/getalluser', 'WorkScheduleController@getAllUser')->na
 // プロジェクト一覧取得
 Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
 
-// 休日一覧取得
-Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall');
-
 // ユーザ情報取得
 Route::post('/user/get', 'UserController@get')->name('user.get');
 // ユーザ一覧取得
@@ -90,3 +87,12 @@ Route::post('/company/store', 'CompanyController@store')->name('company.store');
 Route::post('/company/edit', 'CompanyController@edit')->name('company.edit');
 // 企業削除
 Route::post('/company/delete', 'CompanyController@delete')->name('company.delete');
+
+// 休日一覧取得
+Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall');
+// 休日登録
+Route::post('/holiday/store', 'HolidayController@store')->name('holiday.store');
+// 休日編集
+Route::post('/holiday/edit', 'HolidayController@edit')->name('holiday.edit');
+// 休日削除
+Route::post('/holiday/delete', 'HolidayController@delete')->name('holiday.delete');

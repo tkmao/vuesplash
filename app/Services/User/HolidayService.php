@@ -22,21 +22,6 @@ class HolidayService implements HolidayServiceInterface
     }
 
     /**
-     * 祝日データ取得
-     *
-     * @param int $holidayId
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getHoliday(int $holidayId): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            return $this->holidayRepositoryInterface->getById($holidayId);
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
      * 全祝日データ取得
      *
      * @return \Illuminate\Database\Eloquent\Collection
