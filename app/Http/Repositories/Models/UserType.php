@@ -15,4 +15,8 @@ class UserType extends Model
     public $sortable = [
         'name'
     ];
+
+    protected $casts = [
+        'is_deleted' => 'boolean',
+    ];
 }

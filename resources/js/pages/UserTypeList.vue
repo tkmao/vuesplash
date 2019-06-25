@@ -74,7 +74,9 @@
                     <template v-slot:items="props">
                       <td width="3%">{{ props.item.id }}</td>
                       <td width="20%">{{ props.item.name }}</td>
-                      <td width="30%">{{ props.item.is_deleted }}</td>
+                      <td
+                        width="30%"
+                      >{{ isdelete.find(x => x.value === props.item.is_deleted).text }}</td>
                       <td class="justify-center">
                         <v-icon small @click="editItem(props.item)">edit</v-icon>
                       </td>
@@ -123,6 +125,7 @@ export default {
       rules: {
         required: value => !!value || "必須入力項目です"
       },
+      isdelete: [{ text: "有効", value: false }, { text: "無効", value: true }],
       userTypeHeaders: [
         { text: "ID", align: "left", value: "id" },
         { text: "ユーザタイプ名", value: "date" },
@@ -130,7 +133,7 @@ export default {
         { text: "編集", value: 0, sortable: false },
         { text: "削除", value: 0, sortable: false }
       ],
-      searchuserType: "",
+      searchUserType: "",
       pagination: { rowsPerPage: -1 },
       valid: false,
       userTypes: [],

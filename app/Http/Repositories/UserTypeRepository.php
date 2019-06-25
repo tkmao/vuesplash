@@ -25,7 +25,7 @@ class UserTypeRepository implements UserTypeRepositoryInterface
     public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $userType = $this->userType->orderBy('date', 'asc')->get();
+            $userType = $this->userType->orderBy('id', 'asc')->get();
 
             return $userType;
         } catch (\Exception $e) {
@@ -44,7 +44,7 @@ class UserTypeRepository implements UserTypeRepositoryInterface
         try {
             $userType = new UserType;
             $userType->name = $requestArray['name'];
-            $userType->is_deleted = $requestArray['is_deleted'];
+            $userType->is_deleted = false;
             $userType->save();
         } catch (\Exception $e) {
             throw $e;
@@ -62,7 +62,7 @@ class UserTypeRepository implements UserTypeRepositoryInterface
         try {
             $where = [ 'id' => $requestArray['id'] ];
             $update_values  = [ 'name' => $requestArray['name'],
-                                'is_deleted' => $requestArray['is_deleted'],
+                                'is_deleted' => false,
                             ];
 
             $this->userType->where($where)->update($update_values);
@@ -70,6 +70,7 @@ class UserTypeRepository implements UserTypeRepositoryInterface
             throw $e;
         }
     }
+
 
     /**
      * ユーザタイプデータ削除
@@ -80,7 +81,10 @@ class UserTypeRepository implements UserTypeRepositoryInterface
     public function delete(int $userTypeId): void
     {
         try {
-            $this->userType->destroy($userTypeId);
+            $where = [ 'id' => $userTypeId ];
+            $update_values  = [ 'is_deleted' => true ];
+
+            $this->userType->where($where)->update($update_values);
         } catch (\Exception $e) {
             throw $e;
         }

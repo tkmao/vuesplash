@@ -96,3 +96,12 @@ Route::post('/holiday/store', 'HolidayController@store')->name('holiday.store');
 Route::post('/holiday/edit', 'HolidayController@edit')->name('holiday.edit');
 // 休日削除
 Route::post('/holiday/delete', 'HolidayController@delete')->name('holiday.delete');
+
+// ユーザタイプ一覧取得
+Route::get('/usertype/getall', 'UserTypeController@getAll')->name('usertype.getall');
+// ユーザタイプ登録
+Route::post('/usertype/store', 'UserTypeController@store')->name('usertype.store');
+// ユーザタイプ編集
+Route::post('/usertype/edit', 'UserTypeController@edit')->name('usertype.edit');
+// ユーザタイプ削除
+Route::post('/usertype/delete', 'UserTypeController@delete')->name('usertype.delete');
