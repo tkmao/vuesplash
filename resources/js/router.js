@@ -11,6 +11,8 @@ import UserList from './pages/UserList.vue'
 import CompanyList from './pages/CompanyList.vue'
 import HolidayList from './pages/HolidayList.vue'
 import UserTypeList from './pages/UserTypeList.vue'
+import CategoryList from './pages/CategoryList.vue'
+import ProjectStatusList from './pages/ProjectStatusList.vue'
 import Login from './pages/Login.vue'
 import SystemError from './pages/errors/System.vue'
 import NotFound from './pages/errors/NotFound.vue'
@@ -87,6 +89,22 @@ const routes = [
   {
     path: '/usertype',
     component: UserTypeList,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
+    path: '/category',
+    component: CategoryList,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
+    path: '/projectstatus',
+    component: ProjectStatusList,
     props: route => {
       const page = route.query.page
       return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }

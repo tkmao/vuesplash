@@ -380,6 +380,67 @@ export default {
       }
     },
 
+    /** ユーザ一覧取得 */
+    async fetchUsers() {
+      const response = await axios.get(`/api/user/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      this.users = response.data;
+      this.changeUser();
+    },
+
+    /** ユーザタイプ一覧取得 */
+    async fetchUserTypes() {
+      const response = await axios.get(`/api/usertype/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      this.userTypes = response.data;
+    },
+
+    /** 企業一覧取得 */
+    async fetchCompanies() {
+      const response = await axios.get(`/api/company/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      this.companies = response.data;
+    },
+
+    /** PJ区分一覧取得 */
+    async fetchCategories() {
+      const response = await axios.get(`/api/category/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      this.categories = response.data;
+    },
+
+    /** PJステータス一覧取得 */
+    async fetchProjectStatuses() {
+      const response = await axios.get(`/api/projectstatus/getall`);
+
+      if (response.status !== OK) {
+        this.$store.commit("error/setCode", response.status);
+        return false;
+      }
+
+      this.projectStatuses = response.data;
+    },
+
     /** プロジェクト一覧取得 */
     async fetchProjects() {
       const response = await axios.get(`/api/project/getall`);
@@ -481,6 +542,11 @@ export default {
   watch: {
     $route: {
       async handler() {
+        await this.fetchUsers();
+        await this.fetchUserTypes();
+        await this.fetchCompanies();
+        await this.fetchCategories();
+        await this.fetchProjectStatuses();
         await this.fetchProjects();
       },
       immediate: true

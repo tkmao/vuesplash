@@ -58,9 +58,6 @@ Route::post('/weeklyreport/getalluser', 'WeeklyReportController@getAllUser')->na
 // 全ユーザ勤務表取得（週報管理用）
 Route::post('/workschedule/getalluser', 'WorkScheduleController@getAllUser')->name('workschedule.getalluser');
 
-// プロジェクト一覧取得
-Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
-
 // ユーザ情報取得
 Route::post('/user/get', 'UserController@get')->name('user.get');
 // ユーザ一覧取得
@@ -78,6 +75,15 @@ Route::post('/usercontract/store', 'UserContractController@store')->name('userco
 Route::post('/usercontract/edit', 'UserContractController@edit')->name('usercontract.edit');
 // ユーザ契約削除
 Route::post('/usercontract/delete', 'UserContractController@delete')->name('usercontract.delete');
+
+// プロジェクト一覧取得
+Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
+// プロジェクト登録
+Route::post('/project/store', 'ProjectController@store')->name('project.store');
+// プロジェクト編集
+Route::post('/project/edit', 'ProjectController@edit')->name('project.edit');
+// プロジェクト削除
+Route::post('/project/delete', 'ProjectController@delete')->name('project.delete');
 
 // 企業一覧取得
 Route::get('/company/getall', 'CompanyController@getAll')->name('company.getall');
@@ -105,3 +111,21 @@ Route::post('/usertype/store', 'UserTypeController@store')->name('usertype.store
 Route::post('/usertype/edit', 'UserTypeController@edit')->name('usertype.edit');
 // ユーザタイプ削除
 Route::post('/usertype/delete', 'UserTypeController@delete')->name('usertype.delete');
+
+// PJ区分一覧取得
+Route::get('/category/getall', 'CategoryController@getAll')->name('category.getall');
+// PJ区分登録
+Route::post('/category/store', 'CategoryController@store')->name('category.store');
+// PJ区分編集
+Route::post('/category/edit', 'CategoryController@edit')->name('category.edit');
+// PJ区分削除
+Route::post('/category/delete', 'CategoryController@delete')->name('category.delete');
+
+// PJステータス一覧取得
+Route::get('/projectstatus/getall', 'ProjectStatusController@getAll')->name('projectstatus.getall');
+// PJステータス登録
+Route::post('/projectstatus/store', 'ProjectStatusController@store')->name('projectstatus.store');
+// PJステータス編集
+Route::post('/projectstatus/edit', 'ProjectStatusController@edit')->name('projectstatus.edit');
+// PJステータス削除
+Route::post('/projectstatus/delete', 'ProjectStatusController@delete')->name('projectstatus.delete');

@@ -10,5 +10,5 @@ interface UserTypeRepositoryInterface
 
     public function edit(array $requestArray): void;
 
-    public function delete(int $holidayId): void;
+    public function delete(int $userTypeId): void;
 }

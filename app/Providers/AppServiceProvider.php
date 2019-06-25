@@ -36,9 +36,11 @@ class AppServiceProvider extends ServiceProvider
 
         $bindData = [
             // Service
+            'App\Services\User\CategoryServiceInterface'                => 'App\Services\User\CategoryService',
             'App\Services\User\CompanyServiceInterface'                 => 'App\Services\User\CompanyService',
             'App\Services\User\HolidayServiceInterface'                 => 'App\Services\User\HolidayService',
             'App\Services\User\ProjectServiceInterface'                 => 'App\Services\User\ProjectService',
+            'App\Services\User\ProjectStatusServiceInterface'           => 'App\Services\User\ProjectStatusService',
             'App\Services\User\UserContractServiceInterface'            => 'App\Services\User\UserContractService',
             'App\Services\User\UserServiceInterface'                    => 'App\Services\User\UserService',
             'App\Services\User\UserTypeServiceInterface'                => 'App\Services\User\UserTypeService',
@@ -47,9 +49,11 @@ class AppServiceProvider extends ServiceProvider
             'App\Services\User\WorkScheduleServiceInterface'            => 'App\Services\User\WorkScheduleService',
 
             // Repository
+            'App\Repositories\CategoryRepositoryInterface'              => 'App\Repositories\CategoryRepository',
             'App\Repositories\CompanyRepositoryInterface'               => 'App\Repositories\CompanyRepository',
             'App\Repositories\HolidayRepositoryInterface'               => 'App\Repositories\HolidayRepository',
             'App\Repositories\ProjectRepositoryInterface'               => 'App\Repositories\ProjectRepository',
+            'App\Repositories\ProjectStatusRepositoryInterface'         => 'App\Repositories\ProjectStatusRepository',
             'App\Repositories\ProjectWorkRepositoryInterface'           => 'App\Repositories\ProjectWorkRepository',
             'App\Repositories\UserContractRepositoryInterface'          => 'App\Repositories\UserContractRepository',
             'App\Repositories\UserRepositoryInterface'                  => 'App\Repositories\UserRepository',

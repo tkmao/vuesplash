@@ -7,10 +7,13 @@
         <RouterLink class="nav-link" to="/weeklyreport">週報</RouterLink>
         <RouterLink class="nav-link" to="/weeklyanalyze">週報管理</RouterLink>
         <RouterLink class="nav-link" to="/random">グラフ</RouterLink>
-        <RouterLink class="nav-link" to="/user">社員一覧</RouterLink>
-        <RouterLink class="nav-link" to="/company">企業一覧</RouterLink>
-        <RouterLink class="nav-link" to="/holiday">休日一覧</RouterLink>
-        <RouterLink class="nav-link" to="/usertype">ユーザタイプ一覧</RouterLink>
+        <RouterLink class="nav-link" to="/user">社員管理</RouterLink>
+        <RouterLink class="nav-link" to="/user">PJ管理</RouterLink>
+        <RouterLink class="nav-link" to="/company">企業管理</RouterLink>
+        <RouterLink class="nav-link" to="/holiday">休日管理</RouterLink>
+        <RouterLink class="nav-link" to="/usertype">ユーザタイプ管理</RouterLink>
+        <RouterLink class="nav-link" to="/category">PJ区分管理</RouterLink>
+        <RouterLink class="nav-link" to="/projectstatus">PJステータス管理</RouterLink>
         <button class="button" @click="showForm = ! showForm">
           <i class="icon ion-md-add"></i>
           Submit a photo

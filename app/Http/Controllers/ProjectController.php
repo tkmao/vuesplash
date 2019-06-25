@@ -32,20 +32,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * プロジェクト登録
-     * @param string $id
-     * @return User
-     */
-    public function store(Request $request)
-    {
-        dd($request->all());
-        //$result = $this->workScheduleServiceInterface->store($request);
-        dd('storeUser', $id, $request->all(), gettype($request));
-
-        return $user ?? abort(404);
-    }
-
-    /**
      * プロジェクト一覧
      * @param string $id
      * @return Project
@@ -55,5 +41,43 @@ class ProjectController extends Controller
         $projects = $this->projectServiceInterface->all();
 
         return $projects ?? abort(404);
+    }
+
+    /**
+     * プロジェクト登録
+     * @param string $id
+     * @return User
+     */
+    public function store(Request $request)
+    {
+        dd($request->all());
+        $requestArray = $request->all();
+        $this->projectServiceInterface->store($requestArray['project']);
+    }
+
+    /**
+     * プロジェクト修正
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function edit(Request $request)
+    {
+        dd($request->all());
+        $requestArray = $request->all();
+        $this->projectServiceInterface->edit($requestArray['project']);
+    }
+
+    /**
+     * プロジェクト削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request)
+    {
+        dd($request->all());
+        $requestArray = $request->all();
+        $this->projectServiceInterface->delete($requestArray['projectId']);
     }
 }
