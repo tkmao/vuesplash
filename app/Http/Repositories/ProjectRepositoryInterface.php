@@ -4,9 +4,7 @@ namespace App\Repositories;
 
 interface ProjectRepositoryInterface
 {
-    public function all(): \Illuminate\Database\Eloquent\Collection;
-
-    public function getById(int $id): \Illuminate\Database\Eloquent\Collection;
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection;
 
     public function store(array $requestArray): void;
 

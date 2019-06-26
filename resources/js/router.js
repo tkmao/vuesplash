@@ -8,6 +8,7 @@ import WeeklyReport from './pages/WeeklyReport.vue'
 import WeeklyAnalyze from './pages/WeeklyAnalyze.vue'
 import RandomChart from './pages/RandomChart.vue'
 import UserList from './pages/UserList.vue'
+import ProjectList from './pages/ProjectList.vue'
 import CompanyList from './pages/CompanyList.vue'
 import HolidayList from './pages/HolidayList.vue'
 import UserTypeList from './pages/UserTypeList.vue'
@@ -65,6 +66,14 @@ const routes = [
   {
     path: '/user',
     component: UserList,
+    props: route => {
+      const page = route.query.page
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }
+    }
+  },
+  {
+    path: '/project',
+    component: ProjectList,
     props: route => {
       const page = route.query.page
       return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 }

@@ -22,29 +22,15 @@ class ProjectService implements ProjectServiceInterface
     }
 
     /**
-     * プロジェクトデータ取得
-     *
-     * @param int $projectId
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getById(int $projectId): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            return $this->projectRepositoryInterface->getById($projectId);
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
      * 全プロジェクトデータ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->projectRepositoryInterface->all();
+            return $this->projectRepositoryInterface->all($onlyActive);
         } catch (\Exception $e) {
             throw $e;
         }

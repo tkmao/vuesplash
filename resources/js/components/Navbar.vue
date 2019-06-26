@@ -8,16 +8,18 @@
         <RouterLink class="nav-link" to="/weeklyanalyze">週報管理</RouterLink>
         <RouterLink class="nav-link" to="/random">グラフ</RouterLink>
         <RouterLink class="nav-link" to="/user">社員管理</RouterLink>
-        <RouterLink class="nav-link" to="/user">PJ管理</RouterLink>
+        <RouterLink class="nav-link" to="/project">PJ管理</RouterLink>
         <RouterLink class="nav-link" to="/company">企業管理</RouterLink>
         <RouterLink class="nav-link" to="/holiday">休日管理</RouterLink>
         <RouterLink class="nav-link" to="/usertype">ユーザタイプ管理</RouterLink>
         <RouterLink class="nav-link" to="/category">PJ区分管理</RouterLink>
         <RouterLink class="nav-link" to="/projectstatus">PJステータス管理</RouterLink>
+        <!--
         <button class="button" @click="showForm = ! showForm">
           <i class="icon ion-md-add"></i>
           Submit a photo
         </button>
+        -->
       </div>
       <span v-if="isLogin" class="navbar__item">{{ username }}</span>
       <div v-else class="navbar__item">

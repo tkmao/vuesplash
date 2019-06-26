@@ -20,29 +20,17 @@ class ProjectRepository implements ProjectRepositoryInterface
     /**
      * 全プロジェクトデータ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $projects = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('is_deleted', false)->get();
-
-            return $projects;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * プロジェクトデータ取得
-     *
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getById(int $id): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            $projects = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('id', '=', $id)->get();
+            if ($onlyActive) {
+                $projects = $this->project->with(['category', 'company', 'user', 'projectStatus'])->where('is_deleted', false)->get();
+            } else {
+                $projects = $this->project->with(['category', 'company', 'user', 'projectStatus'])->get();
+            }
 
             return $projects;
         } catch (\Exception $e) {
@@ -60,12 +48,12 @@ class ProjectRepository implements ProjectRepositoryInterface
     {
         try {
             $project = new Project;
-            $project->code = $requestArray['projectCode'];
-            $project->name = $requestArray['projectName'];
-            $project->category_id = $requestArray['categoryId'];
-            $project->company_id = $requestArray['companyId'];
-            $project->user_id = $requestArray['userId'];
-            $project->status_id = $requestArray['projectStatusId'];
+            $project->code = $requestArray['code'];
+            $project->name = $requestArray['name'];
+            $project->category_id = $requestArray['category_id'];
+            $project->company_id = $requestArray['company_id'];
+            $project->user_id = $requestArray['user_id'];
+            $project->status_id = $requestArray['status_id'];
             $project->is_deleted = false;
             $project->save();
         } catch (\Exception $e) {
@@ -82,13 +70,13 @@ class ProjectRepository implements ProjectRepositoryInterface
     public function edit(array $requestArray): void
     {
         try {
-            $where = [ 'id' => $requestArray['projectId'] ];
-            $update_values  = [ 'code' => $requestArray['projectCode'],
-                                'name' => $requestArray['projectName'],
-                                'category_id' => $requestArray['categoryId'],
-                                'company_id' => $requestArray['companyId'],
-                                'user_id' => $requestArray['userId'],
-                                'status_id' => $requestArray['projectStatusId'],
+            $where = [ 'id' => $requestArray['id'] ];
+            $update_values  = [ 'code' => $requestArray['code'],
+                                'name' => $requestArray['name'],
+                                'category_id' => $requestArray['category_id'],
+                                'company_id' => $requestArray['company_id'],
+                                'user_id' => $requestArray['user_id'],
+                                'status_id' => $requestArray['status_id'],
                                 'is_deleted' => false,
                             ];
 

@@ -20,175 +20,204 @@
                 <v-spacer>({{ this.targetDate.format("YYYY") }}年{{ this.targetDate.format("MM") }}月)</v-spacer>
               </v-toolbar>
 
-              <v-flex xs6>
-                <v-alert :value="this.isSubmitted" type="success">当月分の勤務表は提出済みです</v-alert>
-                <v-alert :value="!this.isSubmitted" type="warning">当月分の勤務表は未提出です</v-alert>
-              </v-flex>
-              <v-card-text>
-                基本勤務日数：{{ this.basicWorkDay }} 日
-                <br>
-                出勤日数：{{ WorktingDay() }} 日
-                <br>
-                欠勤日数：{{ AbsenceDay() }} 日
-                <br>
-                今月の勤務時間：下限 {{ this.workingtimeMin }} h 〜 上限 {{ this.workingtimeMax }} h
-                <br>
-                総勤務時間：{{ this.worktimeSum }} 時間
-                <br>
-                不足時間：{{ ShortageTime() }} h
-                <br>
-                超過時間：{{ OverTime() }} h
-                <br>
-                残有給日数：{{ this.user.paid_holiday }} 日 (今月 {{ paidHolidayThisMonth() }} 日 使用)
-              </v-card-text>
-
-              <v-btn color="info" @click="changeMonth(-1)">先月</v-btn>
-              <v-btn color="info" @click="changeMonth(1)">次月</v-btn>
-              <br>
-              <v-btn color="success" @click="addProject()">プロジェクト追加</v-btn>
-              <v-flex xs6>
-                <div
-                  v-for="(projectWorktime, index) in projectWorktimes[0]"
-                  :key="projectWorktime.key"
-                >
-                  <p>プロジェクト{{ index + 1 }}</p>
-                  <v-autocomplete
-                    v-model="selected[index].project_id"
-                    :loading="loadingProject"
-                    :items="projects"
-                    item-value="id"
-                    item-text="name"
-                    :search-input.sync="searchProject[index]"
-                    @change="changeSelected(index)"
-                    cache-items
-                    class="mx-3"
-                    flat
-                    hide-no-data
-                    hide-details
-                    label="プロジェクトコード/名"
-                    solo-inverted
-                  ></v-autocomplete>
-                </div>
-              </v-flex>
-
-              <v-flex xs6>
-                <v-btn color="success" :disabled="!isSameWorkingTimeAMonth()" @click="save()">勤務表保存</v-btn>
-                <v-btn color="info" :disabled="!isSameWorkingTimeAMonth()" @click="submit()">勤務表提出</v-btn>
-              </v-flex>
-              <v-flex xs6>
-                <v-alert
-                  :value="!isSameWorkingTimeAMonth()"
-                  type="warning"
-                >総勤務時間と総プロジェクト時間が一致していません。</v-alert>
-              </v-flex>
-
-              <v-data-table
-                :headers="tableheaders"
-                :items="workschedules"
-                hide-actions
-                :pagination.sync="pagination"
-                class="elevation-1"
+              <div
+                v-loading="loadingFlg"
+                element-loading-text="Loading..."
+                element-loading-spinner="loadingSpinner"
+                element-loading-background="loadingBackground"
               >
-                <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
-                <template v-slot:items="props">
-                  <td
-                    width="3%"
-                    :class="{ holiday: isHoliday(props.item.workdate) }"
-                  >{{ dateformat(props.item.workdate) }}</td>
-                  <td width="2%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-checkbox
-                      v-model="props.item.is_paid_holiday"
-                      :disabled="isHoliday(props.item.workdate)"
-                      @change="changePaidHoliday(props.index)"
-                    ></v-checkbox>
-                  </td>
-                  <td width="12%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <div style="display:flex;">
-                      <v-text-field
-                        v-model="props.item.starttime_hh"
-                        type="Number"
-                        min="0"
-                        max="30"
-                      ></v-text-field>:
-                      <v-text-field
-                        v-model="props.item.starttime_mm"
-                        type="Number"
-                        min="0"
-                        max="45"
-                        step="15"
-                      ></v-text-field>
-                    </div>
-                  </td>
-                  <td width="12%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <div style="display:flex;">
-                      <v-text-field v-model="props.item.endtime_hh" type="Number" min="0" max="30"></v-text-field>:
-                      <v-text-field
-                        v-model="props.item.endtime_mm"
-                        type="Number"
-                        min="0"
-                        max="45"
-                        step="15"
-                      ></v-text-field>
-                    </div>
-                  </td>
-                  <td width="5%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-text-field v-model="props.item.breaktime" type="Number" min="0" step="0.25"></v-text-field>
-                  </td>
-                  <td width="5%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-text-field
-                      v-model="props.item.breaktime_midnight"
-                      type="Number"
-                      min="0"
-                      step="0.25"
-                    ></v-text-field>
-                  </td>
-                  <td
-                    width="5%"
-                    :class="{ holiday: isHoliday(props.item.workdate) }"
-                    class="text-xs-right"
-                  >
-                    <font
-                      size="4"
-                      :class="{ notsame: !isSameWorkingTime(props.index) }"
-                    >{{ worktimeADay(props.index) }}</font>
-                  </td>
-                  <td
-                    width="5%"
-                    :class="{ holiday: isHoliday(props.item.workdate) }"
-                    class="text-xs-right"
-                  >
-                    <font
-                      size="4"
-                      :class="{ notsame: !isSameWorkingTime(props.index) }"
-                    >{{ PJWorktimeADay(props.index) }}</font>
-                  </td>
-                  <td
-                    width="5%"
-                    :class="{ holiday: isHoliday(props.item.workdate) }"
-                    v-for="projectWorktime in projectWorktimes[props.index]"
+                <v-flex xs6>
+                  <v-alert :value="this.isSubmitted" type="success">当月分の勤務表は提出済みです</v-alert>
+                  <v-alert :value="!this.isSubmitted" type="warning">当月分の勤務表は未提出です</v-alert>
+                </v-flex>
+
+                <v-card-text>
+                  基本勤務日数：{{ this.basicWorkDay }} 日
+                  <br>
+                  出勤日数：{{ WorktingDay() }} 日
+                  <br>
+                  欠勤日数：{{ AbsenceDay() }} 日
+                  <br>
+                  今月の勤務時間：下限 {{ this.workingtimeMin }} h 〜 上限 {{ this.workingtimeMax }} h
+                  <br>
+                  総勤務時間：{{ this.worktimeSum }} 時間
+                  <br>
+                  不足時間：{{ ShortageTime() }} h
+                  <br>
+                  超過時間：{{ OverTime() }} h
+                  <br>
+                  残有給日数：{{ this.user.paid_holiday }} 日 (今月 {{ paidHolidayThisMonth() }} 日 使用)
+                </v-card-text>
+
+                <v-btn color="info" @click="changeMonth(-1)">先月</v-btn>
+                <v-btn color="info" @click="changeMonth(1)">次月</v-btn>
+                <br>
+                <v-btn color="success" @click="addProject()">プロジェクト追加</v-btn>
+                <v-flex xs6>
+                  <div
+                    v-for="(projectWorktime, index) in projectWorktimes[0]"
                     :key="projectWorktime.key"
                   >
-                    <v-text-field
-                      v-model="projectWorktime.worktime"
-                      type="Number"
-                      min="0"
-                      step="0.25"
-                    ></v-text-field>
-                  </td>
-                  <td width="30%" :class="{ holiday: isHoliday(props.item.workdate) }">
-                    <v-textarea
-                      solo
-                      rows="2"
-                      v-model="props.item.detail"
-                      name="detail"
-                      label="詳細"
-                      value
-                    ></v-textarea>
-                  </td>
-                </template>
-              </v-data-table>
-              <v-btn color="success" :disabled="!isSameWorkingTimeAMonth()" @click="save()">勤務表保存</v-btn>
-              <v-btn color="info" :disabled="!isSameWorkingTimeAMonth()" @click="submit()">勤務表提出</v-btn>
+                    <p>プロジェクト{{ index + 1 }}</p>
+                    <v-autocomplete
+                      v-model="selected[index].project_id"
+                      :loading="loadingProject"
+                      :items="projects"
+                      item-value="id"
+                      item-text="name"
+                      :search-input.sync="searchProject[index]"
+                      @change="changeSelected(index)"
+                      cache-items
+                      class="mx-3"
+                      flat
+                      hide-no-data
+                      hide-details
+                      label="プロジェクトコード/名"
+                      solo-inverted
+                    ></v-autocomplete>
+                  </div>
+                </v-flex>
+
+                <v-flex xs6>
+                  <v-btn
+                    color="success"
+                    :disabled="!isSameWorkingTimeAMonth()"
+                    @click="save()"
+                  >勤務表保存</v-btn>
+                  <v-btn color="info" :disabled="!isSameWorkingTimeAMonth()" @click="submit()">勤務表提出</v-btn>
+                </v-flex>
+                <v-flex xs6>
+                  <v-alert
+                    :value="!isSameWorkingTimeAMonth()"
+                    type="warning"
+                  >総勤務時間と総プロジェクト時間が一致していません。</v-alert>
+                </v-flex>
+              </div>
+
+              <div
+                v-loading="loadingFlg"
+                element-loading-text="Loading..."
+                element-loading-spinner="loadingSpinner"
+                element-loading-background="loadingBackground"
+              >
+                <v-data-table
+                  :headers="tableheaders"
+                  :items="workschedules"
+                  hide-actions
+                  :pagination.sync="pagination"
+                  class="elevation-1"
+                >
+                  <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
+                  <template v-slot:items="props">
+                    <td
+                      width="3%"
+                      :class="{ holiday: isHoliday(props.item.workdate) }"
+                    >{{ dateformat(props.item.workdate) }}</td>
+                    <td width="2%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                      <v-checkbox
+                        v-model="props.item.is_paid_holiday"
+                        :disabled="isHoliday(props.item.workdate)"
+                        @change="changePaidHoliday(props.index)"
+                      ></v-checkbox>
+                    </td>
+                    <td width="12%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                      <div style="display:flex;">
+                        <v-text-field
+                          v-model="props.item.starttime_hh"
+                          type="Number"
+                          min="0"
+                          max="30"
+                        ></v-text-field>:
+                        <v-text-field
+                          v-model="props.item.starttime_mm"
+                          type="Number"
+                          min="0"
+                          max="45"
+                          step="15"
+                        ></v-text-field>
+                      </div>
+                    </td>
+                    <td width="12%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                      <div style="display:flex;">
+                        <v-text-field
+                          v-model="props.item.endtime_hh"
+                          type="Number"
+                          min="0"
+                          max="30"
+                        ></v-text-field>:
+                        <v-text-field
+                          v-model="props.item.endtime_mm"
+                          type="Number"
+                          min="0"
+                          max="45"
+                          step="15"
+                        ></v-text-field>
+                      </div>
+                    </td>
+                    <td width="5%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                      <v-text-field
+                        v-model="props.item.breaktime"
+                        type="Number"
+                        min="0"
+                        step="0.25"
+                      ></v-text-field>
+                    </td>
+                    <td width="5%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                      <v-text-field
+                        v-model="props.item.breaktime_midnight"
+                        type="Number"
+                        min="0"
+                        step="0.25"
+                      ></v-text-field>
+                    </td>
+                    <td
+                      width="5%"
+                      :class="{ holiday: isHoliday(props.item.workdate) }"
+                      class="text-xs-right"
+                    >
+                      <font
+                        size="4"
+                        :class="{ notsame: !isSameWorkingTime(props.index) }"
+                      >{{ worktimeADay(props.index) }}</font>
+                    </td>
+                    <td
+                      width="5%"
+                      :class="{ holiday: isHoliday(props.item.workdate) }"
+                      class="text-xs-right"
+                    >
+                      <font
+                        size="4"
+                        :class="{ notsame: !isSameWorkingTime(props.index) }"
+                      >{{ PJWorktimeADay(props.index) }}</font>
+                    </td>
+                    <td
+                      width="5%"
+                      :class="{ holiday: isHoliday(props.item.workdate) }"
+                      v-for="projectWorktime in projectWorktimes[props.index]"
+                      :key="projectWorktime.key"
+                    >
+                      <v-text-field
+                        v-model="projectWorktime.worktime"
+                        type="Number"
+                        min="0"
+                        step="0.25"
+                      ></v-text-field>
+                    </td>
+                    <td width="30%" :class="{ holiday: isHoliday(props.item.workdate) }">
+                      <v-textarea
+                        solo
+                        rows="2"
+                        v-model="props.item.detail"
+                        name="detail"
+                        label="詳細"
+                        value
+                      ></v-textarea>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn color="success" :disabled="!isSameWorkingTimeAMonth()" @click="save()">勤務表保存</v-btn>
+                <v-btn color="info" :disabled="!isSameWorkingTimeAMonth()" @click="submit()">勤務表提出</v-btn>
+              </div>
             </div>
           </v-flex>
         </v-layout>
@@ -216,6 +245,10 @@ export default {
   },
   data() {
     return {
+      loadingFlg: false,
+      loadingText: "Loading...",
+      loadingSpinner: "el-icon-loading",
+      loadingBackground: "rgba(255, 255, 255, 0.8)",
       targetDate: 0,
       // basicWorkDay: 0,
       workingtimeMin: 0,
@@ -470,7 +503,7 @@ export default {
 
     /** プロジェクトデータ取得 */
     async fetchProjects() {
-      const response = await axios.get(`/api/project/getall`);
+      const response = await axios.get(`/api/project/getonlyactive`);
 
       if (response.status !== OK) {
         this.$store.commit("error/setCode", response.status);
@@ -489,6 +522,8 @@ export default {
 
     /** 勤務表データ取得 */
     async fetchWorkSchedules() {
+      this.loadingFlg = true;
+
       const response = await axios.post(`/api/workschedule/get`, {
         userId: this.$store.state.auth.user.id,
         yearmonth: this.targetDate.format("YYYYMM")
@@ -520,6 +555,8 @@ export default {
       // 勤務情報再計算
       // this.culBasicWorkDay();
       this.culBasicWorktimeAMonth();
+
+      this.loadingFlg = false;
     },
 
     /** 勤務表登録 */

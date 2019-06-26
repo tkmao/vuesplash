@@ -25,267 +25,281 @@
                 <v-spacer></v-spacer>
               </v-toolbar>
 
-              <v-flex xs6>
-                <v-select
-                  v-model="targetWeek"
-                  :items="weekList"
-                  @change="changeTargetWeek()"
-                  item-value="week_number"
-                  item-text="text"
-                  label="対象週"
-                  box
-                ></v-select>
-              </v-flex>
+              <div
+                v-loading="loadingFlg"
+                element-loading-text="Loading..."
+                element-loading-spinner="loadingSpinner"
+                element-loading-background="loadingBackground"
+              >
+                <v-flex xs6>
+                  <v-select
+                    v-model="targetWeek"
+                    :items="weekList"
+                    @change="changeTargetWeek()"
+                    item-value="week_number"
+                    item-text="text"
+                    label="対象週"
+                    box
+                  ></v-select>
+                </v-flex>
+              </div>
 
-              <v-tabs v-model="active" color="cyan" dark slider-color="yellow">
-                <v-tab v-for="tab in tabs" :key="tab">{{ tab }}</v-tab>
-                <v-tab-item>
-                  <v-card flat>
-                    <v-card-text>
-                      基本勤務日数：{{ this.basicWorkDay }} 日
-                      <br>
-                      社員数：{{ this.workschedules.length }} 人
-                      <br>
-                      週報提出：{{ peopleSubmit() }} 人
-                    </v-card-text>
+              <div
+                v-loading="loadingFlg"
+                element-loading-text="Loading..."
+                element-loading-spinner="loadingSpinner"
+                element-loading-background="loadingBackground"
+              >
+                <v-tabs v-model="active" color="cyan" dark slider-color="yellow">
+                  <v-tab v-for="tab in tabs" :key="tab">{{ tab }}</v-tab>
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text>
+                        基本勤務日数：{{ this.basicWorkDay }} 日
+                        <br>
+                        社員数：{{ this.workschedules.length }} 人
+                        <br>
+                        週報提出：{{ peopleSubmit() }} 人
+                      </v-card-text>
 
-                    <v-card-title>
-                      <v-toolbar dark color="teal">
-                        <v-toolbar-title>検索</v-toolbar-title>
-                        <v-text-field
-                          v-model="searchWeeklyReport"
-                          append-icon="search"
-                          label="社員名 or プロジェクト etc.."
-                          single-line
-                          hide-details
-                        ></v-text-field>
-                      </v-toolbar>
-                    </v-card-title>
-                    <v-card-text>
-                      <v-data-table
-                        :headers="weeklyReportHeaders"
-                        :items="weeklyReportsValidUser()"
-                        hide-actions
-                        :pagination.sync="pagination"
-                        class="elevation-1"
-                        :search="searchWeeklyReport"
-                      >
-                        <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
-                        <template v-slot:items="props">
-                          <td width="2%">{{ props.item.id }}</td>
-                          <td width="7%">{{ props.item.name }}</td>
-                          <td width="5%">{{ props.item.weekly_report.project.code }}</td>
-                          <td width="15%">{{ props.item.weekly_report.project.name }}</td>
-                          <td width="20%">{{ props.item.weekly_report.nextweek_schedule }}</td>
-                          <td width="20%">{{ props.item.weekly_report.site_information }}</td>
-                          <td width="13%">{{ props.item.weekly_report.thismonth_dayoff }}</td>
-                          <td width="15%">{{ props.item.weekly_report.opinion }}</td>
-                          <td width="3%">
-                            <font
-                              :class="{ is_submitted: !props.item.weekly_report.is_subumited }"
-                            >{{ isSubmitted(props.item.weekly_report.is_subumited) }}</font>
-                          </td>
-                        </template>
-                        <template v-slot:no-results>
-                          <v-alert
-                            :value="true"
-                            color="error"
-                            icon="warning"
-                          >"{{ searchWeeklyReport }}" と一致するデータは存在していません。</v-alert>
-                        </template>
-                      </v-data-table>
-                    </v-card-text>
-                  </v-card>
-                </v-tab-item>
-                <v-tab-item>
-                  <v-card flat>
-                    <v-card-text>
-                      基本勤務日数：{{ this.basicWorkDay }} 日
-                      <br>
-                      社員数：{{ this.workschedules.length }} 人
-                    </v-card-text>
-                    <v-card-text>※ 当月累計</v-card-text>
-
-                    <v-card-title>
-                      <v-toolbar dark color="teal">
-                        <v-toolbar-title>検索</v-toolbar-title>
-                        <v-text-field
-                          v-model="searchworkSchedule"
-                          append-icon="search"
-                          label="社員名 etc.."
-                          single-line
-                          hide-details
-                        ></v-text-field>
-                      </v-toolbar>
-                    </v-card-title>
-                    <v-card-text>
-                      <v-data-table
-                        :headers="workScheduleHeaders"
-                        :items="workschedulesValidUser()"
-                        hide-actions
-                        :pagination.sync="pagination"
-                        class="elevation-1"
-                        :search="searchworkSchedule"
-                      >
-                        <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
-                        <template v-slot:items="props">
-                          <td width="3%">{{ props.item.id }}</td>
-                          <td width="10%">{{ props.item.name }}</td>
-                          <td width="5%">グラフ</td>
-                          <td class="text-xs-right" width="5%">{{ props.item.worktimeSum }} h</td>
-                          <div v-if="isContracted(props.item.workingtimeType)">
-                            <td width="5%">
-                              {{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h
-                              <br>
-                              （{{ workingtimetypes.find(x => x.value === props.item.workingtimeType).text }}）
+                      <v-card-title>
+                        <v-toolbar dark color="teal">
+                          <v-toolbar-title>検索</v-toolbar-title>
+                          <v-text-field
+                            v-model="searchWeeklyReport"
+                            append-icon="search"
+                            label="社員名 or プロジェクト etc.."
+                            single-line
+                            hide-details
+                          ></v-text-field>
+                        </v-toolbar>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-data-table
+                          :headers="weeklyReportHeaders"
+                          :items="weeklyReportsValidUser()"
+                          hide-actions
+                          :pagination.sync="pagination"
+                          class="elevation-1"
+                          :search="searchWeeklyReport"
+                        >
+                          <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
+                          <template v-slot:items="props">
+                            <td width="2%">{{ props.item.id }}</td>
+                            <td width="7%">{{ props.item.name }}</td>
+                            <td width="5%">{{ props.item.weekly_report.project.code }}</td>
+                            <td width="15%">{{ props.item.weekly_report.project.name }}</td>
+                            <td width="20%">{{ props.item.weekly_report.nextweek_schedule }}</td>
+                            <td width="20%">{{ props.item.weekly_report.site_information }}</td>
+                            <td width="13%">{{ props.item.weekly_report.thismonth_dayoff }}</td>
+                            <td width="15%">{{ props.item.weekly_report.opinion }}</td>
+                            <td width="3%">
+                              <font
+                                :class="{ is_submitted: !props.item.weekly_report.is_subumited }"
+                              >{{ isSubmitted(props.item.weekly_report.is_subumited) }}</font>
                             </td>
-                          </div>
-                          <div v-else>
-                            <td>現在未契約</td>
-                          </div>
-                          <td class="text-xs-right" width="5%">{{ props.item.shortageTime }} h</td>
-                          <td class="text-xs-right" width="5%">{{ props.item.overTime }} h</td>
-                          <td class="text-xs-right" width="5%">{{ props.item.WorktingDay }} 日</td>
-                          <td class="text-xs-right" width="5%">{{ props.item.AbsenceDay }} 日</td>
-                          <td class="text-xs-right" width="5%">{{ props.item.OverDay }} 日</td>
-                        </template>
-                        <template v-slot:no-results>
-                          <v-alert
-                            :value="true"
-                            color="error"
-                            icon="warning"
-                          >"{{ searchworkSchedule }}" と一致するデータは存在していません。</v-alert>
-                        </template>
-                      </v-data-table>
-                    </v-card-text>
-                  </v-card>
-                </v-tab-item>
-                <v-tab-item>
-                  <div>
-                    <v-card-text>
-                      総勤務時間：{{ this.grossAllProjectWorktime }} 時間
-                      <br>
-                      社員数：{{ this.workschedules.length }} 人
-                      <br>
-                      平均勤務時間：{{ averageWorktime() }} 時間
-                    </v-card-text>
+                          </template>
+                          <template v-slot:no-results>
+                            <v-alert
+                              :value="true"
+                              color="error"
+                              icon="warning"
+                            >"{{ searchWeeklyReport }}" と一致するデータは存在していません。</v-alert>
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text>
+                        基本勤務日数：{{ this.basicWorkDay }} 日
+                        <br>
+                        社員数：{{ this.workschedules.length }} 人
+                      </v-card-text>
+                      <v-card-text>※ 当月累計</v-card-text>
 
-                    <v-btn
-                      color="success"
-                      @click="headerSortByProjectCode()"
-                    >{{ buttonNameProjectCode() }}</v-btn>
-                    <v-btn
-                      color="success"
-                      @click="headerSortByWorktime()"
-                    >{{ buttonNameWorktime() }}</v-btn>
+                      <v-card-title>
+                        <v-toolbar dark color="teal">
+                          <v-toolbar-title>検索</v-toolbar-title>
+                          <v-text-field
+                            v-model="searchworkSchedule"
+                            append-icon="search"
+                            label="社員名 etc.."
+                            single-line
+                            hide-details
+                          ></v-text-field>
+                        </v-toolbar>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-data-table
+                          :headers="workScheduleHeaders"
+                          :items="workschedulesValidUser()"
+                          hide-actions
+                          :pagination.sync="pagination"
+                          class="elevation-1"
+                          :search="searchworkSchedule"
+                        >
+                          <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
+                          <template v-slot:items="props">
+                            <td width="3%">{{ props.item.id }}</td>
+                            <td width="10%">{{ props.item.name }}</td>
+                            <td width="5%">グラフ</td>
+                            <td class="text-xs-right" width="5%">{{ props.item.worktimeSum }} h</td>
+                            <div v-if="isContracted(props.item.workingtimeType)">
+                              <td width="5%">
+                                {{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h
+                                <br>
+                                （{{ workingtimetypes.find(x => x.value === props.item.workingtimeType).text }}）
+                              </td>
+                            </div>
+                            <div v-else>
+                              <td>現在未契約</td>
+                            </div>
+                            <td class="text-xs-right" width="5%">{{ props.item.shortageTime }} h</td>
+                            <td class="text-xs-right" width="5%">{{ props.item.overTime }} h</td>
+                            <td class="text-xs-right" width="5%">{{ props.item.WorktingDay }} 日</td>
+                            <td class="text-xs-right" width="5%">{{ props.item.AbsenceDay }} 日</td>
+                            <td class="text-xs-right" width="5%">{{ props.item.OverDay }} 日</td>
+                          </template>
+                          <template v-slot:no-results>
+                            <v-alert
+                              :value="true"
+                              color="error"
+                              icon="warning"
+                            >"{{ searchworkSchedule }}" と一致するデータは存在していません。</v-alert>
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <div>
+                      <v-card-text>
+                        総勤務時間：{{ this.grossAllProjectWorktime }} 時間
+                        <br>
+                        社員数：{{ this.workschedules.length }} 人
+                        <br>
+                        平均勤務時間：{{ averageWorktime() }} 時間
+                      </v-card-text>
 
-                    <v-expansion-panel v-model="panel" expand>
-                      <v-expansion-panel-content
-                        v-for="(projectWorktimes, i) in projectWorktimesHeader"
-                        :key="i"
-                      >
-                        <template v-slot:header>
-                          <table border="1">
-                            <tr>
-                              <td align="center" nowrap width="5%">{{i + 1}}</td>
-                              <td align="left" width="10%">{{ projectWorktimes.project_code }}</td>
-                              <td align="left" width="65%">{{ projectWorktimes.project_name }}</td>
-                              <td align="right" width="10%">{{ projectWorktimes.worktime }} 時間</td>
-                              <td
-                                align="right"
-                                width="10%"
-                              >{{ percentageOfAllProjectwork(projectWorktimes.worktime) }} %</td>
-                            </tr>
-                          </table>
-                        </template>
-                        <v-card>
-                          <v-card-text class="grey lighten-3">
-                            <v-data-table
-                              :headers="tableheaders"
-                              :items="projectParticipants(projectWorktimes.project_id)"
-                              hide-actions
-                              :pagination.sync="pagination"
-                              class="elevation-1"
-                            >
-                              <template v-slot:items="props">
-                                <td class="text-xs-right" width="5%">{{ props.item.user_id }}</td>
-                                <td width="10%">{{ props.item.user_name }}</td>
-                                <td class="text-xs-right" width="10%">{{ props.item.worktime }} h</td>
-                                <td class="text-xs-right" width="10%">{{ props.item.percent }} %</td>
-                              </template>
-                            </v-data-table>
-                          </v-card-text>
-                        </v-card>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                  </div>
-                </v-tab-item>
-                <v-tab-item>
-                  <v-flex xs10>
-                    <v-toolbar dark color="teal">
-                      <v-toolbar-title>検索</v-toolbar-title>
-                      <v-autocomplete
-                        v-model="targetProjectId"
-                        :loading="loadingProject"
-                        :items="projects"
-                        item-value="id"
-                        item-text="name"
-                        :search-input.sync="searchProject"
-                        @change="createProjectWorklistDoughnut()"
-                        cache-items
-                        class="mx-3"
-                        flat
-                        hide-no-data
-                        hide-details
-                        label="プロジェクトコード/名"
-                        solo-inverted
-                      ></v-autocomplete>
-                    </v-toolbar>
-                  </v-flex>
-                  <div class="half">
-                    <div v-if="canCreateDoughnutAllProject()">
-                      <doughnut-chart :chart-data="allProjectDoughnutcollection"></doughnut-chart>
+                      <v-btn
+                        color="success"
+                        @click="headerSortByProjectCode()"
+                      >{{ buttonNameProjectCode() }}</v-btn>
+                      <v-btn
+                        color="success"
+                        @click="headerSortByWorktime()"
+                      >{{ buttonNameWorktime() }}</v-btn>
+
+                      <v-expansion-panel v-model="panel" expand>
+                        <v-expansion-panel-content
+                          v-for="(projectWorktimes, i) in projectWorktimesHeader"
+                          :key="i"
+                        >
+                          <template v-slot:header>
+                            <table border="1">
+                              <tr>
+                                <td align="center" nowrap width="5%">{{i + 1}}</td>
+                                <td align="left" width="10%">{{ projectWorktimes.project_code }}</td>
+                                <td align="left" width="65%">{{ projectWorktimes.project_name }}</td>
+                                <td align="right" width="10%">{{ projectWorktimes.worktime }} 時間</td>
+                                <td
+                                  align="right"
+                                  width="10%"
+                                >{{ percentageOfAllProjectwork(projectWorktimes.worktime) }} %</td>
+                              </tr>
+                            </table>
+                          </template>
+                          <v-card>
+                            <v-card-text class="grey lighten-3">
+                              <v-data-table
+                                :headers="tableheaders"
+                                :items="projectParticipants(projectWorktimes.project_id)"
+                                hide-actions
+                                :pagination.sync="pagination"
+                                class="elevation-1"
+                              >
+                                <template v-slot:items="props">
+                                  <td class="text-xs-right" width="5%">{{ props.item.user_id }}</td>
+                                  <td width="10%">{{ props.item.user_name }}</td>
+                                  <td class="text-xs-right" width="10%">{{ props.item.worktime }} h</td>
+                                  <td class="text-xs-right" width="10%">{{ props.item.percent }} %</td>
+                                </template>
+                              </v-data-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-expansion-panel-content>
+                      </v-expansion-panel>
                     </div>
-                    <div v-else>
-                      <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <v-flex xs10>
+                      <v-toolbar dark color="teal">
+                        <v-toolbar-title>検索</v-toolbar-title>
+                        <v-autocomplete
+                          v-model="targetProjectId"
+                          :loading="loadingProject"
+                          :items="projects"
+                          item-value="id"
+                          item-text="name"
+                          :search-input.sync="searchProject"
+                          @change="createProjectWorklistDoughnut()"
+                          cache-items
+                          class="mx-3"
+                          flat
+                          hide-no-data
+                          hide-details
+                          label="プロジェクトコード/名"
+                          solo-inverted
+                        ></v-autocomplete>
+                      </v-toolbar>
+                    </v-flex>
+                    <div class="half">
+                      <div v-if="canCreateDoughnutAllProject()">
+                        <doughnut-chart :chart-data="allProjectDoughnutcollection"></doughnut-chart>
+                      </div>
+                      <div v-else>
+                        <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
+                      </div>
                     </div>
-                  </div>
-                  <div class="half">
-                    <div v-if="canCreateDoughnutProject()">
-                      <doughnut-chart :chart-data="projectDoughnutcollection"></doughnut-chart>
+                    <div class="half">
+                      <div v-if="canCreateDoughnutProject()">
+                        <doughnut-chart :chart-data="projectDoughnutcollection"></doughnut-chart>
+                      </div>
+                      <div v-else>
+                        <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
+                      </div>
                     </div>
-                    <div v-else>
-                      <v-alert :value="true" type="warning">表示できるデータがありません。条件を変えて表示してください</v-alert>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <v-flex xs10>
+                      <v-toolbar dark color="teal">
+                        <v-toolbar-title>社員選択/検索</v-toolbar-title>
+                        <v-autocomplete
+                          v-model="targetUserId"
+                          :loading="loadingUser"
+                          :items="users"
+                          item-value="id"
+                          item-text="name"
+                          :search-input.sync="searchUser"
+                          @change="createWorktimeGraph()"
+                          cache-items
+                          class="mx-3"
+                          flat
+                          hide-no-data
+                          hide-details
+                          label="ユーザ名"
+                          solo-inverted
+                        ></v-autocomplete>
+                      </v-toolbar>
+                    </v-flex>
+                    <div class="half">
+                      <line-chart :chart-data="datacollection"></line-chart>
                     </div>
-                  </div>
-                </v-tab-item>
-                <v-tab-item>
-                  <v-flex xs10>
-                    <v-toolbar dark color="teal">
-                      <v-toolbar-title>社員選択/検索</v-toolbar-title>
-                      <v-autocomplete
-                        v-model="targetUserId"
-                        :loading="loadingUser"
-                        :items="users"
-                        item-value="id"
-                        item-text="name"
-                        :search-input.sync="searchUser"
-                        @change="createWorktimeGraph()"
-                        cache-items
-                        class="mx-3"
-                        flat
-                        hide-no-data
-                        hide-details
-                        label="ユーザ名"
-                        solo-inverted
-                      ></v-autocomplete>
-                    </v-toolbar>
-                  </v-flex>
-                  <div class="half">
-                    <line-chart :chart-data="datacollection"></line-chart>
-                  </div>
-                </v-tab-item>
-              </v-tabs>
+                  </v-tab-item>
+                </v-tabs>
+              </div>
             </div>
           </v-flex>
         </v-layout>
@@ -315,6 +329,10 @@ export default {
   },
   data() {
     return {
+      loadingFlg: false,
+      loadingText: "Loading...",
+      loadingSpinner: "el-icon-loading",
+      loadingBackground: "rgba(255, 255, 255, 0.8)",
       tabs: [
         "週報内容",
         "勤務時間内容",
@@ -927,6 +945,8 @@ export default {
 
     /** 全ユーザ勤務表データ取得 */
     async fetchWorkSchedules() {
+      this.loadingFlg = true;
+
       const targetDate = this.targetDate.clone();
       const response = await axios.post(`/api/workschedule/getalluser`, {
         yearmonth: targetDate.endOf("isoweek").format("YYYYMM")
@@ -959,6 +979,8 @@ export default {
       this.createProjectWorklistDoughnut();
       // 線グラフ
       this.createWorktimeGraph();
+
+      this.loadingFlg = false;
     },
 
     /** 全ユーザ週報データ取得 */

@@ -21,24 +21,26 @@ class ProjectController extends Controller
 
     /**
      * プロジェクト一覧
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     */
-    public function index(Request $request)
-    {
-        dd('project index');
-        $projects = $this->projectServiceInterface->getAll();
-
-        return $projects ?? abort(404);
-    }
-
-    /**
-     * プロジェクト一覧
      * @param string $id
      * @return Project
      */
     public function getAll(Request $request)
     {
-        $projects = $this->projectServiceInterface->all();
+        $onlyActive = false;
+        $projects = $this->projectServiceInterface->all($onlyActive);
+
+        return $projects ?? abort(404);
+    }
+
+    /**
+     * プロジェクト一覧（アクティブデータのみ）
+     * @param string $id
+     * @return Project
+     */
+    public function getOnlyActive(Request $request)
+    {
+        $onlyActive = true;
+        $projects = $this->projectServiceInterface->all($onlyActive);
 
         return $projects ?? abort(404);
     }
@@ -50,7 +52,6 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
         $requestArray = $request->all();
         $this->projectServiceInterface->store($requestArray['project']);
     }
@@ -63,7 +64,6 @@ class ProjectController extends Controller
      */
     public function edit(Request $request)
     {
-        dd($request->all());
         $requestArray = $request->all();
         $this->projectServiceInterface->edit($requestArray['project']);
     }
@@ -76,7 +76,6 @@ class ProjectController extends Controller
      */
     public function delete(Request $request)
     {
-        dd($request->all());
         $requestArray = $request->all();
         $this->projectServiceInterface->delete($requestArray['projectId']);
     }

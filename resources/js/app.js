@@ -5,6 +5,13 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import colors from 'vuetify/es5/util/colors'
 
+// Element UI
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import locale from 'element-ui/lib/locale/lang/ja'
+
+Vue.use(ElementUI, { locale })
+
 Vue.use(Vuetify, {
   theme: {
     primary: colors.indigo.base,

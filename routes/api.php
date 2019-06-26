@@ -78,6 +78,8 @@ Route::post('/usercontract/delete', 'UserContractController@delete')->name('user
 
 // プロジェクト一覧取得
 Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
+// プロジェクト一覧取得（アクティブデータのみ）
+Route::get('/project/getonlyactive', 'ProjectController@getOnlyActive')->name('project.getonlyactive');
 // プロジェクト登録
 Route::post('/project/store', 'ProjectController@store')->name('project.store');
 // プロジェクト編集
