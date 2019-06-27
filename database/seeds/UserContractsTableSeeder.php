@@ -25,7 +25,7 @@ class UserContractsTableSeeder extends Seeder
             for ($j = 0; $j < 3; $j++) {
                 $userContracts = new UserContract();
                 $userContracts->user_id = $i;
-                $userContracts->usertype_id = rand(1, 5);
+                $userContracts->usertype_id = App\Repositories\Models\UserType::inRandomOrder()->value('id');
                 $userContracts->workingtime_type = rand(1, 2);
                 $userContracts->worktime_day = 8;
                 $userContracts->maxworktime_month = 20;
