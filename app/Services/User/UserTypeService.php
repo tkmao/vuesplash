@@ -24,12 +24,13 @@ class UserTypeService implements UserTypeServiceInterface
     /**
      * 全ユーザタイプデータ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->userTypeRepositoryInterface->all();
+            return $this->userTypeRepositoryInterface->all($onlyActive);
         } catch (\Exception $e) {
             throw $e;
         }

@@ -26,7 +26,8 @@ class ProjectStatusController extends Controller
      */
     public function getAll(Request $request)
     {
-        $projectStatuses = $this->projectStatusServiceInterface->all();
+        $onlyActive = false;
+        $projectStatuses = $this->projectStatusServiceInterface->all($onlyActive);
 
         return $projectStatuses ?? abort(404);
     }

@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 interface HolidayServiceInterface
 {
-    public function getAllHoliday(): \Illuminate\Database\Eloquent\Collection;
+    public function all(): \Illuminate\Database\Eloquent\Collection;
 
     public function store(array $requestArray): void;
 

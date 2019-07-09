@@ -24,12 +24,13 @@ class ProjectStatusService implements ProjectStatusServiceInterface
     /**
      * 全ユーザタイプデータ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->projectStatusRepositoryInterface->all();
+            return $this->projectStatusRepositoryInterface->all($onlyActive);
         } catch (\Exception $e) {
             throw $e;
         }

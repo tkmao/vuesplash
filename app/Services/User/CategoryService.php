@@ -24,12 +24,13 @@ class CategoryService implements CategoryServiceInterface
     /**
      * 全ユーザタイプデータ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->categoryRepositoryInterface->all();
+            return $this->categoryRepositoryInterface->all($onlyActive);
         } catch (\Exception $e) {
             throw $e;
         }

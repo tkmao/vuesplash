@@ -26,7 +26,8 @@ class UserTypeController extends Controller
      */
     public function getAll(Request $request)
     {
-        $userTypes = $this->userTypeServiceInterface->all();
+        $onlyActive = false;
+        $userTypes = $this->userTypeServiceInterface->all($onlyActive);
 
         return $userTypes ?? abort(404);
     }

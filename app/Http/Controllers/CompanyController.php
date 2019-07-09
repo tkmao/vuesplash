@@ -27,7 +27,8 @@ class CompanyController extends Controller
      */
     public function getAll(Request $request)
     {
-        $companies = $this->companyServiceInterface->all();
+        $onlyActive = true;
+        $companies = $this->companyServiceInterface->all($onlyActive);
 
         return $companies ?? abort(404);
     }

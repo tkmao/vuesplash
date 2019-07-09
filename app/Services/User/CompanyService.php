@@ -24,12 +24,13 @@ class CompanyService implements CompanyServiceInterface
     /**
      * 全企業データ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->companyRepositoryInterface->all();
+            return $this->companyRepositoryInterface->all($onlyActive);
         } catch (\Exception $e) {
             throw $e;
         }

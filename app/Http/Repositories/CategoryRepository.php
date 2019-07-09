@@ -20,12 +20,17 @@ class CategoryRepository implements CategoryRepositoryInterface
     /**
      * 全PJ区分取得処理
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $categories = $this->category->orderBy('id', 'asc')->get();
+            if ($onlyActive) {
+                $categories = $this->category->orderBy('id', 'asc')->where('is_deleted', false)->get();
+            } else {
+                $categories = $this->category->orderBy('id', 'asc')->get();
+            }
 
             return $categories;
         } catch (\Exception $e) {

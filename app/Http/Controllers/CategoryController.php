@@ -26,7 +26,8 @@ class CategoryController extends Controller
      */
     public function getAll(Request $request)
     {
-        $categories = $this->categoryServiceInterface->all();
+        $onlyActive = false;
+        $categories = $this->categoryServiceInterface->all($onlyActive);
 
         return $categories ?? abort(404);
     }

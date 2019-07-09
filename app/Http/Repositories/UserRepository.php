@@ -40,12 +40,17 @@ class UserRepository implements UserRepositoryInterface
     /**
      * 全ユーザ取得処理
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $user = $this->user->with(['userContract.userType'])->get();
+            if ($onlyActive) {
+                $user = $this->user->with(['userContract.userType'])->where('is_deleted', false)->get();
+            } else {
+                $user = $this->user->with(['userContract.userType'])->get();
+            }
 
             return $user;
         } catch (\Exception $e) {

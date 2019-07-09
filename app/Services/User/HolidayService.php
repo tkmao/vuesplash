@@ -26,7 +26,7 @@ class HolidayService implements HolidayServiceInterface
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAllHoliday(): \Illuminate\Database\Eloquent\Collection
+    public function all(): \Illuminate\Database\Eloquent\Collection
     {
         try {
             return $this->holidayRepositoryInterface->all();

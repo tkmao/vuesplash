@@ -45,12 +45,13 @@ class UserService implements UserServiceInterface
     /**
      * 全ユーザデータ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return $this->userRepositoryInterface->all();
+            return $this->userRepositoryInterface->all($onlyActive);
         } catch (\Exception $e) {
             throw $e;
         }

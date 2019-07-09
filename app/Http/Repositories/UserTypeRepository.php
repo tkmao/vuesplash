@@ -20,12 +20,17 @@ class UserTypeRepository implements UserTypeRepositoryInterface
     /**
      * 全ユーザタイプ取得処理
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $userType = $this->userType->orderBy('id', 'asc')->get();
+            if ($onlyActive) {
+                $userType = $this->userType->orderBy('id', 'asc')->where('is_deleted', false)->get();
+            } else {
+                $userType = $this->userType->orderBy('id', 'asc')->get();
+            }
 
             return $userType;
         } catch (\Exception $e) {

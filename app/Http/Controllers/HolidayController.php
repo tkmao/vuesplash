@@ -26,7 +26,7 @@ class HolidayController extends Controller
      */
     public function getAll(Request $request)
     {
-        $holidays = $this->holidayServiceInterface->getAllHoliday();
+        $holidays = $this->holidayServiceInterface->all();
 
         return $holidays ?? abort(404);
     }

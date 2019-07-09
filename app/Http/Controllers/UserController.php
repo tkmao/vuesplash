@@ -51,7 +51,8 @@ class UserController extends Controller
      */
     public function getAll(Request $request)
     {
-        $users = $this->userServiceInterface->all();
+        $onlyActive = false;
+        $users = $this->userServiceInterface->all($onlyActive);
 
         return $users ?? abort(404);
     }

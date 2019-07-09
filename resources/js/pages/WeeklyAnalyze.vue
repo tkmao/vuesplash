@@ -56,9 +56,9 @@
                     <v-card flat>
                       <v-card-text>
                         基本勤務日数：{{ this.basicWorkDay }} 日
-                        <br>
+                        <br />
                         社員数：{{ this.workschedules.length }} 人
-                        <br>
+                        <br />
                         週報提出：{{ peopleSubmit() }} 人
                       </v-card-text>
 
@@ -114,7 +114,7 @@
                     <v-card flat>
                       <v-card-text>
                         基本勤務日数：{{ this.basicWorkDay }} 日
-                        <br>
+                        <br />
                         社員数：{{ this.workschedules.length }} 人
                       </v-card-text>
                       <v-card-text>※ 当月累計</v-card-text>
@@ -149,7 +149,7 @@
                             <div v-if="isContracted(props.item.workingtimeType)">
                               <td width="5%">
                                 {{ props.item.workingtimeMin }} h 〜 {{ props.item.workingtimeMax }} h
-                                <br>
+                                <br />
                                 （{{ workingtimetypes.find(x => x.value === props.item.workingtimeType).text }}）
                               </td>
                             </div>
@@ -177,9 +177,9 @@
                     <div>
                       <v-card-text>
                         総勤務時間：{{ this.grossAllProjectWorktime }} 時間
-                        <br>
+                        <br />
                         社員数：{{ this.workschedules.length }} 人
-                        <br>
+                        <br />
                         平均勤務時間：{{ averageWorktime() }} 時間
                       </v-card-text>
 

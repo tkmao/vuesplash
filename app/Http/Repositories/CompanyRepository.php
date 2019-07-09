@@ -20,12 +20,17 @@ class CompanyRepository implements CompanyRepositoryInterface
     /**
      * 全企業データ取得
      *
+     * @param bool $onlyActive
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(bool $onlyActive): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            $companies = $this->company->where('is_deleted', false)->get();
+            if ($onlyActive) {
+                $companies = $this->company->where('is_deleted', false)->get();
+            } else {
+                $companies = $this->company->get();
+            }
 
             return $companies;
         } catch (\Exception $e) {
