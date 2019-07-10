@@ -27,6 +27,20 @@ class CompanyController extends Controller
      */
     public function getAll(Request $request)
     {
+        $onlyActive = false;
+        $companies = $this->companyServiceInterface->all($onlyActive);
+
+        return $companies ?? abort(404);
+    }
+
+    /**
+     * 全企業取得（アクティブデータのみ）
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOnlyActive(Request $request)
+    {
         $onlyActive = true;
         $companies = $this->companyServiceInterface->all($onlyActive);
 

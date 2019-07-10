@@ -397,13 +397,13 @@
                   </v-toolbar>
                   <v-card-text>
                     社員名 : {{ this.user.name }}
-                    <br>
+                    <br />
                     メールアドレス : {{ this.user.email }}
-                    <br>
+                    <br />
                     入社日 : {{ this.user.hiredate }}
-                    <br>
+                    <br />
                     有給日数 : {{ this.user.paid_holiday }} 日
-                    <br>
+                    <br />
                     <!--
                     権限 : {{ isadmin.find(x => x.value === this.user.is_admin).text }}
                     <br>
@@ -504,10 +504,12 @@ export default {
         /** 契約情報の重複チェック */
         noDuplicateContract: value =>
           (this.users[0]
-            ? this.userContract(value, this.userContractItem.user_id)
-              ? this.userContract(value, this.userContractItem.user_id).id !==
-                this.userContractItem.id
-                ? false
+            ? this.userItem.email === "@e3sys.co.jp" // 新規ユーザ登録画面であれば、このチェックは無視する
+              ? this.userContract(value, this.userContractItem.user_id)
+                ? this.userContract(value, this.userContractItem.user_id).id !==
+                  this.userContractItem.id
+                  ? false
+                  : true
                 : true
               : true
             : true) || "契約有効日が他の契約日時と重なっています",
@@ -825,7 +827,12 @@ export default {
 
     /** ユーザ登録・編集 */
     async save() {
+      console.log("test");
+      console.log(this.$refs.form.validate());
+      console.log(this.$refs.form);
+      console.log(this.userItem);
       if (this.$refs.form.validate()) {
+        console.log("test2");
         // データ登録・編集
         this.isUserExist ? await this.edit() : await this.store();
         // モーダルクローズ

@@ -34,7 +34,8 @@ class UserController extends Controller
 
     /**
      * ユーザ情報取得
-     * @param string $id
+     *
+     * @param Request $request
      * @return User
      */
     public function get(Request $request)
@@ -47,7 +48,9 @@ class UserController extends Controller
 
     /**
      * 全ユーザ情報取得
-     * @return User
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getAll(Request $request)
     {
@@ -58,9 +61,24 @@ class UserController extends Controller
     }
 
     /**
-     * ユーザ登録
+     * 全ユーザ情報取得（アクティブデータのみ）
+     *
      * @param Request $request
-     * @return User
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOnlyActive(Request $request)
+    {
+        $onlyActive = true;
+        $users = $this->userServiceInterface->all($onlyActive);
+
+        return $users ?? abort(404);
+    }
+
+    /**
+     * ユーザ登録
+     *
+     * @param Request $request
+     * @return void
      */
     public function store(Request $request)
     {
@@ -70,8 +88,9 @@ class UserController extends Controller
 
     /**
      * ユーザ編集
+     *
      * @param Request $request
-     * @return User
+     * @return void
      */
     public function edit(Request $request)
     {
@@ -81,8 +100,9 @@ class UserController extends Controller
 
     /**
      * ユーザ削除
+     *
      * @param Request $request
-     * @return User
+     * @return void
      */
     public function delete(Request $request)
     {

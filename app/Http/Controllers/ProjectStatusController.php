@@ -20,9 +20,10 @@ class ProjectStatusController extends Controller
     }
 
     /**
-     * PJ区分一覧
-     * @param string $id
-     * @return ProjectStatus
+     * PJステータス一覧
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getAll(Request $request)
     {
@@ -33,7 +34,21 @@ class ProjectStatusController extends Controller
     }
 
     /**
-     * PJ区分登録
+     * PJステータス一覧（アクティブデータのみ）
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOnlyActive(Request $request)
+    {
+        $onlyActive = true;
+        $projectStatuses = $this->projectStatusServiceInterface->all($onlyActive);
+
+        return $projectStatuses ?? abort(404);
+    }
+
+    /**
+     * PJステータス登録
      *
      * @param Request $request
      * @return void
@@ -45,7 +60,7 @@ class ProjectStatusController extends Controller
     }
 
     /**
-     * PJ区分修正
+     * PJステータス修正
      *
      * @param Request $request
      * @return void
@@ -57,7 +72,7 @@ class ProjectStatusController extends Controller
     }
 
     /**
-     * PJ区分削除
+     * PJステータス削除
      *
      * @param Request $request
      * @return void

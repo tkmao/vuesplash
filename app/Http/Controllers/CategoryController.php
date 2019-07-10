@@ -21,12 +21,27 @@ class CategoryController extends Controller
 
     /**
      * PJ区分一覧
-     * @param string $id
-     * @return Category
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getAll(Request $request)
     {
         $onlyActive = false;
+        $categories = $this->categoryServiceInterface->all($onlyActive);
+
+        return $categories ?? abort(404);
+    }
+
+    /**
+     * PJ区分一覧（アクティブデータのみ）
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOnlyActive(Request $request)
+    {
+        $onlyActive = true;
         $categories = $this->categoryServiceInterface->all($onlyActive);
 
         return $categories ?? abort(404);

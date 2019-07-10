@@ -36,11 +36,11 @@
                 ></v-select>
               </v-flex>
               基本勤務日数：{{ this.basicWorkDay }} 日
-              <br>
+              <br />
               出勤日数：{{ WorktingDay() }} 日
-              <br>
+              <br />
               欠勤日数：{{ AbsenceDay() }} 日
-              <br>
+              <br />
               総勤務時間：{{ this.worktimeSum }} 時間
               <v-flex xs6>
                 <v-autocomplete
@@ -135,7 +135,7 @@
                   </td>
                 </template>
               </v-data-table>
-              <v-textarea outline rows="2" v-model="weeklyreport.nextweek_schedule" label="現場の情報"></v-textarea>
+              <v-textarea outline rows="2" v-model="weeklyreport.nextweek_schedule" label="来週の作業"></v-textarea>
               <v-textarea outline rows="2" v-model="weeklyreport.site_information" label="現場の情報"></v-textarea>
               <v-textarea outline rows="2" v-model="weeklyreport.thismonth_dayoff" label="今月の休み"></v-textarea>
               <v-textarea outline rows="2" v-model="weeklyreport.opinion" label="所感"></v-textarea>

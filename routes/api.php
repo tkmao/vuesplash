@@ -62,6 +62,8 @@ Route::post('/workschedule/getalluser', 'WorkScheduleController@getAllUser')->na
 Route::post('/user/get', 'UserController@get')->name('user.get');
 // ユーザ一覧取得
 Route::get('/user/getall', 'UserController@getAll')->name('user.getall');
+// ユーザ一覧取得（アクティブデータのみ）
+Route::get('/user/getonlyactive', 'UserController@getOnlyActive')->name('user.getonlyactive');
 // ユーザ登録
 Route::post('/user/store', 'UserController@store')->name('user.store');
 // ユーザ編集
@@ -89,6 +91,8 @@ Route::post('/project/delete', 'ProjectController@delete')->name('project.delete
 
 // 企業一覧取得
 Route::get('/company/getall', 'CompanyController@getAll')->name('company.getall');
+// 企業一覧取得（アクティブデータのみ）
+Route::get('/company/getonlyactive', 'CompanyController@getOnlyActive')->name('company.getonlyactive');
 // 企業登録
 Route::post('/company/store', 'CompanyController@store')->name('company.store');
 // 企業編集
@@ -107,6 +111,8 @@ Route::post('/holiday/delete', 'HolidayController@delete')->name('holiday.delete
 
 // ユーザタイプ一覧取得
 Route::get('/usertype/getall', 'UserTypeController@getAll')->name('usertype.getall');
+// ユーザタイプ一覧取得（アクティブデータのみ）
+Route::get('/usertype/getonlyactive', 'UserTypeController@getOnlyActive')->name('usertype.getonlyactive');
 // ユーザタイプ登録
 Route::post('/usertype/store', 'UserTypeController@store')->name('usertype.store');
 // ユーザタイプ編集
@@ -116,6 +122,8 @@ Route::post('/usertype/delete', 'UserTypeController@delete')->name('usertype.del
 
 // PJ区分一覧取得
 Route::get('/category/getall', 'CategoryController@getAll')->name('category.getall');
+// PJ区分一覧取得（アクティブデータのみ）
+Route::get('/category/getonlyactive', 'CategoryController@getOnlyActive')->name('category.getonlyactive');
 // PJ区分登録
 Route::post('/category/store', 'CategoryController@store')->name('category.store');
 // PJ区分編集
@@ -125,6 +133,8 @@ Route::post('/category/delete', 'CategoryController@delete')->name('category.del
 
 // PJステータス一覧取得
 Route::get('/projectstatus/getall', 'ProjectStatusController@getAll')->name('projectstatus.getall');
+// PJステータス一覧取得（アクティブデータのみ）
+Route::get('/projectstatus/getonlyactive', 'ProjectStatusController@getOnlyActive')->name('projectstatus.getonlyactive');
 // PJステータス登録
 Route::post('/projectstatus/store', 'ProjectStatusController@store')->name('projectstatus.store');
 // PJステータス編集

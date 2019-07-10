@@ -21,8 +21,9 @@ class ProjectController extends Controller
 
     /**
      * プロジェクト一覧
-     * @param string $id
-     * @return Project
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getAll(Request $request)
     {
@@ -34,8 +35,9 @@ class ProjectController extends Controller
 
     /**
      * プロジェクト一覧（アクティブデータのみ）
-     * @param string $id
-     * @return Project
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getOnlyActive(Request $request)
     {
@@ -47,8 +49,9 @@ class ProjectController extends Controller
 
     /**
      * プロジェクト登録
-     * @param string $id
-     * @return User
+     *
+     * @param Request $request
+     * @return void
      */
     public function store(Request $request)
     {

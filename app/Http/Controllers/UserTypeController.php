@@ -21,12 +21,27 @@ class UserTypeController extends Controller
 
     /**
      * ユーザタイプ一覧
-     * @param string $id
-     * @return UserType
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getAll(Request $request)
     {
         $onlyActive = false;
+        $userTypes = $this->userTypeServiceInterface->all($onlyActive);
+
+        return $userTypes ?? abort(404);
+    }
+
+    /**
+     * ユーザタイプ一覧（アクティブデータのみ）
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOnlyActive(Request $request)
+    {
+        $onlyActive = true;
         $userTypes = $this->userTypeServiceInterface->all($onlyActive);
 
         return $userTypes ?? abort(404);
