@@ -227,34 +227,41 @@
                         </v-card>
                       </v-dialog>
                     </v-toolbar>
-                    <v-card-text>
-                      <v-data-table
-                        :headers="allUserHeaders"
-                        :items="users"
-                        :pagination.sync="pagination"
-                        class="elevation-1"
-                      >
-                        <template v-slot:items="props">
-                          <td class="text-xs-right">{{ props.item.id }}</td>
-                          <td>{{ props.item.name }}</td>
-                          <td>{{ props.item.email }}</td>
-                          <td>{{ userType(props.item.id) }}</td>
-                          <td>{{ workingtimeType(props.item.id) }}</td>
-                          <td class="text-xs-right">{{ props.item.hiredate }}</td>
-                          <td class="text-xs-right">{{ props.item.paid_holiday }} 日</td>
-                          <td>{{ isadmin.find(x => x.value === props.item.is_admin).text }}</td>
-                          <td>{{ isdelete.find(x => x.value === props.item.is_deleted).text }}</td>
-                          <td class="justify-center">
-                            <!-- 編集ボタン -->
-                            <v-icon small @click="editItem(props.item)">edit</v-icon>
-                          </td>
-                          <td class="justify-center">
-                            <!-- 削除ボタン -->
-                            <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-                          </td>
-                        </template>
-                      </v-data-table>
-                    </v-card-text>
+                    <div
+                      v-loading="loadingFlg"
+                      element-loading-text="Loading..."
+                      element-loading-spinner="loadingSpinner"
+                      element-loading-background="loadingBackground"
+                    >
+                      <v-card-text>
+                        <v-data-table
+                          :headers="allUserHeaders"
+                          :items="users"
+                          :pagination.sync="pagination"
+                          class="elevation-1"
+                        >
+                          <template v-slot:items="props">
+                            <td class="text-xs-right">{{ props.item.id }}</td>
+                            <td>{{ props.item.name }}</td>
+                            <td>{{ props.item.email }}</td>
+                            <td>{{ userType(props.item.id) }}</td>
+                            <td>{{ workingtimeType(props.item.id) }}</td>
+                            <td class="text-xs-right">{{ props.item.hiredate }}</td>
+                            <td class="text-xs-right">{{ props.item.paid_holiday }} 日</td>
+                            <td>{{ isadmin.find(x => x.value === props.item.is_admin).text }}</td>
+                            <td>{{ isdelete.find(x => x.value === props.item.is_deleted).text }}</td>
+                            <td class="justify-center">
+                              <!-- 編集ボタン -->
+                              <v-icon small @click="editItem(props.item)">edit</v-icon>
+                            </td>
+                            <td class="justify-center">
+                              <!-- 削除ボタン -->
+                              <v-icon small @click="deleteItem(props.item)">delete</v-icon>
+                            </td>
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                    </div>
                   </v-card>
                 </v-tab-item>
                 <v-tab-item>
@@ -466,6 +473,10 @@ export default {
   data() {
     return {
       tabs: ["社員一覧", "社員契約管理"],
+      loadingFlg: false,
+      loadingText: "Loading...",
+      loadingSpinner: "el-icon-loading",
+      loadingBackground: "rgba(255, 255, 255, 0.8)",
       active: null,
       dialog: false,
       dialogContract: false,
@@ -827,12 +838,7 @@ export default {
 
     /** ユーザ登録・編集 */
     async save() {
-      console.log("test");
-      console.log(this.$refs.form.validate());
-      console.log(this.$refs.form);
-      console.log(this.userItem);
       if (this.$refs.form.validate()) {
-        console.log("test2");
         // データ登録・編集
         this.isUserExist ? await this.edit() : await this.store();
         // モーダルクローズ
@@ -893,7 +899,9 @@ export default {
   watch: {
     $route: {
       async handler() {
+        this.loadingFlg = true;
         await this.fetchUsers();
+        this.loadingFlg = false;
       },
       immediate: true
     },

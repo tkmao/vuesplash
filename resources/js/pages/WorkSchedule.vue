@@ -33,25 +33,25 @@
 
                 <v-card-text>
                   基本勤務日数：{{ this.basicWorkDay }} 日
-                  <br>
+                  <br />
                   出勤日数：{{ WorktingDay() }} 日
-                  <br>
+                  <br />
                   欠勤日数：{{ AbsenceDay() }} 日
-                  <br>
+                  <br />
                   今月の勤務時間：下限 {{ this.workingtimeMin }} h 〜 上限 {{ this.workingtimeMax }} h
-                  <br>
+                  <br />
                   総勤務時間：{{ this.worktimeSum }} 時間
-                  <br>
+                  <br />
                   不足時間：{{ ShortageTime() }} h
-                  <br>
+                  <br />
                   超過時間：{{ OverTime() }} h
-                  <br>
+                  <br />
                   残有給日数：{{ this.user.paid_holiday }} 日 (今月 {{ paidHolidayThisMonth() }} 日 使用)
                 </v-card-text>
 
                 <v-btn color="info" @click="changeMonth(-1)">先月</v-btn>
                 <v-btn color="info" @click="changeMonth(1)">次月</v-btn>
-                <br>
+                <br />
                 <v-btn color="success" @click="addProject()">プロジェクト追加</v-btn>
                 <v-flex xs6>
                   <div
@@ -403,13 +403,13 @@ export default {
 
     /** 月次移動 */
     changeMonth: function(index) {
-      //this.targetDate.add(index, "months");
+      this.loadingFlg = true;
       const targetDate = this.targetDate.add(index, "months");
       this.targetDate = 0;
       this.targetDate = targetDate;
-      console.log("changeMonth", this.targetDate);
       this.fetchWorkScheduleMonth();
       this.fetchWorkSchedules();
+      this.loadingFlg = false;
     },
 
     /** 勤務表データ作成 */
@@ -522,8 +522,6 @@ export default {
 
     /** 勤務表データ取得 */
     async fetchWorkSchedules() {
-      this.loadingFlg = true;
-
       const response = await axios.post(`/api/workschedule/get`, {
         userId: this.$store.state.auth.user.id,
         yearmonth: this.targetDate.format("YYYYMM")
@@ -555,8 +553,6 @@ export default {
       // 勤務情報再計算
       // this.culBasicWorkDay();
       this.culBasicWorktimeAMonth();
-
-      this.loadingFlg = false;
     },
 
     /** 勤務表登録 */
@@ -715,11 +711,13 @@ export default {
   watch: {
     $route: {
       async handler() {
+        this.loadingFlg = true;
         await this.fetchUser();
         await this.fetchWorkScheduleMonth();
         await this.fetchHolidays();
         await this.fetchProjects();
         await this.fetchWorkSchedules();
+        this.loadingFlg = false;
       },
       immediate: true
     }

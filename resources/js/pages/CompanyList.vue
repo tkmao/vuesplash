@@ -84,51 +84,58 @@
                 </v-dialog>
               </v-toolbar>
               <v-card flat>
-                <v-card-title>
-                  <v-toolbar dark color="teal">
-                    <v-toolbar-title>企業検索</v-toolbar-title>
-                    <v-text-field
-                      v-model="searchCompany"
-                      append-icon="search"
-                      label="企業名、住所、電話番号、fax etc.."
-                      single-line
-                      hide-details
-                    ></v-text-field>
-                  </v-toolbar>
-                </v-card-title>
-                <v-card-text>
-                  <v-data-table
-                    :headers="companyHeaders"
-                    :items="companies"
-                    hide-actions
-                    :pagination.sync="pagination"
-                    class="elevation-1"
-                    :search="searchCompany"
-                  >
-                    <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
-                    <template v-slot:items="props">
-                      <td width="3%">{{ props.item.id }}</td>
-                      <td width="20%">{{ props.item.name }}</td>
-                      <td width="10%">{{ props.item.zipcode }}</td>
-                      <td width="40%">{{ props.item.address }}</td>
-                      <td width="10%">{{ props.item.phone }}</td>
-                      <td width="10%">{{ props.item.fax }}</td>
-                      <td class="justify-center">
-                        <v-icon small @click="editItem(props.item)">edit</v-icon>
-                      </td>
-                      <td class="justify-center">
-                        <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-                      </td>
-                    </template>
-                    <template v-slot:no-results>
-                      <v-alert
-                        :value="true"
-                        color="error"
-                        icon="warning"
-                      >"{{ searchCompany }}" と一致するデータは存在していません。</v-alert>
-                    </template>
-                  </v-data-table>
-                </v-card-text>
+                <div
+                  v-loading="loadingFlg"
+                  element-loading-text="Loading..."
+                  element-loading-spinner="loadingSpinner"
+                  element-loading-background="loadingBackground"
+                >
+                  <v-card-title>
+                    <v-toolbar dark color="teal">
+                      <v-toolbar-title>企業検索</v-toolbar-title>
+                      <v-text-field
+                        v-model="searchCompany"
+                        append-icon="search"
+                        label="企業名、住所、電話番号、fax etc.."
+                        single-line
+                        hide-details
+                      ></v-text-field>
+                    </v-toolbar>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-data-table
+                      :headers="companyHeaders"
+                      :items="companies"
+                      hide-actions
+                      :pagination.sync="pagination"
+                      class="elevation-1"
+                      :search="searchCompany"
+                    >
+                      <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
+                      <template v-slot:items="props">
+                        <td width="3%">{{ props.item.id }}</td>
+                        <td width="20%">{{ props.item.name }}</td>
+                        <td width="10%">{{ props.item.zipcode }}</td>
+                        <td width="40%">{{ props.item.address }}</td>
+                        <td width="10%">{{ props.item.phone }}</td>
+                        <td width="10%">{{ props.item.fax }}</td>
+                        <td class="justify-center">
+                          <v-icon small @click="editItem(props.item)">edit</v-icon>
+                        </td>
+                        <td class="justify-center">
+                          <v-icon small @click="deleteItem(props.item)">delete</v-icon>
+                        </td>
+                      </template>
+                      <template v-slot:no-results>
+                        <v-alert
+                          :value="true"
+                          color="error"
+                          icon="warning"
+                        >"{{ searchCompany }}" と一致するデータは存在していません。</v-alert>
+                      </template>
+                    </v-data-table>
+                  </v-card-text>
+                </div>
               </v-card>
             </div>
           </v-flex>
@@ -156,6 +163,10 @@ export default {
   },
   data() {
     return {
+      loadingFlg: false,
+      loadingText: "Loading...",
+      loadingSpinner: "el-icon-loading",
+      loadingBackground: "rgba(255, 255, 255, 0.8)",
       active: null,
       dialog: false,
       isdelete: [{ text: "有効", value: false }, { text: "無効", value: true }],
@@ -315,7 +326,9 @@ export default {
   watch: {
     $route: {
       async handler() {
+        this.loadingFlg = true;
         await this.fetchCompanies();
+        this.loadingFlg = false;
       },
       immediate: true
     },

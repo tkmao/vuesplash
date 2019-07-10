@@ -945,8 +945,6 @@ export default {
 
     /** 全ユーザ勤務表データ取得 */
     async fetchWorkSchedules() {
-      this.loadingFlg = true;
-
       const targetDate = this.targetDate.clone();
       const response = await axios.post(`/api/workschedule/getalluser`, {
         yearmonth: targetDate.endOf("isoweek").format("YYYYMM")
@@ -979,8 +977,6 @@ export default {
       this.createProjectWorklistDoughnut();
       // 線グラフ
       this.createWorktimeGraph();
-
-      this.loadingFlg = false;
     },
 
     /** 全ユーザ週報データ取得 */
@@ -1263,22 +1259,26 @@ export default {
 
     /** 対象週select */
     changeTargetWeek: function() {
+      this.loadingFlg = true;
       this.targetDate = this.weekNumberToDate(this.targetWeek);
       const targetWeek = this.targetDate.clone();
       this.targetWeek = targetWeek.format("ggggWW");
       this.fetchWorkSchedules();
       this.fetchWeeklyReport();
+      this.loadingFlg = false;
     }
   },
   watch: {
     $route: {
       async handler() {
+        this.loadingFlg = true;
         await this.fetchUsers();
         await this.fetchHolidays();
         await this.fetchProjects();
         await this.fetchOldestWorkdate();
         await this.fetchWorkSchedules();
         await this.fetchWeeklyReport();
+        this.loadingFlg = false;
       },
       immediate: true
     }
