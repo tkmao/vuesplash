@@ -402,13 +402,13 @@ export default {
     },
 
     /** 月次移動 */
-    changeMonth: function(index) {
+    changeMonth: async function(index) {
       this.loadingFlg = true;
       const targetDate = this.targetDate.add(index, "months");
       this.targetDate = 0;
       this.targetDate = targetDate;
-      this.fetchWorkScheduleMonth();
-      this.fetchWorkSchedules();
+      await this.fetchWorkScheduleMonth();
+      await this.fetchWorkSchedules();
       this.loadingFlg = false;
     },
 
@@ -567,6 +567,7 @@ export default {
 
     /** 勤務表データ登録 */
     async store(submit) {
+      console.log("this.workschedules", this.workschedules);
       const response = await axios.post(`/api/workschedule/store`, {
         workschedules: this.workschedules,
         submit: submit

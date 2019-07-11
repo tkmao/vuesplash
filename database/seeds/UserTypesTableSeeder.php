@@ -18,7 +18,12 @@ class UserTypesTableSeeder extends Seeder
 
         DB::table('user_types')->truncate();
 
-        $file = new SplFileObject('database/csv/UserTypes.csv');
+        $appenv = config('app.env');
+        if ($appenv === 'local') {
+            $file = new SplFileObject('database/csv/UserTypes_test.csv');
+        } else {
+            $file = new SplFileObject('database/csv/UserTypes.csv');
+        }
         $file->setFlags(
             \SplFileObject::READ_CSV |
             \SplFileObject::READ_AHEAD |

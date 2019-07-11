@@ -18,7 +18,12 @@ class CategoriesTableSeeder extends Seeder
 
         DB::table('categories')->truncate();
 
-        $file = new SplFileObject('database/csv/Categories.csv');
+        $appenv = config('app.env');
+        if ($appenv === 'local') {
+            $file = new SplFileObject('database/csv/Categories_test.csv');
+        } else {
+            $file = new SplFileObject('database/csv/Categories.csv');
+        }
         $file->setFlags(
             \SplFileObject::READ_CSV |
             \SplFileObject::READ_AHEAD |

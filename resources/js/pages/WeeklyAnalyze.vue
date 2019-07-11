@@ -1258,13 +1258,13 @@ export default {
     },
 
     /** 対象週select */
-    changeTargetWeek: function() {
+    changeTargetWeek: async function() {
       this.loadingFlg = true;
       this.targetDate = this.weekNumberToDate(this.targetWeek);
       const targetWeek = this.targetDate.clone();
       this.targetWeek = targetWeek.format("ggggWW");
-      this.fetchWorkSchedules();
-      this.fetchWeeklyReport();
+      await this.fetchWorkSchedules();
+      await this.fetchWeeklyReport();
       this.loadingFlg = false;
     }
   },

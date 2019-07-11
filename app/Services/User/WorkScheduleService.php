@@ -110,6 +110,7 @@ class WorkScheduleService implements WorkScheduleServiceInterface
     public function store(array $requestArray): void
     {
         try {
+            //dd('$requestArray[workschedules]', $requestArray['workschedules']);
             // 新規での勤務表データ登録の場合、IDが存在しないので、その情報を登録と同時に取得
             $requestArray['workschedules'] = $this->workScheduleRepositoryInterface->store($requestArray['workschedules']);
             // プロジェクト勤務時間の取得

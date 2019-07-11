@@ -18,7 +18,12 @@ class HolidaysTableSeeder extends Seeder
 
         DB::table('holidays')->truncate();
 
-        $file = new SplFileObject('database/csv/Holidays.csv');
+        $appenv = config('app.env');
+        if ($appenv === 'local') {
+            $file = new SplFileObject('database/csv/Holidays_test.csv');
+        } else {
+            $file = new SplFileObject('database/csv/Holidays.csv');
+        }
         $file->setFlags(
             \SplFileObject::READ_CSV |
             \SplFileObject::READ_AHEAD |

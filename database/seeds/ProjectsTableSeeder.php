@@ -18,7 +18,12 @@ class ProjectsTableSeeder extends Seeder
 
         DB::table('projects')->truncate();
 
-        $file = new SplFileObject('database/csv/Projects.csv');
+        $appenv = config('app.env');
+        if ($appenv === 'local') {
+            $file = new SplFileObject('database/csv/Projects_test.csv');
+        } else {
+            $file = new SplFileObject('database/csv/Projects.csv');
+        }
         $file->setFlags(
             \SplFileObject::READ_CSV |
             \SplFileObject::READ_AHEAD |
