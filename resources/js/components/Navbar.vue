@@ -6,7 +6,7 @@
         <RouterLink class="nav-link" to="/workschedule">勤務表</RouterLink>
         <RouterLink class="nav-link" to="/weeklyreport">週報</RouterLink>
         <RouterLink class="nav-link" to="/weeklyanalyze">週報管理</RouterLink>
-        <RouterLink class="nav-link" to="/random">グラフ</RouterLink>
+        <!--<RouterLink class="nav-link" to="/random">グラフ</RouterLink>-->
         <RouterLink class="nav-link" to="/user">社員管理</RouterLink>
         <RouterLink class="nav-link" to="/project">PJ管理</RouterLink>
         <RouterLink class="nav-link" to="/company">企業管理</RouterLink>
@@ -26,7 +26,7 @@
         <RouterLink class="button button--link" to="/login">Login / Register</RouterLink>
       </div>
     </div>
-    <PhotoForm v-model="showForm"/>
+    <PhotoForm v-model="showForm" />
   </nav>
 </template>
 

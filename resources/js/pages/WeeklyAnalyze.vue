@@ -19,31 +19,34 @@
         <v-layout row wrap>
           <v-flex xs12>
             <div>
-              <v-toolbar flat color="white">
-                <v-toolbar-title>週報管理</v-toolbar-title>
-                <v-divider class="mx-2" inset vertical></v-divider>
-                <v-spacer></v-spacer>
-              </v-toolbar>
-
               <div
                 v-loading="loadingFlg"
                 element-loading-text="Loading..."
                 element-loading-spinner="loadingSpinner"
                 element-loading-background="loadingBackground"
               >
-                <v-flex xs6>
-                  <v-select
-                    v-model="targetWeek"
-                    :items="weekList"
-                    @change="changeTargetWeek()"
-                    item-value="week_number"
-                    item-text="text"
-                    label="対象週"
-                    box
-                  ></v-select>
-                </v-flex>
+                <v-toolbar flat color="white">
+                  <v-toolbar-title>週報管理</v-toolbar-title>
+                  <v-divider class="mx-2" inset vertical></v-divider>
+                  <v-spacer>
+                    <v-container fluid>
+                      <v-layout align-center justify-start>
+                        <v-flex xs4>
+                          <v-select
+                            v-model="targetWeek"
+                            :items="weekList"
+                            @change="changeTargetWeek()"
+                            item-value="week_number"
+                            item-text="text"
+                            label="対象週"
+                            box
+                          ></v-select>
+                        </v-flex>
+                      </v-layout>
+                    </v-container>
+                  </v-spacer>
+                </v-toolbar>
               </div>
-
               <div
                 v-loading="loadingFlg"
                 element-loading-text="Loading..."
@@ -117,7 +120,6 @@
                         <br />
                         社員数：{{ this.workschedules.length }} 人
                       </v-card-text>
-                      <v-card-text>※ 当月累計</v-card-text>
 
                       <v-card-title>
                         <v-toolbar dark color="teal">
@@ -132,6 +134,7 @@
                         </v-toolbar>
                       </v-card-title>
                       <v-card-text>
+                        ※ 当月累計
                         <v-data-table
                           :headers="workScheduleHeaders"
                           :items="workschedulesValidUser()"
@@ -399,12 +402,12 @@ export default {
           sortable: false
         },
         {
-          text: "今月の休暇",
+          text: "現場情報",
           value: "weekly_report.site_information",
           sortable: false
         },
         {
-          text: "現場情報",
+          text: "今月の休暇",
           value: "weekly_report.thismonth_dayoff",
           sortable: false
         },

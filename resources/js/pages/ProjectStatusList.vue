@@ -139,7 +139,7 @@ export default {
       isdelete: [{ text: "有効", value: false }, { text: "無効", value: true }],
       projectStatusHeaders: [
         { text: "ID", align: "left", value: "id" },
-        { text: "ユーザタイプ名", value: "name" },
+        { text: "ステータス名", value: "name" },
         { text: "状態", value: "is_deleted" },
         { text: "編集", value: 0, sortable: false },
         { text: "削除", value: 0, sortable: false }
