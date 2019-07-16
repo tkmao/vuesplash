@@ -123,10 +123,10 @@
                             <br />
                           </div>
                         </v-flex>
-                        <v-flex offset-xs9 xs2>
+                        <v-flex xs6>
                           <v-btn fab color="success" @click="addProject()">
                             <v-icon>add_circle</v-icon>
-                          </v-btn>
+                          </v-btn>プロジェクトを追加する
                         </v-flex>
                       </v-layout>
                     </v-flex>
