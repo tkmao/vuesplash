@@ -16,7 +16,7 @@ class WorkScheduleController extends Controller
     ) {
         $this->workScheduleServiceInterface = $workScheduleServiceInterface;
         // 認証が必要
-        $this->middleware('auth')->except(['index', 'download', 'show']);
+        $this->middleware('auth')->except(['index', 'getByWeekNumber', 'getOldestWorkdateByUserId', 'getAllUser', 'store']);
     }
 
     /**

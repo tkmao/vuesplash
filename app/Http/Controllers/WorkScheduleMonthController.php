@@ -15,9 +15,8 @@ class WorkScheduleMonthController extends Controller
         WorkScheduleMonthServiceInterface $workScheduleMonthServiceInterface
     ) {
         $this->workScheduleMonthServiceInterface = $workScheduleMonthServiceInterface;
-
         // 認証が必要
-        $this->middleware('auth')->except(['index', 'download', 'show']);
+        $this->middleware('auth')->except(['isSubmitted']);
     }
 
     /**
