@@ -14,7 +14,7 @@ class AlterUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('api_token', 60)->after('remember_token')->unique()->nullable()->collate('utf8mb4_general_ci')->comment('APIトークン');
+            $table->string('api_token', 80)->after('remember_token')->unique()->nullable()->collate('utf8mb4_general_ci')->comment('APIトークン');
             $table->date('hiredate')->after('api_token')->comment('入社日');
             $table->unsignedInteger('paid_holiday')->after('hiredate')->comment('有給日数');
             $table->boolean('is_admin')->after('paid_holiday')->comment('管理者フラグ');

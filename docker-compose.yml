@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  db:
+    build: ./mariadb
+    container_name: "tkmao-mariadb"
+    ports:
+      - 33306:3306
+    restart: always
+    environment:
+      MYSQL_DATABASE: tkmao-db
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: homestead
+      MYSQL_ROOT_PASSWORD: root
+      TZ: "Asia/Tokyo"
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci

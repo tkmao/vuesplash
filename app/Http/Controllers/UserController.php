@@ -18,7 +18,7 @@ class UserController extends Controller
         $this->userServiceInterface = $userServiceInterface;
 
         // 認証が必要
-        $this->middleware('auth')->except(['index', 'download', 'show']);
+        // $this->middleware('auth')->except(['index', 'download', 'show']);
     }
 
     /**
@@ -29,7 +29,7 @@ class UserController extends Controller
     {
         $users = User::orderBy(User::CREATED_AT, 'desc')->get();
 
-        return $user ?? abort(404);
+        return $users ?? abort(404);
     }
 
     /**
