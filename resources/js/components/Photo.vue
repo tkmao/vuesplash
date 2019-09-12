@@ -22,7 +22,8 @@
           title="Like photo"
           @click.prevent="like"
         >
-          <i class="icon ion-md-heart"></i>{{ item.likes_count }}
+          <i class="icon ion-md-heart"></i>
+          {{ item.likes_count }}
         </button>
         <a
           class="photo__action"
@@ -33,9 +34,7 @@
           <i class="icon ion-md-arrow-round-down"></i>
         </a>
       </div>
-      <div class="photo__username">
-        {{ item.owner.name }}
-      </div>
+      <div class="photo__username">{{ item.owner.name }}</div>
     </RouterLink>
   </div>
 </template>
@@ -48,48 +47,48 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       landscape: false,
       portrait: false
-    }
+    };
   },
   computed: {
-    imageClass () {
+    imageClass() {
       return {
         // 横長クラス
-        'photo__image--landscape': this.landscape,
+        "photo__image--landscape": this.landscape,
         // 縦長クラス
-        'photo__image--portrait': this.portrait
-      }
+        "photo__image--portrait": this.portrait
+      };
     }
   },
   methods: {
-    setAspectRatio () {
-      if (! this.$refs.image) {
-        return false
+    setAspectRatio() {
+      if (!this.$refs.image) {
+        return false;
       }
-      const height = this.$refs.image.clientHeight
-      const width = this.$refs.image.clientWidth
+      const height = this.$refs.image.clientHeight;
+      const width = this.$refs.image.clientWidth;
       // 縦横比率 3:4 よりも横長の画像
-      this.landscape = height / width <= 0.75
+      this.landscape = height / width <= 0.75;
       // 横長でなければ縦長
-      this.portrait = ! this.landscape
+      this.portrait = !this.landscape;
     },
-    like () {
-      this.$emit('like', {
+    like() {
+      this.$emit("like", {
         id: this.item.id,
         liked: this.item.liked_by_user
-      })
+      });
     }
   },
   watch: {
-    $route () {
+    $route() {
       // ページが切り替わってから画像が読み込まれるまでの間に
       // 前のページの同じ位置にあった画像の表示が残ってしまうことを防ぐ
-      this.landscape = false
-      this.portrait = false
+      this.landscape = false;
+      this.portrait = false;
     }
   }
-}
+};
 </script>
