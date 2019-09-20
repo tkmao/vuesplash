@@ -20,124 +20,128 @@ Route::get('/reflesh-token', function (Illuminate\Http\Request $request) {
     return response()->json();
 });
 
-// 写真投稿
-Route::post('/photos', 'PhotoController@create')->name('photo.create');
-// 写真一覧
-Route::get('/photos', 'PhotoController@indexUser')->name('photo.index');
-// 写真詳細
-Route::get('/photos/{id}', 'PhotoController@showUser')->name('photo.show');
-// コメント
-Route::post('/photos/{photo}/comments', 'PhotoController@addComment')->name('photo.comment');
-// いいね
-Route::put('/photos/{id}/like', 'PhotoController@like')->name('photo.like');
-// いいね解除
-Route::delete('/photos/{id}/like', 'PhotoController@unlike');
+Route::middleware(['auth:api'])->group(function () {
 
-// ユーザ登録
-Route::post('/user/{id}/store', 'PhotoController@storeUser')->name('user.storeuser');
+    // 写真投稿
+    Route::post('/photos', 'PhotoController@create')->name('photo.create');
+    // 写真一覧
+    Route::get('/photos', 'PhotoController@indexUser')->name('photo.index');
+    // 写真詳細
+    Route::get('/photos/{id}', 'PhotoController@showUser')->name('photo.show');
+    // コメント
+    Route::post('/photos/{photo}/comments', 'PhotoController@addComment')->name('photo.comment');
+    // いいね
+    Route::put('/photos/{id}/like', 'PhotoController@like')->name('photo.like');
+    // いいね解除
+    Route::delete('/photos/{id}/like', 'PhotoController@unlike');
 
-// 勤務表取得
-Route::post('/workschedule/get', 'WorkScheduleController@index')->name('workschedule.index');
-// 勤務表登録
-Route::post('/workschedule/store', 'WorkScheduleController@store')->name('workschedule.store');
+    // ユーザ登録
+    Route::post('/user/{id}/store', 'PhotoController@storeUser')->name('user.storeuser');
 
-// 勤務表提出状況取得
-Route::post('/workschedulemonth/issubmitted', 'WorkScheduleMonthController@isSubmitted')->name('workschedulemonth.issubmitted');
+    // 勤務表取得
+    Route::post('/workschedule/get', 'WorkScheduleController@index')->name('workschedule.index');
+    // 勤務表登録
+    Route::post('/workschedule/store', 'WorkScheduleController@store')->name('workschedule.store');
 
-// 週報取得
-Route::post('/weeklyreport/get', 'WeeklyReportController@index')->name('weeklyreport.index');
-// 勤務表取得（週報用）
-Route::post('/workschedule/getweek', 'WorkScheduleController@getByWeekNumber')->name('workschedule.getweek');
-// 週報登録
-Route::post('/weeklyreport/store', 'WeeklyReportController@store')->name('weeklyreport.store');
-// 最古の勤務表データを取得
-Route::post('/workschedule/getoldestworkdate', 'WorkScheduleController@getOldestWorkdateByUserId')->name('workschedule.getoldestworkdate');
+    // 勤務表提出状況取得
+    Route::post('/workschedulemonth/issubmitted', 'WorkScheduleMonthController@isSubmitted')->name('workschedulemonth.issubmitted');
 
-// 全ユーザ週報取得（週報管理用）
-Route::post('/weeklyreport/getalluser', 'WeeklyReportController@getAllUser')->name('weeklyreport.getalluser');
-// 全ユーザ勤務表取得（週報管理用）
-Route::post('/workschedule/getalluser', 'WorkScheduleController@getAllUser')->name('workschedule.getalluser');
+    // 週報取得
+    Route::post('/weeklyreport/get', 'WeeklyReportController@index')->name('weeklyreport.index');
+    // 勤務表取得（週報用）
+    Route::post('/workschedule/getweek', 'WorkScheduleController@getByWeekNumber')->name('workschedule.getweek');
+    // 週報登録
+    Route::post('/weeklyreport/store', 'WeeklyReportController@store')->name('weeklyreport.store');
+    // 最古の勤務表データを取得
+    Route::post('/workschedule/getoldestworkdate', 'WorkScheduleController@getOldestWorkdateByUserId')->name('workschedule.getoldestworkdate');
 
-// ユーザ情報取得
-Route::post('/user/get', 'UserController@get')->name('user.get');
-// ユーザ一覧取得
-Route::get('/user/getall', 'UserController@getAll')->name('user.getall');
-// ユーザ一覧取得（アクティブデータのみ）
-Route::get('/user/getonlyactive', 'UserController@getOnlyActive')->name('user.getonlyactive');
-// ユーザ登録
-Route::post('/user/store', 'UserController@store')->name('user.store');
-// ユーザ編集
-Route::post('/user/edit', 'UserController@edit')->name('user.edit');
-// ユーザ削除
-Route::post('/user/delete', 'UserController@delete')->name('user.delete');
+    // 全ユーザ週報取得（週報管理用）
+    Route::post('/weeklyreport/getalluser', 'WeeklyReportController@getAllUser')->name('weeklyreport.getalluser');
+    // 全ユーザ勤務表取得（週報管理用）
+    Route::post('/workschedule/getalluser', 'WorkScheduleController@getAllUser')->name('workschedule.getalluser');
 
-// ユーザ契約登録
-Route::post('/usercontract/store', 'UserContractController@store')->name('usercontract.store');
-// ユーザ契約編集
-Route::post('/usercontract/edit', 'UserContractController@edit')->name('usercontract.edit');
-// ユーザ契約削除
-Route::post('/usercontract/delete', 'UserContractController@delete')->name('usercontract.delete');
+    // ユーザ情報取得
+    Route::post('/user/get', 'UserController@get')->name('user.get');
 
-// プロジェクト一覧取得
-Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
-// プロジェクト一覧取得（アクティブデータのみ）
-Route::get('/project/getonlyactive', 'ProjectController@getOnlyActive')->name('project.getonlyactive');
-// プロジェクト登録
-Route::post('/project/store', 'ProjectController@store')->name('project.store');
-// プロジェクト編集
-Route::post('/project/edit', 'ProjectController@edit')->name('project.edit');
-// プロジェクト削除
-Route::post('/project/delete', 'ProjectController@delete')->name('project.delete');
+    // ユーザ一覧取得
+    Route::get('/user/getall', 'UserController@getAll')->name('user.getall');
+    // ユーザ一覧取得（アクティブデータのみ）
+    Route::get('/user/getonlyactive', 'UserController@getOnlyActive')->name('user.getonlyactive');
+    // ユーザ登録
+    Route::post('/user/store', 'UserController@store')->name('user.store');
+    // ユーザ編集
+    Route::post('/user/edit', 'UserController@edit')->name('user.edit');
+    // ユーザ削除
+    Route::post('/user/delete', 'UserController@delete')->name('user.delete');
 
-// 企業一覧取得
-Route::get('/company/getall', 'CompanyController@getAll')->name('company.getall');
-// 企業一覧取得（アクティブデータのみ）
-Route::get('/company/getonlyactive', 'CompanyController@getOnlyActive')->name('company.getonlyactive');
-// 企業登録
-Route::post('/company/store', 'CompanyController@store')->name('company.store');
-// 企業編集
-Route::post('/company/edit', 'CompanyController@edit')->name('company.edit');
-// 企業削除
-Route::post('/company/delete', 'CompanyController@delete')->name('company.delete');
+    // ユーザ契約登録
+    Route::post('/usercontract/store', 'UserContractController@store')->name('usercontract.store');
+    // ユーザ契約編集
+    Route::post('/usercontract/edit', 'UserContractController@edit')->name('usercontract.edit');
+    // ユーザ契約削除
+    Route::post('/usercontract/delete', 'UserContractController@delete')->name('usercontract.delete');
 
-// 休日一覧取得
-Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall');
-// 休日登録
-Route::post('/holiday/store', 'HolidayController@store')->name('holiday.store');
-// 休日編集
-Route::post('/holiday/edit', 'HolidayController@edit')->name('holiday.edit');
-// 休日削除
-Route::post('/holiday/delete', 'HolidayController@delete')->name('holiday.delete');
+    // プロジェクト一覧取得
+    Route::get('/project/getall', 'ProjectController@getAll')->name('project.getall');
+    // プロジェクト一覧取得（アクティブデータのみ）
+    Route::get('/project/getonlyactive', 'ProjectController@getOnlyActive')->name('project.getonlyactive');
+    // プロジェクト登録
+    Route::post('/project/store', 'ProjectController@store')->name('project.store');
+    // プロジェクト編集
+    Route::post('/project/edit', 'ProjectController@edit')->name('project.edit');
+    // プロジェクト削除
+    Route::post('/project/delete', 'ProjectController@delete')->name('project.delete');
 
-// ユーザタイプ一覧取得
-Route::get('/usertype/getall', 'UserTypeController@getAll')->name('usertype.getall');
-// ユーザタイプ一覧取得（アクティブデータのみ）
-Route::get('/usertype/getonlyactive', 'UserTypeController@getOnlyActive')->name('usertype.getonlyactive');
-// ユーザタイプ登録
-Route::post('/usertype/store', 'UserTypeController@store')->name('usertype.store');
-// ユーザタイプ編集
-Route::post('/usertype/edit', 'UserTypeController@edit')->name('usertype.edit');
-// ユーザタイプ削除
-Route::post('/usertype/delete', 'UserTypeController@delete')->name('usertype.delete');
+    // 企業一覧取得
+    Route::get('/company/getall', 'CompanyController@getAll')->name('company.getall');
+    // 企業一覧取得（アクティブデータのみ）
+    Route::get('/company/getonlyactive', 'CompanyController@getOnlyActive')->name('company.getonlyactive');
+    // 企業登録
+    Route::post('/company/store', 'CompanyController@store')->name('company.store');
+    // 企業編集
+    Route::post('/company/edit', 'CompanyController@edit')->name('company.edit');
+    // 企業削除
+    Route::post('/company/delete', 'CompanyController@delete')->name('company.delete');
 
-// PJ区分一覧取得
-Route::get('/category/getall', 'CategoryController@getAll')->name('category.getall');
-// PJ区分一覧取得（アクティブデータのみ）
-Route::get('/category/getonlyactive', 'CategoryController@getOnlyActive')->name('category.getonlyactive');
-// PJ区分登録
-Route::post('/category/store', 'CategoryController@store')->name('category.store');
-// PJ区分編集
-Route::post('/category/edit', 'CategoryController@edit')->name('category.edit');
-// PJ区分削除
-Route::post('/category/delete', 'CategoryController@delete')->name('category.delete');
+    // 休日一覧取得
+    Route::get('/holiday/getall', 'HolidayController@getAll')->name('holiday.getall');
+    // 休日登録
+    Route::post('/holiday/store', 'HolidayController@store')->name('holiday.store');
+    // 休日編集
+    Route::post('/holiday/edit', 'HolidayController@edit')->name('holiday.edit');
+    // 休日削除
+    Route::post('/holiday/delete', 'HolidayController@delete')->name('holiday.delete');
 
-// PJステータス一覧取得
-Route::get('/projectstatus/getall', 'ProjectStatusController@getAll')->name('projectstatus.getall');
-// PJステータス一覧取得（アクティブデータのみ）
-Route::get('/projectstatus/getonlyactive', 'ProjectStatusController@getOnlyActive')->name('projectstatus.getonlyactive');
-// PJステータス登録
-Route::post('/projectstatus/store', 'ProjectStatusController@store')->name('projectstatus.store');
-// PJステータス編集
-Route::post('/projectstatus/edit', 'ProjectStatusController@edit')->name('projectstatus.edit');
-// PJステータス削除
-Route::post('/projectstatus/delete', 'ProjectStatusController@delete')->name('projectstatus.delete');
+    // ユーザタイプ一覧取得
+    Route::get('/usertype/getall', 'UserTypeController@getAll')->name('usertype.getall');
+    // ユーザタイプ一覧取得（アクティブデータのみ）
+    Route::get('/usertype/getonlyactive', 'UserTypeController@getOnlyActive')->name('usertype.getonlyactive');
+    // ユーザタイプ登録
+    Route::post('/usertype/store', 'UserTypeController@store')->name('usertype.store');
+    // ユーザタイプ編集
+    Route::post('/usertype/edit', 'UserTypeController@edit')->name('usertype.edit');
+    // ユーザタイプ削除
+    Route::post('/usertype/delete', 'UserTypeController@delete')->name('usertype.delete');
+
+    // PJ区分一覧取得
+    Route::get('/category/getall', 'CategoryController@getAll')->name('category.getall');
+    // PJ区分一覧取得（アクティブデータのみ）
+    Route::get('/category/getonlyactive', 'CategoryController@getOnlyActive')->name('category.getonlyactive');
+    // PJ区分登録
+    Route::post('/category/store', 'CategoryController@store')->name('category.store');
+    // PJ区分編集
+    Route::post('/category/edit', 'CategoryController@edit')->name('category.edit');
+    // PJ区分削除
+    Route::post('/category/delete', 'CategoryController@delete')->name('category.delete');
+
+    // PJステータス一覧取得
+    Route::get('/projectstatus/getall', 'ProjectStatusController@getAll')->name('projectstatus.getall');
+    // PJステータス一覧取得（アクティブデータのみ）
+    Route::get('/projectstatus/getonlyactive', 'ProjectStatusController@getOnlyActive')->name('projectstatus.getonlyactive');
+    // PJステータス登録
+    Route::post('/projectstatus/store', 'ProjectStatusController@store')->name('projectstatus.store');
+    // PJステータス編集
+    Route::post('/projectstatus/edit', 'ProjectStatusController@edit')->name('projectstatus.edit');
+    // PJステータス削除
+    Route::post('/projectstatus/delete', 'ProjectStatusController@delete')->name('projectstatus.delete');
+});

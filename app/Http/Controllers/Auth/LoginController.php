@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Repositories\Models\User;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -19,35 +23,72 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    // use AuthenticatesUsers;
+
+    // /**
+    //  * Where to redirect users after login.
+    //  *
+    //  * @var string
+    //  */
+    // protected $redirectTo = '/home';
+
+    private $userEloquent;
+    private $hasher;
+    private $loginedUser;
 
     /**
-     * Where to redirect users after login.
-     *
-     * @var string
+     * @param User $user
      */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
+    public function __construct(
+        User $user,
+        Hasher $hasher
+    ) {
         $this->middleware('guest')->except('logout');
+        $this->userEloquent = $user;
+        $this->hasher = $hasher;
     }
 
-    protected function authenticated(Request $request, $user)
+    // protected function authenticated(Request $request, $user)
+    // {
+    //     return $user;
+    // }
+
+    // protected function loggedOut(Request $request)
+    // {
+    //     // セッションを再生成する
+    //     $request->session()->regenerate();
+
+    //     return response()->json();
+    // }
+
+    public function login(Request $request)
     {
-        return $user;
+        $credentials = $request->only('email', 'password');
+
+        if (! $this->attemptSignin($credentials)) {
+            throw new AuthenticationException('Unauthenticated.');
+        }
+
+        $token = hash('sha256', Str::random(60));
+        $this->loginedUser->forceFill([
+            'api_token' => $token,
+        ])->save();
+
+        $this->loginedUser->api_token = $token;
+
+        return response()->json($this->loginedUser);
     }
 
-    protected function loggedOut(Request $request)
+    private function attemptSignin(array $credentials): bool
     {
-        // セッションを再生成する
-        $request->session()->regenerate();
+        $user = $this->userEloquent::where('email', $credentials['email'])->first();
 
-        return response()->json();
+        if ($user && $this->hasher->check($credentials['password'], $user->password)) {
+            $this->loginedUser = $user;
+
+            return true;
+        }
+
+        return false;
     }
 }
